@@ -27,11 +27,11 @@ void Field::copy(zp& r, const zp& x){
     bn_copy(r, x);
 }
 
-int Field::cmp(const zp& x, const zp& y){
+bool Field::cmp(const zp& x, const zp& y){
     return bn_cmp(x, y) == RLC_EQ;
 }
 
-int Field::cmp(const zp& x, const int& y){
+bool Field::cmp(const zp& x, const int& y){
     return bn_cmp_dig(x, y) == RLC_EQ;
 }
 

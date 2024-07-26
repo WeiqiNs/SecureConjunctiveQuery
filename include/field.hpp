@@ -62,7 +62,7 @@ public:
      * @param y
      * @return
      */
-    static int cmp(const zp& x, const zp& y);
+    static bool cmp(const zp& x, const zp& y);
 
     /**
      *
@@ -70,7 +70,7 @@ public:
      * @param y
      * @return
      */
-    static int cmp(const zp& x, const int& y);
+    static bool cmp(const zp& x, const int& y);
 
     /**
     *

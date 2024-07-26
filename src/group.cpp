@@ -22,7 +22,7 @@ Group::Group(const bool& pre){
     }
 }
 
-int Group::gt_eq(const gt& x, const gt& y){
+bool Group::cmp_gt(const gt& x, const gt& y){
     return gt_cmp(x, y) == RLC_EQ;
 }
 

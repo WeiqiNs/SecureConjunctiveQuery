@@ -55,9 +55,9 @@ int test_filter_str_neq(){
 int main(){
     // Perform test.
     if (test_filter_int_eq() != 1) return 1;
-    // if (test_filter_int_neq() == 1) return 1;
-    // if (test_filter_str_eq() != 1) return 1;
-    // if (test_filter_str_neq() == 1) return 1;
+    if (test_filter_int_neq() == 1) return 1;
+    if (test_filter_str_eq() != 1) return 1;
+    if (test_filter_str_neq() == 1) return 1;
 
     return 0;
 }

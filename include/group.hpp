@@ -14,7 +14,7 @@ public:
 
     explicit Group(const bool& pre);
 
-    static int gt_eq(const gt& x, const gt& y);
+    static bool cmp_gt(const gt& x, const gt& y);
 
     static void pair(gt& r, const g1& x, const g2& y);
 

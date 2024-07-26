@@ -49,7 +49,7 @@ bool Filter::dec(g1_vec& ct, g2_vec& sk){
     Group::pair(y, ct, sk);
 
     // Check for equality.
-    return Group::gt_eq(x, y);
+    return Group::cmp_gt(x, y);
 }
 
 g1_vec Filter::enc(const pp& pp, const zp_vec& r, const zp_vec& x){

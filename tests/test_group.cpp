@@ -16,7 +16,7 @@ int test_pair(){
     group.g2_raise(b2, y2);
     Group::pair(c2, a2, b2);
 
-    return Group::gt_eq(c1, c2);
+    return Group::cmp_gt(c1, c2);
 }
 
 int test_pair_with_pre(){
@@ -35,7 +35,7 @@ int test_pair_with_pre(){
     group.g2_raise(b2, y2);
     Group::pair(c2, a2, b2);
 
-    return Group::gt_eq(c1, c2);
+    return Group::cmp_gt(c1, c2);
 }
 
 int test_pair_vec_with_pre(){
@@ -64,7 +64,7 @@ int test_pair_vec_with_pre(){
     Group::pair(r1, gx1, gy1);
     Group::pair(r2, gx2, gy2);
 
-    return Group::gt_eq(r1, r2);
+    return Group::cmp_gt(r1, r2);
 }
 
 int main() {
