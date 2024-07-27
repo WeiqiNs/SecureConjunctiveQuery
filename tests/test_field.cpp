@@ -107,7 +107,7 @@ int test_zp_mul(){
     zp_field.from_int(y, 10);
     zp_field.mul(r, x, y);
 
-    return Field::cmp( r, 6);
+    return Field::cmp(r, 6);
 }
 
 int test_zp_inv(){
@@ -183,7 +183,7 @@ int test_zp_vec_mul_zp(){
 
 int test_zp_vec_ip(){
     // Create a prime field.
-    zp p{};
+    zp p;
     Field::init_zp(p);
     Field::set_int(p, 11);
     const Field zp_field(p);
@@ -199,6 +199,140 @@ int test_zp_vec_ip(){
     zp_field.vec_ip(ip, zp_x, zp_y);
 
     return Field::cmp(ip, 9);
+}
+
+int test_zp_vec_join(){
+    // Create a prime field.
+    zp p;
+    Field::init_zp(p);
+    Field::set_int(p, 11);
+    const Field zp_field(p);
+
+    const int_vec int_x = {1, 2, 3, 4, 5};
+    const int_vec int_y = {6, 7, 8, 9, 10};
+
+    const zp_vec zp_x = zp_field.from_int_vec(int_x);
+    const zp_vec zp_y = zp_field.from_int_vec(int_y);
+    const zp_vec zp_r = Field::vec_join(zp_x, zp_y);
+
+    return Field::cmp(zp_r[8], 9);
+}
+
+int test_zp_mat_from(){
+    // Create a prime field.
+    zp p;
+    Field::init_zp(p);
+    Field::set_int(p, 11);
+    const Field zp_field(p);
+
+    const int_vec int_x = {1, 2, 3, 4, 5};
+    const int_vec int_y = {6, 7, 8, 9, 10};
+    const int_vec int_z = {11, 12, 13, 14, 15};
+    const int_mat r = {int_x, int_y, int_z};
+
+    const zp_mat zp_r = zp_field.from_int_mat(r);
+
+    return Field::cmp(zp_r[2][2], 2);
+}
+
+int test_zp_mat_id(){
+    const zp_mat id = Field::mat_id(10);
+    return Field::mat_is_id(id);
+}
+
+int test_zp_mat_transpose(){
+    const int_vec int_x = {1, 2, 3, 4, 5};
+    const int_vec int_y = {6, 7, 8, 9, 10};
+    const int_vec int_z = {11, 12, 13, 14, 15};
+    const int_mat r = {int_x, int_y, int_z};
+
+    const zp_mat zp_r = Field::set_int_mat(r);
+    const zp_mat zp_r_t = Field::mat_transpose(zp_r);
+
+    return Field::cmp(zp_r_t[4][2], 15);
+}
+
+int test_zp_mat_join(){
+    const int_vec int_x = {1, 2, 3, 4, 5};
+    const int_vec int_y = {6, 7, 8, 9, 10};
+    const int_vec int_z = {11, 12, 13, 14, 15};
+    const int_mat r = {int_x, int_y, int_z};
+    const int_mat p = {int_z, int_y, int_x};
+
+    const zp_mat zp_r = Field::set_int_mat(r);
+    const zp_mat zp_p = Field::set_int_mat(p);
+    const zp_mat zp_rp = Field::mat_join(zp_r, zp_p);
+
+    return Field::cmp(zp_rp[2][5], 1);
+}
+
+int test_zp_mat_mul_mat(){
+    // Create a prime field.
+    zp p;
+    Field::init_zp(p);
+    Field::set_int(p, 23);
+    const Field zp_field(p);
+
+    const int_vec int_x = {1, 2, 3, 4, 5};
+    const int_vec int_y = {6, 7, 8, 9, 10};
+    const int_vec int_z = {11, 12, 13, 14, 15};
+    const int_mat x = {int_x, int_y, int_z};
+
+    const int_vec int_a = {1, 2, 3, 4};
+    const int_mat y = {int_a, int_a, int_a, int_a, int_a};
+
+    const zp_mat zp_x = zp_field.from_int_mat(x);
+    const zp_mat zp_y = zp_field.from_int_mat(y);
+
+    const zp_mat zp_r = zp_field.mat_mul(zp_x, zp_y);
+
+    return Field::cmp(zp_r[2][3], 7);
+}
+
+int test_zp_mat_mul_zp(){
+    // Create a prime field.
+    zp p;
+    Field::init_zp(p);
+    Field::set_int(p, 11);
+    const Field zp_field(p);
+
+    zp c;
+    Field::init_zp(c);
+    zp_field.from_int(c, 5);
+
+    const int_vec int_x = {1, 2, 3, 4, 5};
+    const int_vec int_y = {6, 7, 8, 9, 10};
+    const int_vec int_z = {11, 12, 13, 14, 15};
+    const int_mat r = {int_x, int_y, int_z};
+
+    const zp_mat zp_r = zp_field.from_int_mat(r);
+    const zp_mat zp_cr = zp_field.mat_mul(zp_r, c);
+
+    return Field::cmp(zp_cr[2][4], 9);
+}
+
+int test_zp_mat_inv(){
+    // Create a prime field.
+    zp p;
+    Field::init_zp(p);
+    Field::set_int(p, 101);
+    const Field zp_field(p);
+
+    zp det;
+    Field::init_zp(det);
+
+    const int_vec int_x = {3, 5, 8};
+    const int_vec int_y = {2, 2, 2};
+    const int_vec int_z = {9, 9, 3};
+    const int_mat r = {int_x, int_y, int_z};
+
+    const zp_mat zp_r = zp_field.from_int_mat(r);
+
+    const zp_mat zp_ri = zp_field.mat_inv_with_det(zp_r, det);
+
+    const zp_mat rri = zp_field.mat_mul(zp_r, zp_ri);
+
+    return Field::mat_is_id(rri) && Field::cmp(det, 24);
 }
 
 int main(){
@@ -220,6 +354,14 @@ int main(){
     if (test_zp_vec_mul() != 1) return 1;
     if (test_zp_vec_mul_zp() != 1) return 1;
     if (test_zp_vec_ip() != 1) return 1;
+    if (test_zp_vec_join() != 1) return 1;
+    if (test_zp_mat_from() != 1) return 1;
+    if (test_zp_mat_id() != 1) return 1;
+    if (test_zp_mat_transpose() != 1) return 1;
+    if (test_zp_mat_join() != 1) return 1;
+    if (test_zp_mat_mul_mat() != 1) return 1;
+    if (test_zp_mat_mul_zp() != 1) return 1;
+    if (test_zp_mat_inv() != 1) return 1;
 
     return 0;
 }

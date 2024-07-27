@@ -216,7 +216,7 @@ public:
      * @param x 
      * @return 
      */
-    zp_mat from_int_mat(const int_mat& x);
+    [[nodiscard]] zp_mat from_int_mat(const int_mat& x) const;
 
     /**
      * 
@@ -224,36 +224,28 @@ public:
      * @param col 
      * @return 
      */
-    zp_mat mat_rand(const int& row, const int& col);
+    [[nodiscard]] zp_mat mat_rand(const int& row, const int& col) const;
 
     /**
      * 
      * @param size 
      * @return 
      */
-    zp_mat mat_id(const int& size);
+    static zp_mat mat_id(const int& size);
 
     /**
      * 
      * @param x 
      * @return 
      */
-    bool mat_is_id(zp_mat& x);
+    static bool mat_is_id(const zp_mat& x);
 
     /**
      * 
      * @param x 
      * @return 
      */
-    zp_mat mat_transpose(zp_mat& x);
-
-    /**
-     * 
-     * @param x 
-     * @param y 
-     * @return 
-     */
-    zp_mat mat_join(zp_mat& x, zp_mat& y);
+    static zp_mat mat_transpose(const zp_mat& x);
 
     /**
      * 
@@ -261,7 +253,7 @@ public:
      * @param y 
      * @return 
      */
-    zp_mat mat_mul(zp_mat& x, zp_mat& y);
+    static zp_mat mat_join(const zp_mat& x, const zp_mat& y);
 
     /**
      * 
@@ -269,7 +261,15 @@ public:
      * @param y 
      * @return 
      */
-    zp_mat mat_mul(zp_mat& x, zp& y);
+    [[nodiscard]] zp_mat mat_mul(const zp_mat& x, const zp_mat& y) const;
+
+    /**
+     * 
+     * @param x 
+     * @param y 
+     * @return 
+     */
+    [[nodiscard]] zp_mat mat_mul(const zp_mat& x, const zp& y) const;
 
     /**
      * 
@@ -277,7 +277,7 @@ public:
      * @param det 
      * @return 
      */
-    zp_mat mat_inv_with_det(zp_mat& x, zp& det);
+    [[nodiscard]] zp_mat mat_inv_with_det(const zp_mat& x, zp& det) const;
 
 private:
     zp P{};
