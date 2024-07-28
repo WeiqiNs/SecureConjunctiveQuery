@@ -39,3 +39,9 @@ add_executable(test_aggre test_aggre.cpp)
 target_link_libraries(test_aggre PRIVATE ej_lib)
 add_test(NAME test_aggre COMMAND test_aggre)
 # -----------------------------------------------------
+
+# -----------------------------------------------------
+add_executable(test_ipfe test_ipfe.cpp)
+target_link_libraries(test_ipfe PRIVATE ej_lib)
+add_test(NAME test_ipfe COMMAND test_ipfe)
+# -----------------------------------------------------

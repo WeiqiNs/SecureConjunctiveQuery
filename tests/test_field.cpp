@@ -283,7 +283,6 @@ int test_zp_mat_mul_mat(){
 
     const zp_mat zp_x = zp_field.from_int_mat(x);
     const zp_mat zp_y = zp_field.from_int_mat(y);
-
     const zp_mat zp_r = zp_field.mat_mul(zp_x, zp_y);
 
     return Field::cmp(zp_r[2][3], 7);
@@ -327,12 +326,24 @@ int test_zp_mat_inv(){
     const int_mat r = {int_x, int_y, int_z};
 
     const zp_mat zp_r = zp_field.from_int_mat(r);
-
     const zp_mat zp_ri = zp_field.mat_inv_with_det(zp_r, det);
-
     const zp_mat rri = zp_field.mat_mul(zp_r, zp_ri);
 
     return Field::mat_is_id(rri) && Field::cmp(det, 24);
+}
+
+int test_zp_find_coeff(){
+    // Create a prime field.
+    zp p;
+    Field::init_zp(p);
+    Field::set_int(p, 101);
+    const Field zp_field(p);
+
+    const int_vec int_x = {2, 4, 6, 8, 10};
+    const zp_vec x = zp_field.from_int_vec(int_x);
+    const zp_vec coeff = zp_field.find_coeff(x);
+
+    return Field::cmp(coeff[0], 99) && Field::cmp(coeff[3], 37) && Field::cmp(coeff[5], 1);
 }
 
 int main(){
@@ -362,6 +373,7 @@ int main(){
     if (test_zp_mat_mul_mat() != 1) return 1;
     if (test_zp_mat_mul_zp() != 1) return 1;
     if (test_zp_mat_inv() != 1) return 1;
+    if (test_zp_find_coeff() != 1) return 1;
 
     return 0;
 }

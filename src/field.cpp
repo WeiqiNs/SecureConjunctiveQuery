@@ -324,6 +324,27 @@ zp_mat Field::mat_mul(const zp_mat& x, const zp_mat& y) const{
     return r;
 }
 
+zp_vec Field::mat_mul(const zp_mat& x, const zp_vec& y) const{
+    // Check that inputs have to have equal length.
+    if (x.size() != y.size()){
+        throw std::runtime_error("Dimensions of the input vector and input matrix do not match.");
+    }
+
+    zp_vec r(x[0].size());
+
+    zp prod;
+    init_zp(prod);
+
+    for (int j = 0; j < x[0].size(); ++j) {
+        for (int i = 0; i < x.size(); ++i) {
+            mul(prod, x[i][j], y[i]);
+            add(r[j], r[j], prod);
+        }
+    }
+
+    return r;
+}
+
 zp_mat Field::mat_mul(const zp_mat& x, const zp& y) const{
     zp_mat r(x.size());
 
@@ -399,4 +420,32 @@ zp_mat Field::mat_inv_with_det(const zp_mat& x, zp& det) const{
         }
     }
     return xi;
+}
+
+zp_vec Field::find_coeff(const zp_vec& roots) const{
+    // Declare a temp zp variable and the result zp vector.
+    zp temp;
+    init_zp(temp);
+    zp_vec coeff(roots.size() + 1);
+
+    // Set starting values of the coefficients.
+    one(coeff[0]);
+    for (int i = 1; i < coeff.size(); ++i){
+        zero(coeff[i]);
+    }
+
+    // Compute the coefficients.
+    for (int i = 0; i < roots.size(); ++i){
+        for (int j = i; j >= 0; --j){
+            mul(temp, coeff[j], roots[i]);
+            neg(temp, temp);
+            add(coeff[j + 1], coeff[j + 1], temp);
+        }
+    }
+
+    // Invert the coefficients to return c + a0 + a1 + ...
+    zp_vec inv_coeff(coeff.size());
+    for (int i = 0; i < coeff.size(); ++i) copy(inv_coeff[i], coeff[coeff.size() - i - 1]);
+
+    return inv_coeff;
 }

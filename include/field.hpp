@@ -264,6 +264,14 @@ public:
     [[nodiscard]] zp_mat mat_mul(const zp_mat& x, const zp_mat& y) const;
 
     /**
+        *
+        * @param x
+        * @param y
+        * @return
+        */
+    [[nodiscard]] zp_vec mat_mul(const zp_mat& x, const zp_vec& y) const;
+
+    /**
      * 
      * @param x 
      * @param y 
@@ -278,6 +286,13 @@ public:
      * @return 
      */
     [[nodiscard]] zp_mat mat_inv_with_det(const zp_mat& x, zp& det) const;
+
+    /**
+     *
+     * @param roots
+     * @return
+     */
+    [[nodiscard]] zp_vec find_coeff(const zp_vec& roots) const;
 
 private:
     zp P{};
