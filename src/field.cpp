@@ -1,5 +1,7 @@
 #include "field.hpp"
 
+#include <ranges>
+
 Field::Field(const zp& order){
     init_zp(P);
     bn_copy(P, order);
@@ -422,17 +424,18 @@ zp_mat Field::mat_inv_with_det(const zp_mat& x, zp& det) const{
     return xi;
 }
 
-zp_vec Field::find_coeff(const zp_vec& roots) const{
+zp_vec Field::find_coeff(const int& degree, const zp_vec& roots) const{
+    if (roots.size() > degree){
+        throw std::runtime_error("The input vectors are of different lengths.");
+    }
+
     // Declare a temp zp variable and the result zp vector.
     zp temp;
     init_zp(temp);
-    zp_vec coeff(roots.size() + 1);
+    zp_vec coeff = set_int_vec(int_vec(roots.size() + 1, 0));
 
     // Set starting values of the coefficients.
     one(coeff[0]);
-    for (int i = 1; i < coeff.size(); ++i){
-        zero(coeff[i]);
-    }
 
     // Compute the coefficients.
     for (int i = 0; i < roots.size(); ++i){
@@ -446,6 +449,11 @@ zp_vec Field::find_coeff(const zp_vec& roots) const{
     // Invert the coefficients to return c + a0 + a1 + ...
     zp_vec inv_coeff(coeff.size());
     for (int i = 0; i < coeff.size(); ++i) copy(inv_coeff[i], coeff[coeff.size() - i - 1]);
+
+    // Attach additional zeros if needed.
+    if (degree > roots.size()){
+        inv_coeff = vec_join(inv_coeff, set_int_vec(int_vec(degree - roots.size(), 0)));
+    }
 
     return inv_coeff;
 }

@@ -1,6 +1,6 @@
 #include "aggre.hpp"
 
-int test_aggre_eq(){
+int test_ipfe_eq(){
     const auto pp = Aggre::pp_gen();
     const auto msk = Aggre::msk_gen(pp, 10);
 
@@ -30,7 +30,7 @@ int test_aggre_neq(){
 
 int main(){
     // Perform test.
-    if (test_aggre_eq() != 1) return 1;
+    if (test_ipfe_eq() != 1) return 1;
     if (test_aggre_neq() == 1) return 1;
 
     return 0;

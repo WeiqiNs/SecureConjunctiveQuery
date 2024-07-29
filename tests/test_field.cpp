@@ -341,9 +341,12 @@ int test_zp_find_coeff(){
 
     const int_vec int_x = {2, 4, 6, 8, 10};
     const zp_vec x = zp_field.from_int_vec(int_x);
-    const zp_vec coeff = zp_field.find_coeff(x);
+    const zp_vec coeff = zp_field.find_coeff(10, x);
 
-    return Field::cmp(coeff[0], 99) && Field::cmp(coeff[3], 37) && Field::cmp(coeff[5], 1);
+    return Field::cmp(coeff[0], 99) &&
+        Field::cmp(coeff[3], 37) &&
+        Field::cmp(coeff[5], 1) &&
+        Field::cmp(coeff[9], 0);
 }
 
 int main(){

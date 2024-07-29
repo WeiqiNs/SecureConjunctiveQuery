@@ -288,11 +288,12 @@ public:
     [[nodiscard]] zp_mat mat_inv_with_det(const zp_mat& x, zp& det) const;
 
     /**
-     *
-     * @param roots
-     * @return
+     * 
+     * @param degree 
+     * @param roots 
+     * @return 
      */
-    [[nodiscard]] zp_vec find_coeff(const zp_vec& roots) const;
+    [[nodiscard]] zp_vec find_coeff(const int& degree, const zp_vec& roots) const;
 
 private:
     zp P{};

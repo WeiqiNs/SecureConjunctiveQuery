@@ -61,7 +61,7 @@ zp_vec Ipfe::prepare_msg(const ipfe_pp& pp, const ipfe_msk& msk, const int_vec& 
     return output;
 }
 
-zp_vec Ipfe::prepare_key(const ipfe_pp& pp, const ipfe_msk& msk, const int_vec& x){
+zp_vec Ipfe::prepare_key(const ipfe_pp& pp, const ipfe_msk& msk, const int_mat& y){
     // We sample the random points.
     zp r;
     Field::init_zp(r);
@@ -71,24 +71,15 @@ zp_vec Ipfe::prepare_key(const ipfe_pp& pp, const ipfe_msk& msk, const int_vec& 
     zp_vec output(1);
     Field::copy(output[0], msk.k);
 
-    std::cout << output.size() << std::endl;
-
     // Attach the polynomial coefficients.
-    for (const int i : x){
-        int_vec temp;
-        for (int j = 1; j <= pp.d; ++j){
-            temp.push_back(static_cast<int>(pow(i, j)));
-        }
-        output = Field::vec_join(output, pp.field_zp.find_coeff(pp.field_zp.from_int_vec(temp)));
-        std::cout << output.size() << std::endl;
+    for (const auto& i : y){
+        output = Field::vec_join(output, pp.field_zp.find_coeff(pp.d, pp.field_zp.from_int_vec(i)));
     }
 
     // Create another vector of length 2 and attach to the output vector.
     zp_vec last_output(2);
     Field::zero(last_output[0]);
     pp.field_zp.rand(last_output[1]);
-
-    std::cout << output.size() << std::endl;
 
     return Field::vec_join(output, last_output);
 }
@@ -99,7 +90,7 @@ g1_vec Ipfe::enc(const ipfe_pp& pp, const ipfe_msk& msk, const int_vec& x){
     return pp.group_bp.g1_raise(raise);
 }
 
-g2_vec Ipfe::keygen(const ipfe_pp& pp, const ipfe_msk& msk, const int_vec& y){
+g2_vec Ipfe::keygen(const ipfe_pp& pp, const ipfe_msk& msk, const int_mat& y){
     const zp_vec r = prepare_key(pp, msk, y);
     const zp_vec raise = pp.field_zp.mat_mul(msk.bi, r);
     return pp.group_bp.g2_raise(raise);

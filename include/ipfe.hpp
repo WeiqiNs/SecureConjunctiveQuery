@@ -27,11 +27,11 @@ public:
 
     static zp_vec prepare_msg(const ipfe_pp& pp, const ipfe_msk& msk, const int_vec& x);
 
-    static zp_vec prepare_key(const ipfe_pp& pp, const ipfe_msk& msk, const int_vec& x);
+    static zp_vec prepare_key(const ipfe_pp& pp, const ipfe_msk& msk, const int_mat& y);
 
     static g1_vec enc(const ipfe_pp& pp, const ipfe_msk& msk, const int_vec& x);
 
-    static g2_vec keygen(const ipfe_pp& pp, const ipfe_msk& msk, const int_vec& y);
+    static g2_vec keygen(const ipfe_pp& pp, const ipfe_msk& msk, const int_mat& y);
 
     static bool dec(const g1_vec& ct1, const g2_vec& sk1, const g1_vec& ct2, const g2_vec& sk2);
 };
