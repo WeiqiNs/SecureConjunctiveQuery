@@ -1,7 +1,5 @@
 #include "ipfe_join.hpp"
 
-#include <iostream>
-
 pp IpfeJoin::pp_gen(const int& degree, const bool& pre){
     return Filter::pp_gen(degree, pre);
 }

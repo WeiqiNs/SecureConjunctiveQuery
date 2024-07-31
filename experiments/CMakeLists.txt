@@ -1,0 +1,2 @@
+add_executable(client_enc_setup_time client_enc_setup_time.cpp)
+target_link_libraries(client_enc_setup_time PRIVATE ej_lib)

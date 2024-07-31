@@ -1,5 +1,5 @@
 # Set cmake version.
-cmake_minimum_required(VERSION 3.27)
+cmake_minimum_required(VERSION 3.22)
 
 # Project name and language.
 project(
@@ -24,3 +24,4 @@ find_library(RELIC_LIB relic)
 # Add desired subdirectories.
 add_subdirectory(src)
 add_subdirectory(tests)
+add_subdirectory(experiments)
