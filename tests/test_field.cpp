@@ -72,6 +72,25 @@ int test_zp_add(){
     return Field::cmp(r, 4);
 }
 
+int test_zp_sub(){
+    // Create a prime field.
+    zp p;
+    Field::init_zp(p);
+    Field::set_int(p, 11);
+    const Field zp_field(p);
+
+    // Perform testing.
+    zp x, y, r;
+    Field::init_zp(x);
+    Field::init_zp(y);
+    Field::init_zp(r);
+    zp_field.from_int(x, 5);
+    zp_field.from_int(y, 10);
+    zp_field.sub(r, x, y);
+
+    return Field::cmp(r, 6);
+}
+
 int test_zp_neg(){
     // Create a prime field.
     zp p;
@@ -110,6 +129,25 @@ int test_zp_mul(){
     return Field::cmp(r, 6);
 }
 
+int test_zp_exp(){
+    // Create a prime field.
+    zp p;
+    Field::init_zp(p);
+    Field::set_int(p, 11);
+    const Field zp_field(p);
+
+    // Perform testing.
+    zp x, y, r;
+    Field::init_zp(x);
+    Field::init_zp(y);
+    Field::init_zp(r);
+    zp_field.from_int(x, 5);
+    zp_field.from_int(y, 10);
+    zp_field.exp(r, x, y);
+
+    return Field::cmp(r, 1);
+}
+
 int test_zp_inv(){
     // Create a prime field.
     zp p;
@@ -144,6 +182,23 @@ int test_zp_vec_add(){
     const zp_vec r = zp_field.vec_add(zp_x, zp_y);
 
     return Field::cmp(r[3], 2);
+}
+
+int test_zp_vec_sub(){
+    // Create a prime field.
+    zp p;
+    Field::init_zp(p);
+    Field::set_int(p, 11);
+    const Field zp_field(p);
+
+    const int_vec int_x = {1, 2, 3, 4, 5};
+    const int_vec int_y = {6, 7, 8, 9, 10};
+
+    const zp_vec zp_x = zp_field.from_int_vec(int_x);
+    const zp_vec zp_y = zp_field.from_int_vec(int_y);
+    const zp_vec r = zp_field.vec_sub(zp_x, zp_y);
+
+    return Field::cmp(r[3], 6);
 }
 
 int test_zp_vec_mul(){
@@ -355,16 +410,19 @@ int main(){
     init_get_order(p);
 
     // Perform test.
-    if (test_zp_zero() != 1) return 1;
     if (test_zp_one() != 1) return 1;
+    if (test_zp_zero() != 1) return 1;
     if (test_zp_copy() != 1) return 1;
     if (test_zp_set() != 1) return 1;
     if (test_zp_from() != 1) return 1;
     if (test_zp_add() != 1) return 1;
+    if (test_zp_sub() != 1) return 1;
     if (test_zp_neg() != 1) return 1;
     if (test_zp_mul() != 1) return 1;
+    if (test_zp_exp() != 1) return 1;
     if (test_zp_inv() != 1) return 1;
     if (test_zp_vec_add() != 1) return 1;
+    if (test_zp_vec_sub() != 1) return 1;
     if (test_zp_vec_mul() != 1) return 1;
     if (test_zp_vec_mul_zp() != 1) return 1;
     if (test_zp_vec_ip() != 1) return 1;

@@ -7,7 +7,8 @@
 
 using str = std::string;
 using str_vec = std::vector<str>;
-using vec = std::vector<unsigned char>;
+using str_mat = std::vector<str_vec>;
+using char_vec = std::vector<unsigned char>;
 
 class Helper{
 public:
@@ -16,33 +17,33 @@ public:
      * @param x
      * @return
      */
-    static vec int_to_vec(const int& x);
+    static char_vec int_to_vec(const int& x);
 
     /**
      *
      * @param x
      * @return
      */
-    static int vec_to_int(const vec& x);
+    static int vec_to_int(const char_vec& x);
 
     /**
      *
      * @param x
      * @return
      */
-    static vec str_to_vec(const str& x);
+    static char_vec str_to_vec(const str& x);
 
     /**
      *
      * @param x
      * @return
      */
-    static str vec_to_str(const vec& x);
+    static str vec_to_str(const char_vec& x);
 
     /**
      * 
      * @param r 
      * @param x 
      */
-    static void vec_to_zp(zp& r, const vec& x);
+    static void vec_to_zp(zp& r, const char_vec& x);
 };

@@ -112,7 +112,23 @@ public:
      * @param x
      * @param y
      */
+    void sub(zp& r, const zp& x, const zp& y) const;
+
+    /**
+     *
+     * @param r
+     * @param x
+     * @param y
+     */
     void mul(zp& r, const zp& x, const zp& y) const;
+
+    /**
+     *
+     * @param r
+     * @param x
+     * @param y
+     */
+    void exp(zp& r, const zp& x, const zp& y) const;
 
     /**
      *
@@ -127,6 +143,13 @@ public:
      * @param x
      */
     void inv(zp& r, const zp& x) const;
+
+    /**
+     *
+     * @param r
+     * @param x
+     */
+    static void copy_vec(zp_vec& r, const zp_vec& x);
 
     /**
         *
@@ -156,6 +179,14 @@ public:
      * @return
      */
     [[nodiscard]] zp_vec vec_add(const zp_vec& x, const zp_vec& y) const;
+
+    /**
+     *
+     * @param x
+     * @param y
+     * @return
+     */
+    [[nodiscard]] zp_vec vec_sub(const zp_vec& x, const zp_vec& y) const;
 
     /**
         *
@@ -289,7 +320,7 @@ public:
 
     /**
      * 
-     * @param degree 
+     * @param degree
      * @param roots 
      * @return 
      */

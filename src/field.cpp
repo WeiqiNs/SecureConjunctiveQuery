@@ -1,7 +1,5 @@
 #include "field.hpp"
 
-#include <ranges>
-
 Field::Field(const zp& order){
     init_zp(P);
     bn_copy(P, order);
@@ -71,9 +69,18 @@ void Field::add(zp& r, const zp& x, const zp& y) const{
     mod(r);
 }
 
+void Field::sub(zp& r, const zp& x, const zp& y) const{
+    bn_sub(r, x, y);
+    mod(r);
+}
+
 void Field::mul(zp& r, const zp& x, const zp& y) const{
     bn_mul(r, x, y);
     mod(r);
+}
+
+void Field::exp(zp& r, const zp& x, const zp& y) const{
+    bn_mxp(r, x, y, P);
 }
 
 void Field::neg(zp& r, const zp& x) const{
@@ -83,6 +90,14 @@ void Field::neg(zp& r, const zp& x) const{
 
 void Field::inv(zp& r, const zp& x) const{
     bn_mod_inv(r, x, P);
+}
+
+void Field::copy_vec(zp_vec& r, const zp_vec& x){
+    if (r.size() != x.size()){
+        throw std::runtime_error("The input vectors are of different lengths.");
+    }
+
+    for (int i = 0; i < x.size(); ++i) copy(r[i], x[i]);
 }
 
 zp_vec Field::set_int_vec(const int_vec& x){
@@ -129,6 +144,22 @@ zp_vec Field::vec_add(const zp_vec& x, const zp_vec& y) const{
     for (int i = 0; i < x.size(); i++){
         init_zp(r[i]);
         add(r[i], x[i], y[i]);
+    }
+
+    return r;
+}
+
+zp_vec Field::vec_sub(const zp_vec& x, const zp_vec& y) const{
+    // Check that inputs have to have equal length.
+    if (x.size() != y.size()){
+        throw std::runtime_error("The input vectors are of different lengths.");
+    }
+
+    zp_vec r(x.size());
+
+    for (int i = 0; i < x.size(); i++){
+        init_zp(r[i]);
+        sub(r[i], x[i], y[i]);
     }
 
     return r;
@@ -337,8 +368,8 @@ zp_vec Field::mat_mul(const zp_mat& x, const zp_vec& y) const{
     zp prod;
     init_zp(prod);
 
-    for (int j = 0; j < x[0].size(); ++j) {
-        for (int i = 0; i < x.size(); ++i) {
+    for (int j = 0; j < x[0].size(); ++j){
+        for (int i = 0; i < x.size(); ++i){
             mul(prod, x[i][j], y[i]);
             add(r[j], r[j], prod);
         }

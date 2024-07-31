@@ -26,12 +26,12 @@ Aes::Aes(const int& key_length){
     RAND_bytes(key.data(), byte_length);
 }
 
-vec Aes::get_key(){ return key; }
+char_vec Aes::get_key(){ return key; }
 
-vec Aes::encrypt(const vec& plaintext) const{
-    vec iv(EVP_MAX_IV_LENGTH);
+char_vec Aes::encrypt(const char_vec& plaintext) const{
+    char_vec iv(EVP_MAX_IV_LENGTH);
     RAND_bytes(iv.data(), EVP_MAX_IV_LENGTH);
-    vec ciphertext(plaintext.size() + EVP_CIPHER_block_size(get_cipher()));
+    char_vec ciphertext(plaintext.size() + EVP_CIPHER_block_size(get_cipher()));
 
     int len;
     const int plaintext_len = static_cast<int>(plaintext.size());
@@ -65,10 +65,10 @@ vec Aes::encrypt(const vec& plaintext) const{
     return ciphertext;
 }
 
-vec Aes::decrypt(const vec& ciphertext) const{
-    const vec iv(ciphertext.begin(), ciphertext.begin() + EVP_MAX_IV_LENGTH);
-    const vec actual_ciphertext(ciphertext.begin() + EVP_MAX_IV_LENGTH, ciphertext.end());
-    vec plaintext(actual_ciphertext.size() + EVP_CIPHER_block_size(get_cipher()));
+char_vec Aes::decrypt(const char_vec& ciphertext) const{
+    const char_vec iv(ciphertext.begin(), ciphertext.begin() + EVP_MAX_IV_LENGTH);
+    const char_vec actual_ciphertext(ciphertext.begin() + EVP_MAX_IV_LENGTH, ciphertext.end());
+    char_vec plaintext(actual_ciphertext.size() + EVP_CIPHER_block_size(get_cipher()));
 
     int len;
     const int ciphertext_len = static_cast<int>(actual_ciphertext.size());
@@ -108,12 +108,12 @@ Hash::Hash(){
     RAND_bytes(key.data(), HASH_SIZE);
 }
 
-vec Hash::get_iv(){ return iv; }
+char_vec Hash::get_iv(){ return iv; }
 
-vec Hash::get_key(){ return key; }
+char_vec Hash::get_key(){ return key; }
 
-vec Hash::digest(const vec& data) const{
-    vec ciphertext(data.size() + EVP_CIPHER_block_size(EVP_aes_128_cbc()));
+char_vec Hash::digest(const char_vec& data) const{
+    char_vec ciphertext(data.size() + EVP_CIPHER_block_size(EVP_aes_128_cbc()));
 
     int len;
     const int plaintext_len = static_cast<int>(data.size());

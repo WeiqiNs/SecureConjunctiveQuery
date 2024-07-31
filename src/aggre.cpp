@@ -1,8 +1,17 @@
 #include "aggre.hpp"
 
-pp Aggre::pp_gen(const bool& pre){ return Filter::pp_gen(pre); }
+aggre_pp Aggre::pp_gen(const bool& pre){
+    zp p;
+    init_get_order(p);
 
-aggre_msk Aggre::msk_gen(const pp& pp, const int& input_len){
+    aggre_pp pp;
+    pp.field_zp.init(p);
+    pp.group_bp.init(pre);
+
+    return pp;
+}
+
+aggre_msk Aggre::msk_gen(const aggre_pp& pp, const int& input_len){
     aggre_msk msk;
     Field::init_zp(msk.d);
     Field::init_zp(msk.dp);
@@ -16,7 +25,7 @@ aggre_msk Aggre::msk_gen(const pp& pp, const int& input_len){
     return msk;
 }
 
-g1_vec Aggre::enc(const pp& pp, const aggre_msk& msk, const int_vec& x){
+g1_vec Aggre::enc(const aggre_pp& pp, const aggre_msk& msk, const int_vec& x){
     // Convert the input to zp.
     const zp_vec zp_x = pp.field_zp.from_int_vec(x);
 
@@ -45,7 +54,7 @@ g1_vec Aggre::enc(const pp& pp, const aggre_msk& msk, const int_vec& x){
     return pp.group_bp.g1_raise(raise);
 }
 
-g2_vec Aggre::keygen(const pp& pp, const aggre_msk& msk, const int_vec& y, const int& p){
+g2_vec Aggre::keygen(const aggre_pp& pp, const aggre_msk& msk, const int_vec& y, const int& p){
     // Convert the input to zp.
     const zp_vec zp_y = pp.field_zp.from_int_vec(y);
     // Convert the input point to zp as well.

@@ -1,9 +1,9 @@
 #include "helper.hpp"
 
-vec Helper::int_to_vec(const int& x){
+char_vec Helper::int_to_vec(const int& x){
 
     int temp = x;
-    vec r(sizeof(int));
+    char_vec r(sizeof(int));
 
     // Use reinterpret_cast to treat the integer as a sequence of bytes
     std::copy_n(reinterpret_cast<unsigned char*>(&temp), sizeof(int), r.begin());
@@ -11,7 +11,7 @@ vec Helper::int_to_vec(const int& x){
     return r;
 }
 
-int Helper::vec_to_int(const vec& x){
+int Helper::vec_to_int(const char_vec& x){
     int r = 0;
 
     // Check if the size of the vector is correct
@@ -25,11 +25,11 @@ int Helper::vec_to_int(const vec& x){
     return r;
 }
 
-vec Helper::str_to_vec(const str& x){ return {x.begin(), x.end()}; }
+char_vec Helper::str_to_vec(const str& x){ return {x.begin(), x.end()}; }
 
-str Helper::vec_to_str(const vec& x){ return {x.begin(), x.end()}; }
+str Helper::vec_to_str(const char_vec& x){ return {x.begin(), x.end()}; }
 
-void Helper::vec_to_zp(zp& r, const vec& x){
+void Helper::vec_to_zp(zp& r, const char_vec& x){
     // Make sure we start with zero.
     Field::zero(r);
 

@@ -6,7 +6,7 @@
 static int HASH_SIZE = 16;
 
 class Aes{
-    vec key;
+    char_vec key;
     int byte_length;
 
     /**
@@ -26,26 +26,26 @@ public:
      * 
      * @return 
      */
-    vec get_key();
+    char_vec get_key();
 
     /**
      * 
      * @param plaintext 
      * @return 
      */
-    [[nodiscard]] vec encrypt(const vec& plaintext) const;
+    [[nodiscard]] char_vec encrypt(const char_vec& plaintext) const;
 
     /**
      * 
      * @param ciphertext 
      * @return 
      */
-    [[nodiscard]] vec decrypt(const vec& ciphertext) const;
+    [[nodiscard]] char_vec decrypt(const char_vec& ciphertext) const;
 };
 
 class Hash{
-    vec iv;
-    vec key;
+    char_vec iv;
+    char_vec key;
 
 public:
     /**
@@ -58,20 +58,20 @@ public:
      * 
      * @return 
      */
-    vec get_iv();
+    char_vec get_iv();
 
     /**
      * 
      * @return 
      */
-    vec get_key();
+    char_vec get_key();
 
     /**
      * 
      * @param data 
      * @return 
      */
-    [[nodiscard]] vec digest(const vec& data) const;
+    [[nodiscard]] char_vec digest(const char_vec& data) const;
 
     /**
      * 

@@ -41,7 +41,13 @@ add_test(NAME test_aggre COMMAND test_aggre)
 # -----------------------------------------------------
 
 # -----------------------------------------------------
-add_executable(test_ipfe test_ipfe.cpp)
-target_link_libraries(test_ipfe PRIVATE ej_lib)
-add_test(NAME test_ipfe COMMAND test_ipfe)
+add_executable(test_ipfe_filter test_ipfe_filter.cpp)
+target_link_libraries(test_ipfe_filter PRIVATE ej_lib)
+add_test(NAME test_ipfe_filter COMMAND test_ipfe_filter)
+# -----------------------------------------------------
+
+# -----------------------------------------------------
+add_executable(test_ipfe_join test_ipfe_join.cpp)
+target_link_libraries(test_ipfe_join PRIVATE ej_lib)
+add_test(NAME test_ipfe_join COMMAND test_ipfe_join)
 # -----------------------------------------------------
