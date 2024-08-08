@@ -1,6 +1,5 @@
-# encrypted-query
 
-# Towards Practical Oblivious Map
+# Reduce Leakages in Query Processing on Encrypted Multi-dimensional Data with Practicality
 
 Xinle Cao, Weiqi Feng, Quanqing Xu, Chuanhui Yang, Jian Liu and Kui Ren.
 
