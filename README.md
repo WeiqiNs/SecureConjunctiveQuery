@@ -9,38 +9,20 @@ The full version of the paper is listed in this repo [here](Full_version_Towards
 
 ## FixSch (ICDE 2022)
 
-- [Insecure Freecursive (ASPLOS 2015)](https://people.csail.mit.edu/devadas/pubs/freecursive.pdf), which is
-  implemented [here](orams/freecursive_oram.py). The `reset_method` needs to be set to `"hard"`.
-- [Secure Freecursive with probabilistic resets (TCC 2017)](https://eprint.iacr.org/2016/1084), which is
-  implemented [here](orams/freecursive_oram.py). The `reset_method` needs to be set to `"prob"`.
-- The proposed DAORAM with deterministic resets, which is implemented [here](orams/da_oram.py).
+- [FixSch](https://www.computer.org/csdl/proceedings-article/icde/2022/088300b635/1FwFv0bDBba), which is
+  implemented [here](include/ipfe_join.hpp) and [here](include/ipfe_filter.hpp).
 
 ## Our method FleSch
 
-- [OMAP based on AVL (CCS 2014)](https://dl.acm.org/doi/10.1145/2660267.2660314), which is
-  implemented [here](omaps/avl_ods_omap.py). The `distinguishable_search` needs to be set to `False`.
-- [OMAP based on optimized AVL (VLDB 2024)](https://www.vldb.org/pvldb/vol16/p4324-chamani.pdf), which is
-  implemented [here](omaps/avl_ods_omap.py). The `distinguishable_search` needs to be set to `True`.
-- [OMAP based on the B+ tree (VLDB 2020)](https://people.eecs.berkeley.edu/~matei/papers/2020/vldb_oblidb.pdf), which is
-  implemented [here](omaps/bplus_ods_omap.py).
-- The proposed OMAP framework is implemented [here](omaps/oram_ods_omap.py). It can be instantiated with any ORAM class
-  contained in this repo combined with any OMAP class in this repo.
-
-The open-sourced repositories we used as reference for the OMAP based on AVL tree and OMAP based on B+ tree are
-here: [AVL](https://github.com/obliviousram/oblivious-avl-tree) [B+ tree](https://github.com/SabaEskandarian/ObliDB).
+- The filter method is implemented [here](include/filter.hpp) and the join method is implemented [here](include/join.hpp).
 
 ## Project Structure
 
-- The [demo](demo) folder consists of demonstrations of how to use socket to set up ORAM/OMAP server and client.
-- The [dependency](dependency) folder consists of some dependencies used including the socket, cryptography, etc.
-- The [omaps](omaps) folder consists of all the OMAP constructions considered.
-- The [orams](orams) folder consists of all the ORAM constructions considered.
+- The [experiments](experiments) folder consists of files to run experiments that we report in the paper.
+- The [include](include) folder consists of header files of our implementations.
+- The [src](src) folder consists of source files of our implementations. 
 - The [tests](tests) folder consists of test cases for validating correctness of our implementations.
 
 ## How to run this code
 
-You need to first install the package listed in [`requirements.txt`](requirements.txt). If you want to run the schemes
-with "local server", sample usages can be found in [`tests/test_orams.py`](tests/test_orams.py)
-or [`tests/test_omaps.py`](tests/test_omaps.py). If you wish to set up a remote server, you should first
-run [`demo/server.py`](demo/server.py) on the server and then run [`demo/oram_client.py`](demo/oram_client.py)
-or [`demo/oram_client.py`](demo/omap_client.py) on your client device.
+You need to first install the RELIC library; note that our experiment is done on the BLS12-381 curve. One could refer to the [Dockerfile](Dockerfile) to see how to setup the dev environment (or use it to build a container directly).
