@@ -1,29 +1,9 @@
 #include <chrono>
-#include <random>
 #include <fstream>
 #include "filter.hpp"
 #include "ipfe_filter.hpp"
 
-static int ROUND = 50;
-static int MINR = 1;
-static int MAXR = 1000;
-
-int_vec rand_vec(const int length, const int seed){
-    std::vector<int> r;
-    r.reserve(length);
-
-    // Initialize random number generator with a seed based on current time
-    std::mt19937 generator(seed);
-
-    // Define the range for the random numbers
-    std::uniform_int_distribution distribution(MINR, MAXR);
-
-    for (int i = 0; i < length; ++i){
-        r.push_back(distribution(generator));
-    }
-
-    return r;
-}
+static int ROUND = 2;
 
 int main(){
     // Open the output files.
@@ -38,7 +18,7 @@ int main(){
     // For m from 4 to 20, we perform the Filter setup.
     setup_file << "Filter Setup time (ms): " << std::endl;
     enc_file << "Filter Enc time (ms): " << std::endl;
-    for (int i = 4; i <= 20; ++i){
+    for (int i = 100; i <= 300; i = i + 10){
         // Set the start and the end.
         auto start = std::chrono::high_resolution_clock::now();
         for (int j = 0; j < ROUND; ++j){
@@ -51,7 +31,7 @@ int main(){
         setup_file << "(" << i << ", " << elapsed.count() / ROUND << ")" << std::endl;
 
         // We now count the Enc time, first create a vector.
-        int_vec r = rand_vec(i, i);
+        int_vec r = Helper::rand_vec(i, 1, 1000);
         // Count time.
         start = std::chrono::high_resolution_clock::now();
         for (int j = 0; j < ROUND; ++j){
@@ -68,7 +48,7 @@ int main(){
     // For m from 4 to 20, we perform the Filter setup.
     setup_file << "IPFE Filter Setup time (ms): " << std::endl;
     enc_file << "IPFE Filter Enc time (ms): " << std::endl;
-    for (int i = 4; i <= 10; ++i){
+    for (int i = 100; i <= 300; i = i + 10){
         // Set the start and the end.
         auto start = std::chrono::high_resolution_clock::now();
         for (int j = 0; j < ROUND; ++j){
@@ -81,7 +61,7 @@ int main(){
         setup_file << "(" << i << ", " << elapsed.count() / ROUND << ")" << std::endl;
 
         // We now count the Enc time, first create a vector.
-        int_vec r = rand_vec(i, i);
+        int_vec r = Helper::rand_vec(i, 1, 1000);
         // Count time.
         start = std::chrono::high_resolution_clock::now();
         for (int j = 0; j < ROUND; ++j){

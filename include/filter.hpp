@@ -36,10 +36,19 @@ public:
 
     static g2_vec keygen(const pp& pp, const filter_msk& msk, const str_mat& y);
 
+    static g2_vec keygen(const pp& pp, const filter_msk& msk, const int_mat& y, const int_vec& sel);
+
+    static g2_vec keygen(const pp& pp, const filter_msk& msk, const str_mat& y, const int_vec& sel);
+
     static bool dec(g1_vec& ct, g2_vec& sk);
+
+    static bool dec(const pp& pp, g1_vec& ct, g2_vec& sk, const int_vec& sel);
 
 private:
     static g1_vec enc(const pp& pp, const filter_msk& msk, const zp_vec& x);
 
     static g2_vec keygen(const pp& pp, const filter_msk& msk, const zp_mat& y);
+
+    static g2_vec keygen(const pp& pp, const filter_msk& msk, const zp_mat& y, const int_vec& sel);
+
 };

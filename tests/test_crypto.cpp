@@ -1,3 +1,6 @@
+#include <chrono>
+#include <iostream>
+
 #include "crypto.hpp"
 
 int test_aes_128() {
@@ -7,8 +10,18 @@ int test_aes_128() {
 
     const char_vec plaintext_vec = Helper::str_to_vec(plaintext);
 
-    const char_vec ciphertext = aes.encrypt(plaintext_vec);
+    std::chrono::duration<double, std::milli> elapsed = std::chrono::duration<double, std::milli>::zero();
+    for (int i = 0; i < 100; ++i){
+        auto start = std::chrono::high_resolution_clock::now();
+        const char_vec ciphertext = aes.encrypt(plaintext_vec);
+        auto end = std::chrono::high_resolution_clock::now();
+        elapsed += (end - start);
+        std::cout << elapsed.count() << std::endl;
+    }
 
+    std::cout << elapsed.count() / 100 << std::endl;
+
+    const char_vec ciphertext = aes.encrypt(plaintext_vec);
     return aes.decrypt(ciphertext) == plaintext_vec;
 }
 

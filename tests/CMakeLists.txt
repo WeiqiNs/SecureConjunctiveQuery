@@ -29,15 +29,21 @@ add_test(NAME test_group COMMAND test_group)
 # -----------------------------------------------------
 
 # -----------------------------------------------------
+add_executable(test_aggre test_aggre.cpp)
+target_link_libraries(test_aggre PRIVATE ej_lib)
+add_test(NAME test_aggre COMMAND test_aggre)
+# -----------------------------------------------------
+
+# -----------------------------------------------------
 add_executable(test_filter test_filter.cpp)
 target_link_libraries(test_filter PRIVATE ej_lib)
 add_test(NAME test_filter COMMAND test_filter)
 # -----------------------------------------------------
 
 # -----------------------------------------------------
-add_executable(test_aggre test_aggre.cpp)
-target_link_libraries(test_aggre PRIVATE ej_lib)
-add_test(NAME test_aggre COMMAND test_aggre)
+add_executable(test_join test_join.cpp)
+target_link_libraries(test_join PRIVATE ej_lib)
+add_test(NAME test_join COMMAND test_join)
 # -----------------------------------------------------
 
 # -----------------------------------------------------

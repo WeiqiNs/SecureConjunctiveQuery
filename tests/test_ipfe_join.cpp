@@ -1,3 +1,6 @@
+#include <chrono>
+#include <iostream>
+
 #include "ipfe_join.hpp"
 
 int test_ipfe_join_eq(){
@@ -24,7 +27,11 @@ int test_ipfe_join_eq(){
 
     // Compute the decryption.
     gt r1, r2;
+    auto start = std::chrono::high_resolution_clock::now();
     IpfeJoin::dec(r1, ct1, sk1);
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> elapsed = end - start;
+    std::cout << elapsed.count() << std::endl;
     IpfeJoin::dec(r2, ct2, sk2);
 
     return Group::cmp_gt(r1, r2);
