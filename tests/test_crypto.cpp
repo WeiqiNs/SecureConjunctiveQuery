@@ -1,62 +1,38 @@
-#include <chrono>
-#include <iostream>
-
+#include <gtest/gtest.h>
 #include "crypto.hpp"
 
-int test_aes_128() {
+TEST(CryptoTests, AES128){
     const auto aes = Aes(128);
 
     const str plaintext = "This is a secret message.";
 
-    const char_vec plaintext_vec = Helper::str_to_vec(plaintext);
+    const CharVec plaintext_vec = Helper::str_to_char_vec(plaintext);
 
-    std::chrono::duration<double, std::milli> elapsed = std::chrono::duration<double, std::milli>::zero();
-    for (int i = 0; i < 100; ++i){
-        auto start = std::chrono::high_resolution_clock::now();
-        const char_vec ciphertext = aes.encrypt(plaintext_vec);
-        auto end = std::chrono::high_resolution_clock::now();
-        elapsed += (end - start);
-        std::cout << elapsed.count() << std::endl;
-    }
+    const CharVec ciphertext = aes.encrypt(plaintext_vec);
 
-    std::cout << elapsed.count() / 100 << std::endl;
-
-    const char_vec ciphertext = aes.encrypt(plaintext_vec);
-    return aes.decrypt(ciphertext) == plaintext_vec;
+    EXPECT_EQ(aes.decrypt(ciphertext), plaintext_vec);
 }
 
-int test_aes_256() {
+TEST(CryptoTests, AES256){
     const auto aes = Aes(256);
 
     const str plaintext = "This is another secret message.";
 
-    const char_vec plaintext_vec = Helper::str_to_vec(plaintext);
+    const CharVec plaintext_vec = Helper::str_to_char_vec(plaintext);
 
-    const char_vec ciphertext = aes.encrypt(plaintext_vec);
+    const CharVec ciphertext = aes.encrypt(plaintext_vec);
 
-    return aes.decrypt(ciphertext) == plaintext_vec;
+    EXPECT_EQ(aes.decrypt(ciphertext), plaintext_vec);
 }
 
-int test_hash(){
+TEST(CryptoTests, Hash){
     const auto hash = Hash();
 
-    const str data = "Something to hash.";
+    const CharVec data_vec = Helper::str_to_char_vec("Something to hash.");
 
-    const char_vec data_vec = Helper::str_to_vec(data);
+    const CharVec hash_one = hash.digest(data_vec);
 
-    const char_vec hash_one = hash.digest(data_vec);
+    const CharVec hash_two = hash.digest(data_vec);
 
-    const char_vec hash_two = hash.digest(data_vec);
-
-    return hash_one == hash_two;
-}
-
-
-int main() {
-    // Perform test.
-    if (test_aes_128() != 1) return 1;
-    if (test_aes_256() != 1) return 1;
-    if (test_hash() != 1) return 1;
-
-    return 0;
+    EXPECT_EQ(hash_one, hash_two);
 }

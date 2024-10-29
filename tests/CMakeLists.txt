@@ -1,59 +1,14 @@
 # -----------------------------------------------------
-add_executable(test_crypto test_crypto.cpp)
-target_link_libraries(test_crypto PRIVATE ej_lib)
-add_test(NAME test_crypto COMMAND test_crypto)
-# -----------------------------------------------------
-
+# Include google test here and enable testing.
+include(GoogleTest)
+# Set alias for google test.
+set(GTEST_LIB gtest gtest_main)
 # -----------------------------------------------------
 add_executable(test_helper test_helper.cpp)
-target_link_libraries(test_helper PRIVATE ej_lib)
-add_test(NAME test_helper COMMAND test_helper)
+target_link_libraries(test_helper EEJ ${GTEST_LIB})
+gtest_discover_tests(test_helper)
 # -----------------------------------------------------
-
-# -----------------------------------------------------
-add_executable(test_init test_init.cpp)
-target_link_libraries(test_init PRIVATE ej_lib)
-add_test(NAME test_init COMMAND test_init)
-# -----------------------------------------------------
-
-# -----------------------------------------------------
-add_executable(test_field test_field.cpp)
-target_link_libraries(test_field PRIVATE ej_lib)
-add_test(NAME test_field COMMAND test_field)
-# -----------------------------------------------------
-
-# -----------------------------------------------------
-add_executable(test_group test_group.cpp)
-target_link_libraries(test_group PRIVATE ej_lib)
-add_test(NAME test_group COMMAND test_group)
-# -----------------------------------------------------
-
-# -----------------------------------------------------
-add_executable(test_aggre test_aggre.cpp)
-target_link_libraries(test_aggre PRIVATE ej_lib)
-add_test(NAME test_aggre COMMAND test_aggre)
-# -----------------------------------------------------
-
-# -----------------------------------------------------
-add_executable(test_filter test_filter.cpp)
-target_link_libraries(test_filter PRIVATE ej_lib)
-add_test(NAME test_filter COMMAND test_filter)
-# -----------------------------------------------------
-
-# -----------------------------------------------------
-add_executable(test_join test_join.cpp)
-target_link_libraries(test_join PRIVATE ej_lib)
-add_test(NAME test_join COMMAND test_join)
-# -----------------------------------------------------
-
-# -----------------------------------------------------
-add_executable(test_ipfe_filter test_ipfe_filter.cpp)
-target_link_libraries(test_ipfe_filter PRIVATE ej_lib)
-add_test(NAME test_ipfe_filter COMMAND test_ipfe_filter)
-# -----------------------------------------------------
-
-# -----------------------------------------------------
-add_executable(test_ipfe_join test_ipfe_join.cpp)
-target_link_libraries(test_ipfe_join PRIVATE ej_lib)
-add_test(NAME test_ipfe_join COMMAND test_ipfe_join)
+add_executable(test_crypto test_crypto.cpp)
+target_link_libraries(test_crypto EEJ ${GTEST_LIB})
+gtest_discover_tests(test_crypto)
 # -----------------------------------------------------

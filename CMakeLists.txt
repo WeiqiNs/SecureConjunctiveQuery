@@ -1,27 +1,40 @@
 # Set cmake version.
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.20)
 
 # Project name and language.
 project(
-        EqualJoin
+        EncryptedEqualJoin
         VERSION 0.1
-        DESCRIPTION "Some description should be here."
+        DESCRIPTION "This project implements the encrypted equal join protocol."
         LANGUAGES CXX
 )
 
 # Set standards and include tests.
-if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
-    set(CMAKE_CXX_STANDARD 20)
-    set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-    include(CTest)
-endif ()
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Find the SSL library.
+# Enable the testing.
+enable_testing()
+
+# Find required libraries.
+find_package(RBP REQUIRED)
 find_package(OpenSSL REQUIRED)
-# Find the relic library.
-find_library(RELIC_LIB relic)
+
+# Find the google test library for testing.
+find_package(GTest)
+if(NOT GTest_FOUND)
+    include(FetchContent)
+    FetchContent_Declare(
+            googletest
+            URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
+            DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+    )
+    # For Windows: Prevent overriding the parent project's compiler/linker settings
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(googletest)
+endif()
 
 # Add desired subdirectories.
 add_subdirectory(src)
 add_subdirectory(tests)
-add_subdirectory(experiments)
+#add_subdirectory(experiments)

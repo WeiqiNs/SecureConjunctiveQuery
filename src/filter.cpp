@@ -1,73 +1,116 @@
 #include "filter.hpp"
 
 pp Filter::pp_gen(const int& degree, const bool& pre){
-    zp p;
-    init_get_order(p);
-
+    // Create the pp instance.
     pp pp;
+
+    // Update the degree according to input.
     pp.d = degree;
-    pp.field_zp.init(p);
-    pp.group_bp.init(pre);
+
+    // Save the created pairing group.
+    auto pairing_group = BP(pre);
+    pp.pairing_group = &pairing_group;
 
     return pp;
 }
 
-filter_msk Filter::msk_gen(const pp& pp, const int& input_len){
-    filter_msk msk;
-    Field::init_zp(msk.d);
-    Field::init_zp(msk.di);
-    pp.field_zp.rand(msk.d);
-    pp.field_zp.inv(msk.di, msk.d);
+FilterMsk Filter::msk_gen(const pp& pp, const int& input_len){
+    FilterMsk msk;
 
-    msk.r = pp.field_zp.vec_rand(2 * input_len * (pp.d + 1));
-    msk.b = pp.field_zp.vec_rand(2 * input_len * (pp.d + 1));
-    msk.bi = pp.field_zp.vec_inv(msk.b);
+    if (pp.d == 1){
+        msk.r = pp.pairing_group->Zp->rand_vec(input_len);
+    }
+    //
+    // Field::init_zp(msk.d);
+    // Field::init_zp(msk.di);
+    // pp.field_zp.rand(msk.d);
+    // pp.field_zp.inv(msk.di, msk.d);
+    //
+    // msk.r = pp.field_zp.vec_rand(2 * input_len * (pp.d + 1));
+    // msk.b = pp.field_zp.vec_rand(2 * input_len * (pp.d + 1));
+    // msk.bi = pp.field_zp.vec_inv(msk.b);
 
     return msk;
 }
 
-zp_vec Filter::poly_msg(const pp& pp, const zp_vec& x){
-    // The vector would be of length degree * len(x).
-    zp_vec output(x.size() * (pp.d + 1));
+G1Vec Filter::enc(const pp& pp, const FilterMsk& msk, const IntVec& x){
+    FpVec x_digest = msk.hash.digest_int_vec(x);
 
-    // Set values for the power.
-    zp_vec power(pp.d + 1);
-    for (int i = 0; i < power.size(); ++i) pp.field_zp.from_int(power[i], i);
+    for (auto i: x_digest) pp.pairing_group->Zp->mod(i);
 
-    // Copy the polynomial over to the result vector.
-    for (int i = 0; i < x.size(); ++i){
-        for (int j = 0; j <= pp.d; ++j){
-            // Compute x_i^j.
-            pp.field_zp.exp(output[i * (pp.d + 1) + j], x[i], power[j]);
-        }
-    }
-
-    // Return the output vector.
-    return output;
+    return enc(pp, msk, x_digest);
 }
 
-zp_vec Filter::poly_key(const pp& pp, const zp_mat& y){
-    // The vector would be of length degree * len(x).
-    zp_vec output;
+G1Vec Filter::enc(const pp& pp, const FilterMsk& msk, const StrVec& x){
+    FpVec x_digest = msk.hash.digest_str_vec(x);
 
-    // Attach the polynomial coefficients.
-    for (const auto& roots : y){
-        output = Field::vec_join(output, pp.field_zp.find_coeff(pp.d, roots));
-    }
+    for (auto i: x_digest) pp.pairing_group->Zp->mod(i);
 
-    return output;
+    return enc(pp, msk, x_digest);
 }
 
-g1_vec Filter::enc(const pp& pp, const filter_msk& msk, const int_vec& x){
-    return enc(pp, msk, msk.hash.digest_int_vec(x));
+g1_vec Filter::enc(const pp& pp, const FilterMsk& msk, const zp_vec& x){
+    // Sample the random point alpha.
+    zp alpha;
+    Field::init_zp(alpha);
+    pp.field_zp.rand(alpha);
+
+    // We compute the value for evaluating polynomial at x.
+    const auto poly_x = poly_msg(pp, x);
+    // Duplicate the poly(x).
+    const auto xx = Field::vec_join(poly_x, poly_x);
+    // Compute poly(x)||poly(x) + r.
+    const auto xxr = pp.field_zp.vec_add(xx, msk.r);
+    // Compute alpha * (poly(x)||poly(x) + r).
+    const auto axxr = pp.field_zp.vec_mul(xxr, alpha);
+    // Compute alpha * b * (poly(x)||poly(x) + r).
+    const auto abxxr = pp.field_zp.vec_mul(axxr, msk.b);
+
+    // Compute the last point to join to the vector.
+    zp last;
+    Field::init_zp(last);
+    pp.field_zp.mul(last, alpha, msk.d);
+
+    // Raise to g1 and return.
+    return pp.group_bp.g1_raise(Field::vec_join(abxxr, last));
 }
 
-g1_vec Filter::enc(const pp& pp, const filter_msk& msk, const str_vec& x){
-    return enc(pp, msk, msk.hash.digest_str_vec(x));
-}
+// zp_vec Filter::poly_msg(const pp& pp, const zp_vec& x){
+//     // The vector would be of length degree * len(x).
+//     zp_vec output(x.size() * (pp.d + 1));
+//
+//     // Set values for the power.
+//     zp_vec power(pp.d + 1);
+//     for (int i = 0; i < power.size(); ++i) pp.field_zp.from_int(power[i], i);
+//
+//     // Copy the polynomial over to the result vector.
+//     for (int i = 0; i < x.size(); ++i){
+//         for (int j = 0; j <= pp.d; ++j){
+//             // Compute x_i^j.
+//             pp.field_zp.exp(output[i * (pp.d + 1) + j], x[i], power[j]);
+//         }
+//     }
+//
+//     // Return the output vector.
+//     return output;
+// }
+//
+// zp_vec Filter::poly_key(const pp& pp, const zp_mat& y){
+//     // The vector would be of length degree * len(x).
+//     zp_vec output;
+//
+//     // Attach the polynomial coefficients.
+//     for (const auto& roots : y){
+//         output = Field::vec_join(output, pp.field_zp.find_coeff(pp.d, roots));
+//     }
+//
+//     return output;
+// }
 
 
-g2_vec Filter::keygen(const pp& pp, const filter_msk& msk, const int_mat& y){
+
+
+g2_vec Filter::keygen(const pp& pp, const FilterMsk& msk, const int_mat& y){
     zp_mat hashed_zp(y.size());
 
     for (int i = 0; i < y.size(); ++i){
@@ -77,7 +120,7 @@ g2_vec Filter::keygen(const pp& pp, const filter_msk& msk, const int_mat& y){
     return keygen(pp, msk, hashed_zp);
 }
 
-g2_vec Filter::keygen(const pp& pp, const filter_msk& msk, const str_mat& y){
+g2_vec Filter::keygen(const pp& pp, const FilterMsk& msk, const str_mat& y){
     zp_mat hashed_zp(y.size());
 
     for (int i = 0; i < y.size(); ++i){
@@ -87,7 +130,7 @@ g2_vec Filter::keygen(const pp& pp, const filter_msk& msk, const str_mat& y){
     return keygen(pp, msk, hashed_zp);
 }
 
-g2_vec Filter::keygen(const pp& pp, const filter_msk& msk, const int_mat& y, const int_vec& sel){
+g2_vec Filter::keygen(const pp& pp, const FilterMsk& msk, const int_mat& y, const int_vec& sel){
     zp_mat hashed_zp(y.size());
 
     for (int i = 0; i < y.size(); ++i){
@@ -97,7 +140,7 @@ g2_vec Filter::keygen(const pp& pp, const filter_msk& msk, const int_mat& y, con
     return keygen(pp, msk, hashed_zp, sel);
 }
 
-g2_vec Filter::keygen(const pp& pp, const filter_msk& msk, const str_mat& y, const int_vec& sel){
+g2_vec Filter::keygen(const pp& pp, const FilterMsk& msk, const str_mat& y, const int_vec& sel){
     zp_mat hashed_zp(y.size());
 
     for (int i = 0; i < y.size(); ++i){
@@ -161,33 +204,9 @@ bool Filter::dec(const pp& pp, g1_vec& ct, g2_vec& sk, const int_vec& sel){
     return Group::cmp_gt(x, y);
 }
 
-g1_vec Filter::enc(const pp& pp, const filter_msk& msk, const zp_vec& x){
-    // Sample the random point alpha.
-    zp alpha;
-    Field::init_zp(alpha);
-    pp.field_zp.rand(alpha);
 
-    // We compute the value for evaluating polynomial at x.
-    const auto poly_x = poly_msg(pp, x);
-    // Duplicate the poly(x).
-    const auto xx = Field::vec_join(poly_x, poly_x);
-    // Compute poly(x)||poly(x) + r.
-    const auto xxr = pp.field_zp.vec_add(xx, msk.r);
-    // Compute alpha * (poly(x)||poly(x) + r).
-    const auto axxr = pp.field_zp.vec_mul(xxr, alpha);
-    // Compute alpha * b * (poly(x)||poly(x) + r).
-    const auto abxxr = pp.field_zp.vec_mul(axxr, msk.b);
 
-    // Compute the last point to join to the vector.
-    zp last;
-    Field::init_zp(last);
-    pp.field_zp.mul(last, alpha, msk.d);
-
-    // Raise to g1 and return.
-    return pp.group_bp.g1_raise(Field::vec_join(abxxr, last));
-}
-
-g2_vec Filter::keygen(const pp& pp, const filter_msk& msk, const zp_mat& y){
+g2_vec Filter::keygen(const pp& pp, const FilterMsk& msk, const zp_mat& y){
     // Sample the random point beta.
     zp beta;
     Field::init_zp(beta);
@@ -225,7 +244,7 @@ g2_vec Filter::keygen(const pp& pp, const filter_msk& msk, const zp_mat& y){
     return pp.group_bp.g2_raise(Field::vec_join(bbic, last));
 }
 
-g2_vec Filter::keygen(const pp& pp, const filter_msk& msk, const zp_mat& y, const int_vec& sel){
+g2_vec Filter::keygen(const pp& pp, const FilterMsk& msk, const zp_mat& y, const int_vec& sel){
     // Sample the random point beta.
     zp beta;
     Field::init_zp(beta);

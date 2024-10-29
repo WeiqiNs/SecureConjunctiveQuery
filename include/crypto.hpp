@@ -6,15 +6,6 @@
 static int HASH_SIZE = 16;
 
 class Aes{
-    char_vec key;
-    int byte_length;
-
-    /**
-     * 
-     * @return 
-     */
-    [[nodiscard]] const EVP_CIPHER* get_cipher() const;
-
 public:
     /**
      * 
@@ -26,27 +17,35 @@ public:
      * 
      * @return 
      */
-    char_vec get_key();
+    CharVec get_key();
 
     /**
      * 
      * @param plaintext 
      * @return 
      */
-    [[nodiscard]] char_vec encrypt(const char_vec& plaintext) const;
+    [[nodiscard]] CharVec encrypt(const CharVec& plaintext) const;
 
     /**
      * 
      * @param ciphertext 
      * @return 
      */
-    [[nodiscard]] char_vec decrypt(const char_vec& ciphertext) const;
+    [[nodiscard]] CharVec decrypt(const CharVec& ciphertext) const;
+
+private:
+    /// Variables to hold the key and its byte length.
+    CharVec key;
+    int byte_length;
+
+    /**
+     *
+     * @return
+     */
+    [[nodiscard]] const EVP_CIPHER* get_cipher() const;
 };
 
 class Hash{
-    char_vec iv;
-    char_vec key;
-
 public:
     /**
      * 
@@ -58,32 +57,37 @@ public:
      * 
      * @return 
      */
-    char_vec get_iv();
+    CharVec get_iv();
 
     /**
      * 
      * @return 
      */
-    char_vec get_key();
+    CharVec get_key();
 
     /**
      * 
      * @param data 
      * @return 
      */
-    [[nodiscard]] char_vec digest(const char_vec& data) const;
+    [[nodiscard]] CharVec digest(const CharVec& data) const;
 
     /**
      * 
      * @param x 
      * @return 
      */
-    [[nodiscard]] zp_vec digest_int_vec(const int_vec& x) const;
+    [[nodiscard]] FpVec digest_int_vec(const IntVec& x) const;
 
     /**
      * 
      * @param x 
      * @return 
      */
-    [[nodiscard]] zp_vec digest_str_vec(const str_vec& x) const;
+    [[nodiscard]] FpVec digest_str_vec(const StrVec& x) const;
+
+private:
+    /// Vectors of characters to hold the IV and the key.
+    CharVec iv;
+    CharVec key;
 };

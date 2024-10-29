@@ -1,69 +1,67 @@
 #pragma once
 
-#include <algorithm>
 #include <string>
 #include <random>
-#include <vector>
-#include "field.hpp"
+#include "RBP/bp.hpp"
 
 using str = std::string;
-using str_vec = std::vector<str>;
-using str_mat = std::vector<str_vec>;
-using char_vec = std::vector<unsigned char>;
+using StrVec = std::vector<str>;
+using StrMat = std::vector<StrVec>;
+using CharVec = std::vector<unsigned char>;
 
 class Helper{
 public:
     /**
-     *
-     * @param x
-     * @return
+     * Convert an integer to a vector of unsigned characters.
+     * @param x an integer.
+     * @return a vector of unsigned characters.
      */
-    static char_vec int_to_vec(const int& x);
+    static CharVec int_to_char_vec(const int& x);
 
     /**
-     *
-     * @param x
-     * @return
+     * Convert a vector of unsigned characters to an integer.
+     * @param x a vector of unsigned characters.
+     * @return an integer.
      */
-    static int vec_to_int(const char_vec& x);
+    static int char_vec_to_int(const CharVec& x);
 
     /**
-     *
-     * @param x
-     * @return
+     * Convert a string to a vector of unsigned characters.
+     * @param x a string.
+     * @return a vector of unsigned characters.
      */
-    static char_vec str_to_vec(const str& x);
+    static CharVec str_to_char_vec(const str& x);
 
     /**
-     *
-     * @param x
-     * @return
+     * Convert a vector of unsigned characters to a string.
+     * @param x a vector of unsigned characters.
+     * @return a string.
      */
-    static str vec_to_str(const char_vec& x);
+    static str char_vec_to_str(const CharVec& x);
 
     /**
-     * 
-     * @param r 
-     * @param x 
+     * Convert a vector of unsigned characters to a field point.
+     * @param x a vector of unsigned characters.
+     * @return a field point.
      */
-    static void vec_to_zp(zp& r, const char_vec& x);
+    static Fp char_vec_to_fp(const CharVec& x);
 
     /**
-     * 
-     * @param length
-     * @param min_v
-     * @param max_v
-     * @return 
+     * Return a vector of random integers with in a bound.
+     * @param length the length of the desired vector.
+     * @param min_v the minimum of the random value.
+     * @param max_v the maximum of the random value.
+     * @return a vector of random integers.
      */
-    static int_vec rand_vec(const int& length, const int& min_v, const int& max_v);
+    static IntVec rand_int_vec(const int& length, const int& min_v, const int& max_v);
 
     /**
-     *
-     * @param row
-     * @param col
-     * @param min_v
-     * @param max_v
-     * @return
+     * Return a matrix of random integers with in a bound.
+     * @param row the number of rows in the matrix.
+     * @param col the number of columns in the matrix.
+     * @param min_v the minimum of the random value.
+     * @param max_v the maximum of the random value.
+     * @return a matrix of random integers.
      */
-    static int_mat rand_mat(const int& row, const int& col, const int& min_v, const int& max_v);
+    static IntMat rand_int_mat(const int& row, const int& col, const int& min_v, const int& max_v);
 };

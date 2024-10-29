@@ -1,20 +1,21 @@
 #pragma once
 
-#include "group.hpp"
 #include "crypto.hpp"
 
 struct pp{
-    int d{};
-    Field field_zp;
-    Group group_bp;
+    int d = 0;
+    BP* pairing_group = nullptr;
 };
 
-struct filter_msk{
-    zp d;
-    zp di;
-    zp_vec r;
-    zp_vec b;
-    zp_vec bi;
+struct FilterMsk{
+    Fp d;
+    Fp di;
+    FpVec r;
+    FpVec rp;
+    FpVec b;
+    FpVec bi;
+    FpVec bp;
+    FpVec bpi;
     Hash hash;
 };
 
@@ -22,33 +23,37 @@ class Filter{
 public:
     static pp pp_gen(const int& degree, const bool& pre = true);
 
-    static filter_msk msk_gen(const pp& pp, const int& input_len);
+    static FilterMsk msk_gen(const pp& pp, const int& input_len);
 
-    static zp_vec poly_msg(const pp& pp, const zp_vec& x);
+    static G1Vec enc(const pp& pp, const FilterMsk& msk, const IntVec& x);
 
-    static zp_vec poly_key(const pp& pp, const zp_mat& y);
+    static G1Vec enc(const pp& pp, const FilterMsk& msk, const StrVec& x);
 
-    static g1_vec enc(const pp& pp, const filter_msk& msk, const int_vec& x);
+    static G1Vec enc(const pp& pp, const FilterMsk& msk, const FpVec& x);
 
-    static g1_vec enc(const pp& pp, const filter_msk& msk, const str_vec& x);
 
-    static g2_vec keygen(const pp& pp, const filter_msk& msk, const int_mat& y);
+    //
+    // static zp_vec poly_msg(const pp& pp, const zp_vec& x);
+    //
+    // static zp_vec poly_key(const pp& pp, const zp_mat& y);
 
-    static g2_vec keygen(const pp& pp, const filter_msk& msk, const str_mat& y);
 
-    static g2_vec keygen(const pp& pp, const filter_msk& msk, const int_mat& y, const int_vec& sel);
+    // static g2_vec keygen(const pp& pp, const FilterMsk& msk, const int_mat& y);
 
-    static g2_vec keygen(const pp& pp, const filter_msk& msk, const str_mat& y, const int_vec& sel);
+    // static g2_vec keygen(const pp& pp, const FilterMsk& msk, const str_mat& y);
 
-    static bool dec(g1_vec& ct, g2_vec& sk);
+    // static g2_vec keygen(const pp& pp, const FilterMsk& msk, const int_mat& y, const int_vec& sel);
+    //
+    // static g2_vec keygen(const pp& pp, const FilterMsk& msk, const str_mat& y, const int_vec& sel);
 
-    static bool dec(const pp& pp, g1_vec& ct, g2_vec& sk, const int_vec& sel);
+    // static bool dec(g1_vec& ct, g2_vec& sk);
 
-private:
-    static g1_vec enc(const pp& pp, const filter_msk& msk, const zp_vec& x);
+    // static bool dec(const pp& pp, g1_vec& ct, g2_vec& sk, const int_vec& sel);
 
-    static g2_vec keygen(const pp& pp, const filter_msk& msk, const zp_mat& y);
 
-    static g2_vec keygen(const pp& pp, const filter_msk& msk, const zp_mat& y, const int_vec& sel);
+
+    // static g2_vec keygen(const pp& pp, const FilterMsk& msk, const zp_mat& y);
+
+    // static g2_vec keygen(const pp& pp, const FilterMsk& msk, const zp_mat& y, const int_vec& sel);
 
 };
