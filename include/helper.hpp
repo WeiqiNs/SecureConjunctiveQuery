@@ -77,11 +77,11 @@ public:
     static FpVec power_poly(int d, const BP& pairing_group, const FpVec& x);
 
     /**
-     *
+     * Given a matrix of roots, compute the polynomial coefficients and merge them into one vector.
      * @param d the desired degree of the polynomial.
      * @param pairing_group the bilinear pairing group object.
      * @param x a matrix of field point values. Note that each row may contain different number of elements though.
-     * @return a vector of interpolated coefficients of the input matrix.
+     * @return a vector of computed coefficients of the input matrix.
      */
     static FpVec coeff_poly(int d, const BP& pairing_group, const FpMat& x);
 
@@ -94,11 +94,11 @@ public:
     static FpVec split_poly(const BP& pairing_group, const FpVec& x);
 
     /**
-     * 
-     * @param degree
-     * @param length
-     * @param sel 
-     * @return 
+     * This is specific to our functionality of selecting only a few columns from the entire ciphertext.
+     * @param degree how many values we select for each index.
+     * @param length total number of possible index.
+     * @param sel a vector of integers indicating where we want to select.
+     * @return a vector of selected indices.
      */
     static IntVec get_sel_index(int degree, int length, const IntVec& sel);
 };

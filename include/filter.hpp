@@ -22,17 +22,65 @@ struct FilterMsk{
 
 class Filter{
 public:
+    /**
+     * Generate the required public parameters.
+     * @param degree the degree of the polynomial.
+     * @param pre whether we want to use the precomputed table for group exponentiation.
+     * @return the generated public parameters.
+     */
     static pp pp_gen(const int& degree, const bool& pre = true);
 
+    /**
+     * Generate master secret key.
+     * @param pp the public parameters.
+     * @param input_len the length of vectors to the encryption algorithm.
+     * @return the generated master secret key.
+     */
     static FilterMsk msk_gen(pp& pp, const int& input_len);
 
+    /**
+     * Perform the Filter FE encryption.
+     * @param pp the public parameters.
+     * @param msk the master secret key.
+     * @param x a vector of strings or integers.
+     * @return the ciphertext.
+     */
     static G1Vec enc(const pp& pp, const FilterMsk& msk, const Vec& x);
 
+    /**
+     * Perform the Filter FE key generation.
+     * @param pp the public parameters.
+     * @param msk the master secret key.
+     * @param y a vector or matrix of strings or integers. Use matrix only when you are selecting set of inputs.
+     * @return the function key.
+     */
     static G2Vec keygen(const pp& pp, const FilterMsk& msk, const VecMat& y);
 
+    /**
+     * Perform the Filter FE key generation with select selecting columns.
+     * @param pp the public parameters.
+     * @param msk the master secret key.
+     * @param y a vector or matrix of strings or integers. Use matrix only when you are selecting set of inputs.
+     * @param sel a vector of integers indicating which columns to select.
+     * @return the function key.
+     */
     static G2Vec keygen(const pp& pp, const FilterMsk& msk, const VecMat& y, const IntVec& sel);
 
+    /**
+     * Perform the Filter FE decryption.
+     * @param ct the ciphertext.
+     * @param sk the secret key.
+     * @return a boolean indicating the result of Filter.
+     */
     static bool dec(const G1Vec& ct, const G2Vec& sk);
 
+    /**
+     * Perform the Filter FE decryption with selecting columns.
+     * @param pp the public parameters.
+     * @param ct the ciphertext.
+     * @param sk the secret key.
+     * @param sel a vector of integers indicating which columns to select.
+     * @return a boolean indicating the result of Filter.
+     */
     static bool dec(const pp& pp, const G1Vec& ct, const G2Vec& sk, const IntVec& sel);
 };

@@ -15,28 +15,25 @@ using VecMat = std::variant<IntVec, StrVec, IntMat, StrMat>;
 class Aes{
 public:
     /**
-     * 
-     * @param key_length 
+     * The default constructor for the AES class.
+     * @param key_length the number of bits in the AES key.
      */
     explicit Aes(const int& key_length);
 
-    /**
-     * 
-     * @return 
-     */
+    /// Get the key used for AES encryption.
     CharVec get_key();
 
     /**
-     * 
-     * @param plaintext 
-     * @return 
+     * Perform AES encryption.
+     * @param plaintext a vector of unsigned characters.
+     * @return a vector of unsigned characters.
      */
     [[nodiscard]] CharVec encrypt(const CharVec& plaintext) const;
 
     /**
-     * 
-     * @param ciphertext 
-     * @return 
+     * Perform AES decryption.
+     * @param ciphertext a vector of unsigned characters.
+     * @return a vector of unsigned characters.
      */
     [[nodiscard]] CharVec decrypt(const CharVec& ciphertext) const;
 
@@ -45,67 +42,56 @@ private:
     CharVec key;
     int byte_length;
 
-    /**
-     *
-     * @return
-     */
+    /// Select proper AES object to use base on the key length.
     [[nodiscard]] const EVP_CIPHER* get_cipher() const;
 };
 
 class Hash{
 public:
-    /**
-     * 
-     */
+    /// Default constructor of the hash function, note we use AES128CBC.
     Hash();
 
 
-    /**
-     * 
-     * @return 
-     */
+    /// Return the IV used. (IV is fixed so that hash can be deterministic.)
     CharVec get_iv();
 
-    /**
-     * 
-     * @return 
-     */
+    /// Return the key used.
     CharVec get_key();
 
     /**
-     * 
-     * @param data 
-     * @return 
+     * Perform the hash digestion.
+     * @param data a vector of unsigned characters.
+     * @return a vector of unsigned characters.
      */
     [[nodiscard]] CharVec digest(const CharVec& data) const;
 
     /**
-     * 
-     * @param x 
-     * @return 
+     * Hash a vector of integers to field elements.
+     * @param x a vector of integers.
+     * @return a vector of field elements.
      */
     [[nodiscard]] FpVec digest_int_vec(const IntVec& x) const;
 
     /**
-     * 
-     * @param x 
-     * @return 
+     * Hash a vector of strings to field elements.
+     * @param x a vector of strings.
+     * @return a vector of field elements.
      */
     [[nodiscard]] FpVec digest_str_vec(const StrVec& x) const;
 
     /**
-     *
-     * @param pairing_group
-     * @param x
-     * @return
+     * Digest a string or an integer vector to a vector of field element.
+     * @param pairing_group a bilinear pairing group object.
+     * @param x a string or an integer vector.
+     * @return a vector of field elements.
      */
     [[nodiscard]] FpVec digest_vec_to_fp(const BP& pairing_group, const Vec& x) const;
 
     /**
-     *
-     * @param pairing_group
-     * @param x
-     * @return
+     * Digest a string or an integer matrix to a vector of field element.
+     * @param pairing_group a bilinear pairing group object.
+     * @param x a string or an integer matrix.
+     * @return a vector of field elements.
      */
     [[nodiscard]] FpMat digest_mat_to_fp(const BP& pairing_group, const Mat& x) const;
 
