@@ -12,6 +12,9 @@ pp Filter::pp_gen(const int& degree, const bool& pre){
 }
 
 FilterMsk Filter::msk_gen(pp& pp, const int& input_len){
+    // Update the length.
+    pp.l = input_len;
+
     // Create the msk instance.
     FilterMsk msk;
 
@@ -23,10 +26,10 @@ FilterMsk Filter::msk_gen(pp& pp, const int& input_len){
         // Sample a random point and its inverse.
         msk.d = pp.pairing_group->Zp->rand();
         msk.di = pp.pairing_group->Zp->inv(msk.d);
-        // If degree is higher than 1, we need the length to be 2 * length * (degree + 1).
+        // If degree is higher than 1, we need the length to be 2 * (length * degree + 1).
         // This utilizes the optimization of adding the constant together.
-        msk.r = pp.pairing_group->Zp->rand_vec(2 * input_len * (pp.d + 1));
-        msk.b = pp.pairing_group->Zp->rand_vec(2 * input_len * (pp.d + 1));
+        msk.r = pp.pairing_group->Zp->rand_vec(2 * (input_len * pp.d + 1));
+        msk.b = pp.pairing_group->Zp->rand_vec(2 * (input_len * pp.d + 1));
         msk.bi = pp.pairing_group->Zp->vec_inv(msk.b);
     }
 
@@ -178,7 +181,7 @@ G2Vec Filter::keygen(const pp& pp, const FilterMsk& msk, const VecMat& y, const 
     coeff = Helper::split_poly(*pp.pairing_group, coeff);
 
     // Get the selected index.
-    const auto sel_index = Helper::get_sel_index(pp.d, sel);
+    const auto sel_index = Helper::get_sel_index(pp.d, pp.l, sel);
 
     // Select r and bi.
     FpVec sel_r, sel_bi;
@@ -219,7 +222,7 @@ bool Filter::dec(const pp& pp, const G1Vec& ct, const G2Vec& sk, const IntVec& s
         return dec(sel_ct, sk);
     }
     // Get the selected index.
-    const auto sel_index = Helper::get_sel_index(pp.d, sel);
+    const auto sel_index = Helper::get_sel_index(pp.d, pp.l, sel);
 
     // Create the holder for selected ct.
     G1Vec sel_ct;

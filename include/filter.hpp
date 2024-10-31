@@ -5,6 +5,8 @@
 struct pp{
     // Suppose by default the degree is 1.
     int d = 1;
+    // Suppose by default the length is 1.
+    int l = 1;
     // Create a pointer to hold the bilinear pairing group object.
     std::unique_ptr<BP> pairing_group;
 };

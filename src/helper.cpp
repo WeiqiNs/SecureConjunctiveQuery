@@ -66,12 +66,14 @@ FpVec Helper::power_poly(const int d, const BP& pairing_group, const FpVec& x){
     FpVec r, power;
 
     // Fill the power Fp vector from 1 to degree.
-    for (int i = 0; i <= d; ++i) power.emplace_back(i);
+    for (int i = 1; i <= d; ++i) power.emplace_back(i);
 
-    // Compute x_i^0, x_i^1, x_i^2..., x_n^d.
+    // Compute x_i^1, x_i^2..., x_n^d.
     for (const auto& i : x)
-        for (const auto& j : power)
-            r.emplace_back(pairing_group.Zp->exp(i, j));
+        for (const auto& j : power) r.emplace_back(pairing_group.Zp->exp(i, j));
+
+    // Finally attach a one to the end.
+    r.emplace_back(1);
 
     // Return the output vector.
     return r;
@@ -81,9 +83,22 @@ FpVec Helper::coeff_poly(const int d, const BP& pairing_group, const FpMat& x){
     // Create holder for the returned vector.
     FpVec r;
 
-    for (const auto& i : x)
+    // Create holder for the aggregated constants.
+    Fp constant;
+
+    for (const auto& i : x){
         // Interpolate the polynomial on this row.
-        r = Field::vec_join(r, pairing_group.Zp->poly_interpolate(d, i));
+        FpVec temp = pairing_group.Zp->poly_interpolate(d, i);
+        // Add the constant together.
+        constant = pairing_group.Zp->add(constant, temp[0]);
+        // Pop the constant; the first value.
+        temp.erase(temp.begin());
+        // Join the vector to the result.
+        r = Field::vec_join(r, temp);
+    }
+
+    // Add the aggregated constant to the returned vector.
+    r.push_back(constant);
 
     return r;
 }
@@ -108,12 +123,14 @@ FpVec Helper::split_poly(const BP& pairing_group, const FpVec& x){
     return r;
 }
 
-IntVec Helper::get_sel_index(const int degree, const IntVec& sel){
+IntVec Helper::get_sel_index(const int degree, const int length, const IntVec& sel){
     // Create holder for the returned vector.
     IntVec r;
 
     // Add the selected index.
-    for (const auto i: sel) for (int j = 0; j <= degree; ++j) r.emplace_back(i * (degree + 1) + j);
+    for (const auto i: sel) for (int j = 0; j < degree; ++j) r.emplace_back(i * degree + j);
 
+    // Add the last index.
+    r.push_back(degree * length);
     return r;
 }

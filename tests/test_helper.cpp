@@ -41,9 +41,9 @@ TEST(HelperTests, PowerPoly){
     const auto r = Helper::power_poly(3, pairing_group, pairing_group.Zp->from_int(x_vec));
 
     // Check the size.
-    EXPECT_EQ(r.size(), 12);
+    EXPECT_EQ(r.size(), 10);
     // Check correctness.
-    EXPECT_TRUE(Field::cmp(r[0], 1) && Field::cmp(r[5], 2) && Field::cmp(r[11], 27));
+    EXPECT_TRUE(Field::cmp(r[0], 1) && Field::cmp(r[8], 27) && Field::cmp(r[9], 1));
 }
 
 TEST(HelperTests, CoeffPoly){
@@ -54,17 +54,16 @@ TEST(HelperTests, CoeffPoly){
     const auto r = Helper::coeff_poly(3, pairing_group, pairing_group.Zp->from_int(x_mat));
 
     // Check the size.
-    EXPECT_EQ(r.size(), 12);
+    EXPECT_EQ(r.size(), 10);
     // Check correctness.
     EXPECT_TRUE(
-        Field::cmp(r[0], pairing_group.Zp->neg(Fp(6))) &&
-        Field::cmp(r[1], 11) &&
-        Field::cmp(r[2], pairing_group.Zp->neg(Fp(6))) &&
-        Field::cmp(r[3], 1) &&
-        Field::cmp(r[4], 20) &&
-        Field::cmp(r[5], pairing_group.Zp->neg(Fp(9))) &&
-        Field::cmp(r[6], 1) &&
-        Field::cmp(r[7], 0)
+        Field::cmp(r[0], 11) &&
+        Field::cmp(r[1], pairing_group.Zp->neg(Fp(6))) &&
+        Field::cmp(r[2], 1) &&
+        Field::cmp(r[3], pairing_group.Zp->neg(Fp(9))) &&
+        Field::cmp(r[4], 1) &&
+        Field::cmp(r[5], 0) &&
+        Field::cmp(r[9], 8)
     );
 }
 
@@ -144,8 +143,8 @@ TEST(HelperTests, FilterSplitFalse){
 TEST(HelperTests, SelectIndex){
     const IntVec sel = {1, 2, 5};
 
-    const auto r = Helper::get_sel_index(3, sel);
+    const auto r = Helper::get_sel_index(3, 10, sel);
 
-    EXPECT_EQ(r[0], 4);
-    EXPECT_EQ(r.back(), 23);
+    EXPECT_EQ(r[0], 3);
+    EXPECT_EQ(r.back(), 30);
 }

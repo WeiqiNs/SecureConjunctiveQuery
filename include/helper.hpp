@@ -96,8 +96,9 @@ public:
     /**
      * 
      * @param degree
+     * @param length
      * @param sel 
      * @return 
      */
-    static IntVec get_sel_index(int degree, const IntVec& sel);
+    static IntVec get_sel_index(int degree, int length, const IntVec& sel);
 };
