@@ -30,5 +30,122 @@ TEST(HelperTests, CharFpConversion){
 
     const Fp x = Helper::char_vec_to_fp(x_vec);
 
-    EXPECT_TRUE(Field::cmp(x, 13330));
+    EXPECT_TRUE(Field::cmp(x, 4660));
+}
+
+TEST(HelperTests, PowerPoly){
+    const IntVec x_vec = {1, 2, 3};
+
+    const auto pairing_group = BP();
+
+    const auto r = Helper::power_poly(3, pairing_group, pairing_group.Zp->from_int(x_vec));
+
+    // Check the size.
+    EXPECT_EQ(r.size(), 12);
+    // Check correctness.
+    EXPECT_TRUE(Field::cmp(r[0], 1) && Field::cmp(r[5], 2) && Field::cmp(r[11], 27));
+}
+
+TEST(HelperTests, CoeffPoly){
+    const IntMat x_mat = {{1, 2, 3}, {4, 5}, {6}};
+
+    const auto pairing_group = BP();
+
+    const auto r = Helper::coeff_poly(3, pairing_group, pairing_group.Zp->from_int(x_mat));
+
+    // Check the size.
+    EXPECT_EQ(r.size(), 12);
+    // Check correctness.
+    EXPECT_TRUE(
+        Field::cmp(r[0], pairing_group.Zp->neg(Fp(6))) &&
+        Field::cmp(r[1], 11) &&
+        Field::cmp(r[2], pairing_group.Zp->neg(Fp(6))) &&
+        Field::cmp(r[3], 1) &&
+        Field::cmp(r[4], 20) &&
+        Field::cmp(r[5], pairing_group.Zp->neg(Fp(9))) &&
+        Field::cmp(r[6], 1) &&
+        Field::cmp(r[7], 0)
+    );
+}
+
+TEST(HelperTests, SplitPoly){
+    const IntVec x = {1, 2, 3, 4, 5};
+
+    const auto pairing_group = BP();
+
+    const auto r = Helper::split_poly(pairing_group, pairing_group.Zp->from_int(x));
+
+    EXPECT_TRUE(
+        Field::cmp(pairing_group.Zp->add(r[0], r[5]), 1) &&
+        Field::cmp(pairing_group.Zp->add(r[2], r[7]), 3)
+    );
+}
+
+TEST(HelperTests, FilterTrue){
+    const IntVec x = {1, 2, 3};
+    const IntMat y = {{1, 2}, {2, 3}, {1, 3}};
+
+    const auto pairing_group = BP();
+
+    const auto poly_x = Helper::power_poly(3, pairing_group, pairing_group.Zp->from_int(x));
+    const auto poly_y = Helper::coeff_poly(3, pairing_group, pairing_group.Zp->from_int(y));
+
+    const auto r = pairing_group.Zp->vec_ip(poly_x, poly_y);
+
+    EXPECT_TRUE(Field::cmp(r, 0));
+}
+
+TEST(HelperTests, FilterFalse){
+    const IntVec x = {1, 2, 3};
+    const IntMat y = {{2, 3}, {2, 3}, {1, 3}};
+
+    const auto pairing_group = BP();
+
+    const auto poly_x = Helper::power_poly(3, pairing_group, pairing_group.Zp->from_int(x));
+    const auto poly_y = Helper::coeff_poly(3, pairing_group, pairing_group.Zp->from_int(y));
+
+    const auto r = pairing_group.Zp->vec_ip(poly_x, poly_y);
+
+    EXPECT_FALSE(Field::cmp(r, 0));
+}
+
+TEST(HelperTests, FilterSplitTrue){
+    const IntVec x = {1, 2, 3};
+    const IntMat y = {{1, 2}, {2, 3}, {1, 3}};
+
+    const auto pairing_group = BP();
+
+    const auto poly_x = Helper::power_poly(3, pairing_group, pairing_group.Zp->from_int(x));
+    const auto poly_y = Helper::coeff_poly(3, pairing_group, pairing_group.Zp->from_int(y));
+
+    const auto r = pairing_group.Zp->vec_ip(
+        Field::vec_join(poly_x, poly_x), Helper::split_poly(pairing_group, poly_y)
+    );
+
+    EXPECT_TRUE(Field::cmp(r, 0));
+}
+
+TEST(HelperTests, FilterSplitFalse){
+    const IntVec x = {1, 2, 3};
+    const IntMat y = {{2, 3}, {2, 3}, {1, 3}};
+
+    const auto pairing_group = BP();
+
+    const auto poly_x = Helper::power_poly(3, pairing_group, pairing_group.Zp->from_int(x));
+    const auto poly_y = Helper::coeff_poly(3, pairing_group, pairing_group.Zp->from_int(y));
+
+    const auto r = pairing_group.Zp->vec_ip(
+        Field::vec_join(poly_x, poly_x), Helper::split_poly(pairing_group, poly_y)
+    );
+
+    EXPECT_FALSE(Field::cmp(r, 0));
+}
+
+TEST(HelperTests, SelectIndex){
+    const IntVec sel = {1, 2, 5};
+
+    const auto r = Helper::get_sel_index(3, sel);
+
+    EXPECT_EQ(r[0], 4);
+    EXPECT_EQ(r.back(), 23);
 }

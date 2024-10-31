@@ -3,305 +3,369 @@
 pp Filter::pp_gen(const int& degree, const bool& pre){
     // Create the pp instance.
     pp pp;
-
     // Update the degree according to input.
     pp.d = degree;
-
     // Save the created pairing group.
-    auto pairing_group = BP(pre);
-    pp.pairing_group = &pairing_group;
+    pp.pairing_group = std::make_unique<BP>(pre);
 
     return pp;
 }
 
-FilterMsk Filter::msk_gen(const pp& pp, const int& input_len){
+FilterMsk Filter::msk_gen(pp& pp, const int& input_len){
+    // Create the msk instance.
     FilterMsk msk;
 
     if (pp.d == 1){
+        // If degree is 1, only r is needed.
         msk.r = pp.pairing_group->Zp->rand_vec(input_len);
     }
-    //
-    // Field::init_zp(msk.d);
-    // Field::init_zp(msk.di);
-    // pp.field_zp.rand(msk.d);
-    // pp.field_zp.inv(msk.di, msk.d);
-    //
-    // msk.r = pp.field_zp.vec_rand(2 * input_len * (pp.d + 1));
-    // msk.b = pp.field_zp.vec_rand(2 * input_len * (pp.d + 1));
-    // msk.bi = pp.field_zp.vec_inv(msk.b);
+    else{
+        // Sample a random point and its inverse.
+        msk.d = pp.pairing_group->Zp->rand();
+        msk.di = pp.pairing_group->Zp->inv(msk.d);
+        // If degree is higher than 1, we need the length to be 2 * length * (degree + 1).
+        // This utilizes the optimization of adding the constant together.
+        msk.r = pp.pairing_group->Zp->rand_vec(2 * input_len * (pp.d + 1));
+        msk.b = pp.pairing_group->Zp->rand_vec(2 * input_len * (pp.d + 1));
+        msk.bi = pp.pairing_group->Zp->vec_inv(msk.b);
+    }
 
+    // Return the master secret key.
     return msk;
 }
 
-G1Vec Filter::enc(const pp& pp, const FilterMsk& msk, const IntVec& x){
-    FpVec x_digest = msk.hash.digest_int_vec(x);
+G1Vec Filter::enc(const pp& pp, const FilterMsk& msk, const Vec& x){
+    // Generate hash of the input x vector.
+    const FpVec x_digest = msk.hash.digest_vec_to_fp(*pp.pairing_group, x);
 
-    for (auto i: x_digest) pp.pairing_group->Zp->mod(i);
-
-    return enc(pp, msk, x_digest);
-}
-
-G1Vec Filter::enc(const pp& pp, const FilterMsk& msk, const StrVec& x){
-    FpVec x_digest = msk.hash.digest_str_vec(x);
-
-    for (auto i: x_digest) pp.pairing_group->Zp->mod(i);
-
-    return enc(pp, msk, x_digest);
-}
-
-g1_vec Filter::enc(const pp& pp, const FilterMsk& msk, const zp_vec& x){
     // Sample the random point alpha.
-    zp alpha;
-    Field::init_zp(alpha);
-    pp.field_zp.rand(alpha);
+    const Fp alpha = pp.pairing_group->Zp->rand();
 
-    // We compute the value for evaluating polynomial at x.
-    const auto poly_x = poly_msg(pp, x);
+    // Depends on whether the degree is 1 or higher, we perform encryption differently.
+    if (pp.d == 1){
+        // Find x + r.
+        const auto xr = pp.pairing_group->Zp->vec_add(x_digest, msk.r);
+        // Find a(x + r).
+        auto axr = pp.pairing_group->Zp->vec_mul(xr, alpha);
+        // Append the last point negative a.
+        axr.push_back(pp.pairing_group->Zp->neg(alpha));
+
+        // Raise the vector to g1 and return.
+        return pp.pairing_group->Gp->g1_raise(axr);
+    }
+
+    // Here is the case where the degree is higher than 1, we compute the value for evaluating polynomial at x.
+    const auto poly_x = Helper::power_poly(pp.d, *pp.pairing_group, x_digest);
     // Duplicate the poly(x).
     const auto xx = Field::vec_join(poly_x, poly_x);
     // Compute poly(x)||poly(x) + r.
-    const auto xxr = pp.field_zp.vec_add(xx, msk.r);
+    const auto xxr = pp.pairing_group->Zp->vec_add(xx, msk.r);
     // Compute alpha * (poly(x)||poly(x) + r).
-    const auto axxr = pp.field_zp.vec_mul(xxr, alpha);
-    // Compute alpha * b * (poly(x)||poly(x) + r).
-    const auto abxxr = pp.field_zp.vec_mul(axxr, msk.b);
+    const auto axxr = pp.pairing_group->Zp->vec_mul(xxr, alpha);
+    // Compute alpha * vec_b * (poly(x)||poly(x) + r).
+    auto abxxr = pp.pairing_group->Zp->vec_mul(axxr, msk.b);
+    // Attach the last point -alpha * delta.
+    abxxr.push_back(pp.pairing_group->Zp->neg(pp.pairing_group->Zp->mul(alpha, msk.d)));
 
-    // Compute the last point to join to the vector.
-    zp last;
-    Field::init_zp(last);
-    pp.field_zp.mul(last, alpha, msk.d);
-
-    // Raise to g1 and return.
-    return pp.group_bp.g1_raise(Field::vec_join(abxxr, last));
+    // Raise the vector to g1 and return.
+    return pp.pairing_group->Gp->g1_raise(abxxr);
 }
 
-// zp_vec Filter::poly_msg(const pp& pp, const zp_vec& x){
-//     // The vector would be of length degree * len(x).
-//     zp_vec output(x.size() * (pp.d + 1));
+G2Vec Filter::keygen(const pp& pp, const FilterMsk& msk, const VecMat& y){
+    // Sample the random point beta.
+    const Fp beta = pp.pairing_group->Zp->rand();
+
+    // Depends on whether the degree is 1 or higher, we perform key generation differently.
+    if (pp.d == 1){
+        // Generate the hash of the input y vector.
+        FpVec y_digest;
+        // Make sure the input y is vector type.
+        std::visit([&pp, &msk, &y_digest](auto&& input_y){
+            using T = std::decay_t<decltype(input_y)>;
+            if constexpr (std::is_same_v<T, IntVec> || std::is_same_v<T, StrVec>)
+                y_digest = msk.hash.digest_vec_to_fp(*pp.pairing_group, input_y);
+            else throw std::invalid_argument("The degree must be 1 when inputting a y vector.");
+        }, y);
+
+        // Compute by.
+        auto by = pp.pairing_group->Zp->vec_mul(y_digest, beta);
+        // Compute the last element <y, y> + <y, r> and append it to the result.
+        const auto temp = pp.pairing_group->Zp->add(
+            pp.pairing_group->Zp->vec_ip(y_digest, y_digest),
+            pp.pairing_group->Zp->vec_ip(y_digest, msk.r)
+        );
+        by.push_back(pp.pairing_group->Zp->mul(temp, beta));
+
+        // Raise the vector to g2 and return.
+        return pp.pairing_group->Gp->g2_raise(by);
+    }
+
+    // Generate the hash of the input y vector.
+    FpMat y_digest;
+    // Make sure the input y is vector type.
+    std::visit([&pp, &msk, &y_digest](auto&& input_y){
+        using T = std::decay_t<decltype(input_y)>;
+        if constexpr (std::is_same_v<T, IntMat> || std::is_same_v<T, StrMat>)
+            y_digest = msk.hash.digest_mat_to_fp(*pp.pairing_group, input_y);
+        else throw std::invalid_argument("The degree must be more than 1 when inputting a y matrix.");
+    }, y);
+
+    // We compute the coefficient for when mat y equals to zero.
+    auto coeff = Helper::coeff_poly(pp.d, *pp.pairing_group, y_digest);
+    // Split the coefficient to two parts.
+    coeff = Helper::split_poly(*pp.pairing_group, coeff);
+
+    // Compute beta * c.
+    const auto bc = pp.pairing_group->Zp->vec_mul(coeff, beta);
+    // Compute beta * bi * c.
+    auto bbic = pp.pairing_group->Zp->vec_mul(bc, msk.bi);
+
+    // Compute the last point to join to the vector.
+    auto temp = pp.pairing_group->Zp->vec_ip(coeff, msk.r);
+    temp = pp.pairing_group->Zp->mul(temp, beta);
+    bbic.push_back(pp.pairing_group->Zp->mul(temp, msk.di));
+
+    // Raise to g2 and return.
+    return pp.pairing_group->Gp->g2_raise(bbic);
+}
+
+G2Vec Filter::keygen(const pp& pp, const FilterMsk& msk, const VecMat& y, const IntVec& sel){
+    // Sample the random point beta.
+    const Fp beta = pp.pairing_group->Zp->rand();
+
+    // Depends on whether the degree is 1 or higher, we perform key generation differently.
+    if (pp.d == 1){
+        // Generate the hash of the input y vector.
+        FpVec y_digest;
+        // Make sure the input y is vector type.
+        std::visit([&pp, &msk, &y_digest](auto&& input_y){
+            using T = std::decay_t<decltype(input_y)>;
+            if constexpr (std::is_same_v<T, IntVec> || std::is_same_v<T, StrVec>)
+                y_digest = msk.hash.digest_vec_to_fp(*pp.pairing_group, input_y);
+            else throw std::invalid_argument("The degree must be 1 when inputting a y vector.");
+        }, y);
+
+        // Select desired r.
+        FpVec sel_r;
+        for (const auto i : sel) sel_r.push_back(msk.r[i]);
+
+        // Compute by.
+        auto by = pp.pairing_group->Zp->vec_mul(y_digest, beta);
+        // Compute the last element <y, y> + <y, r> and append it to the result.
+        const auto temp = pp.pairing_group->Zp->add(
+            pp.pairing_group->Zp->vec_ip(y_digest, y_digest),
+            pp.pairing_group->Zp->vec_ip(y_digest, sel_r)
+        );
+        by.push_back(pp.pairing_group->Zp->mul(temp, beta));
+
+        // Raise the vector to g2 and return.
+        return pp.pairing_group->Gp->g2_raise(by);
+    }
+
+    // Generate the hash of the input y vector.
+    FpMat y_digest;
+    // Make sure the input y is vector type.
+    std::visit([&pp, &msk, &y_digest](auto&& input_y){
+        using T = std::decay_t<decltype(input_y)>;
+        if constexpr (std::is_same_v<T, IntMat> || std::is_same_v<T, StrMat>)
+            y_digest = msk.hash.digest_mat_to_fp(*pp.pairing_group, input_y);
+        else throw std::invalid_argument("The degree must be more than 1 when inputting a y matrix.");
+    }, y);
+
+    // We compute the coefficient for when mat y equals to zero.
+    auto coeff = Helper::coeff_poly(pp.d, *pp.pairing_group, y_digest);
+    // Split the coefficient to two parts.
+    coeff = Helper::split_poly(*pp.pairing_group, coeff);
+
+    // Get the selected index.
+    const auto sel_index = Helper::get_sel_index(pp.d, sel);
+
+    // Select r and bi.
+    FpVec sel_r, sel_bi;
+    for (const auto i : sel_index){
+        sel_r.push_back(msk.r[i]);
+        sel_bi.push_back(msk.bi[i]);
+    }
+    for (const auto i : sel_index){
+        sel_r.push_back(msk.r[msk.r.size() / 2 + i]);
+        sel_bi.push_back(msk.bi[msk.r.size() / 2 + i]);
+    }
+
+    // Compute beta * c.
+    const auto bc = pp.pairing_group->Zp->vec_mul(coeff, beta);
+    // Compute beta * bi * c.
+    auto bbic = pp.pairing_group->Zp->vec_mul(bc, sel_bi);
+
+    // Compute the last point to join to the vector.
+    auto temp = pp.pairing_group->Zp->vec_ip(coeff, sel_r);
+    temp = pp.pairing_group->Zp->mul(temp, beta);
+    bbic.push_back(pp.pairing_group->Zp->mul(temp, msk.di));
+
+    // Raise to g2 and return.
+    return pp.pairing_group->Gp->g2_raise(bbic);
+}
+
+bool Filter::dec(const G1Vec& ct, const G2Vec& sk){
+    return gt_is_unity(Group::pair(ct, sk).value);
+}
+
+bool Filter::dec(const pp& pp, const G1Vec& ct, const G2Vec& sk, const IntVec& sel){
+    if (pp.d == 1){
+        // We select desired things from ct.
+        G1Vec sel_ct;
+        for (const auto i : sel) sel_ct.push_back(ct[i]);
+        // We also need to add the last point in ct.
+        sel_ct.push_back(ct.back());
+        return dec(sel_ct, sk);
+    }
+    // Get the selected index.
+    const auto sel_index = Helper::get_sel_index(pp.d, sel);
+
+    // Create the holder for selected ct.
+    G1Vec sel_ct;
+    for (const auto i : sel_index) sel_ct.push_back(ct[i]);
+    for (const auto i : sel_index) sel_ct.push_back(ct[ct.size() / 2 + i]);
+    // We also need to add the last point in ct.
+    sel_ct.push_back(ct.back());
+
+    return dec(sel_ct, sk);
+}
+
+
+// bool Filter::dec(const pp& pp, g1_vec& ct, g2_vec& sk, const int_vec& sel){
+//     // Decalre two variables in Gt.
+//     gt x, y;
 //
-//     // Set values for the power.
-//     zp_vec power(pp.d + 1);
-//     for (int i = 0; i < power.size(); ++i) pp.field_zp.from_int(power[i], i);
+//     // First compute a x byyr.
+//     Group::pair(x, ct.back(), sk.back());
 //
-//     // Copy the polynomial over to the result vector.
-//     for (int i = 0; i < x.size(); ++i){
+//     // Remove them from the vector.
+//     ct.pop_back();
+//     sk.pop_back();
+//
+//     // Copy the selected randomness.
+//     g1_vec sel_ct(sel.size() * (pp.d + 1) * 2);
+//     for (int i = 0; i < sel_ct.size(); ++i){
+//         g1_null(sel_ct[i]);
+//         g1_new(sel_ct[i]);
+//     }
+//
+//     // Copy over the values now.
+//     for (int i = 0; i < sel.size(); ++i){
 //         for (int j = 0; j <= pp.d; ++j){
-//             // Compute x_i^j.
-//             pp.field_zp.exp(output[i * (pp.d + 1) + j], x[i], power[j]);
+//             g1_copy(sel_ct[i * (pp.d + 1) + j], ct[sel[i] * (pp.d + 1) + j]);
+//             g1_copy(
+//                 sel_ct[sel.size() / 2 + i * (pp.d + 1) + j],
+//                 ct[ct.size() / 2 + sel[i] * (pp.d + 1) + j]
+//             );
 //         }
 //     }
 //
-//     // Return the output vector.
-//     return output;
+//     // Compute ip pairing.
+//     Group::pair(y, sel_ct, sk);
+//
+//     // Check for equality.
+//     return Group::cmp_gt(x, y);
 // }
 //
-// zp_vec Filter::poly_key(const pp& pp, const zp_mat& y){
-//     // The vector would be of length degree * len(x).
-//     zp_vec output;
 //
-//     // Attach the polynomial coefficients.
-//     for (const auto& roots : y){
-//         output = Field::vec_join(output, pp.field_zp.find_coeff(pp.d, roots));
+//
+// g2_vec Filter::keygen(const pp& pp, const FilterMsk& msk, const zp_mat& y){
+//     // Sample the random point beta.
+//     zp beta;
+//     Field::init_zp(beta);
+//     pp.field_zp.rand(beta);
+//
+//     // We compute the coefficient for when mat y equals to zero.
+//     const auto coeff = poly_key(pp, y);
+//
+//     // Sample the first set of coefficients.
+//     zp_vec c1(coeff.size());
+//     // Make sure c1 != coeff.
+//     int i = 0;
+//     while (i < coeff.size()){
+//         if (Field::cmp(c1[i], coeff[i])) pp.field_zp.rand(c1[i]);
+//         else ++i;
 //     }
 //
-//     return output;
+//     // Compute the second set of coefficients.
+//     const auto c2 = pp.field_zp.vec_sub(coeff, c1);
+//     // Join the full set of coefficients.
+//     const auto full_coeff = Field::vec_join(c1, c2);
+//     // Compute beta * c.
+//     const auto bc = pp.field_zp.vec_mul(full_coeff, beta);
+//     // Compute beta * bi * c.
+//     const auto bbic = pp.field_zp.vec_mul(bc, msk.bi);
+//
+//     // Compute the last point to join to the vector.
+//     zp last;
+//     Field::init_zp(last);
+//     pp.field_zp.vec_ip(last, full_coeff, msk.r);
+//     pp.field_zp.mul(last, last, msk.di);
+//     pp.field_zp.mul(last, last, beta);
+//
+//     // Raise to g2 and return.
+//     return pp.group_bp.g2_raise(Field::vec_join(bbic, last));
 // }
-
-
-
-
-g2_vec Filter::keygen(const pp& pp, const FilterMsk& msk, const int_mat& y){
-    zp_mat hashed_zp(y.size());
-
-    for (int i = 0; i < y.size(); ++i){
-        hashed_zp[i] = msk.hash.digest_int_vec(y[i]);
-    }
-
-    return keygen(pp, msk, hashed_zp);
-}
-
-g2_vec Filter::keygen(const pp& pp, const FilterMsk& msk, const str_mat& y){
-    zp_mat hashed_zp(y.size());
-
-    for (int i = 0; i < y.size(); ++i){
-        hashed_zp[i] = msk.hash.digest_str_vec(y[i]);
-    }
-
-    return keygen(pp, msk, hashed_zp);
-}
-
-g2_vec Filter::keygen(const pp& pp, const FilterMsk& msk, const int_mat& y, const int_vec& sel){
-    zp_mat hashed_zp(y.size());
-
-    for (int i = 0; i < y.size(); ++i){
-        hashed_zp[i] = msk.hash.digest_int_vec(y[i]);
-    }
-
-    return keygen(pp, msk, hashed_zp, sel);
-}
-
-g2_vec Filter::keygen(const pp& pp, const FilterMsk& msk, const str_mat& y, const int_vec& sel){
-    zp_mat hashed_zp(y.size());
-
-    for (int i = 0; i < y.size(); ++i){
-        hashed_zp[i] = msk.hash.digest_str_vec(y[i]);
-    }
-
-    return keygen(pp, msk, hashed_zp, sel);
-}
-
-bool Filter::dec(g1_vec& ct, g2_vec& sk){
-    // Decalre two variables in Gt.
-    gt x, y;
-
-    // First compute a x byyr.
-    Group::pair(x, ct.back(), sk.back());
-
-    // Remove them from the vector.
-    ct.pop_back();
-    sk.pop_back();
-
-    // Compute ip pairing.
-    Group::pair(y, ct, sk);
-
-    // Check for equality.
-    return Group::cmp_gt(x, y);
-}
-
-bool Filter::dec(const pp& pp, g1_vec& ct, g2_vec& sk, const int_vec& sel){
-    // Decalre two variables in Gt.
-    gt x, y;
-
-    // First compute a x byyr.
-    Group::pair(x, ct.back(), sk.back());
-
-    // Remove them from the vector.
-    ct.pop_back();
-    sk.pop_back();
-
-    // Copy the selected randomness.
-    g1_vec sel_ct(sel.size() * (pp.d + 1) * 2);
-    for (int i = 0; i < sel_ct.size(); ++i){
-        g1_null(sel_ct[i]);
-        g1_new(sel_ct[i]);
-    }
-
-    // Copy over the values now.
-    for (int i = 0; i < sel.size(); ++i){
-        for (int j = 0; j <= pp.d; ++j){
-            g1_copy(sel_ct[i * (pp.d + 1) + j], ct[sel[i] * (pp.d + 1) + j]);
-            g1_copy(
-                sel_ct[sel.size() / 2 + i * (pp.d + 1) + j],
-                ct[ct.size() / 2 + sel[i] * (pp.d + 1) + j]
-            );
-        }
-    }
-
-    // Compute ip pairing.
-    Group::pair(y, sel_ct, sk);
-
-    // Check for equality.
-    return Group::cmp_gt(x, y);
-}
-
-
-
-g2_vec Filter::keygen(const pp& pp, const FilterMsk& msk, const zp_mat& y){
-    // Sample the random point beta.
-    zp beta;
-    Field::init_zp(beta);
-    pp.field_zp.rand(beta);
-
-    // We compute the coefficient for when mat y equals to zero.
-    const auto coeff = poly_key(pp, y);
-
-    // Sample the first set of coefficients.
-    zp_vec c1(coeff.size());
-    // Make sure c1 != coeff.
-    int i = 0;
-    while (i < coeff.size()){
-        if (Field::cmp(c1[i], coeff[i])) pp.field_zp.rand(c1[i]);
-        else ++i;
-    }
-
-    // Compute the second set of coefficients.
-    const auto c2 = pp.field_zp.vec_sub(coeff, c1);
-    // Join the full set of coefficients.
-    const auto full_coeff = Field::vec_join(c1, c2);
-    // Compute beta * c.
-    const auto bc = pp.field_zp.vec_mul(full_coeff, beta);
-    // Compute beta * bi * c.
-    const auto bbic = pp.field_zp.vec_mul(bc, msk.bi);
-
-    // Compute the last point to join to the vector.
-    zp last;
-    Field::init_zp(last);
-    pp.field_zp.vec_ip(last, full_coeff, msk.r);
-    pp.field_zp.mul(last, last, msk.di);
-    pp.field_zp.mul(last, last, beta);
-
-    // Raise to g2 and return.
-    return pp.group_bp.g2_raise(Field::vec_join(bbic, last));
-}
-
-g2_vec Filter::keygen(const pp& pp, const FilterMsk& msk, const zp_mat& y, const int_vec& sel){
-    // Sample the random point beta.
-    zp beta;
-    Field::init_zp(beta);
-    pp.field_zp.rand(beta);
-
-    // We compute the coefficient for when mat y equals to zero.
-    const auto coeff = poly_key(pp, y);
-
-    // Sample the first set of coefficients.
-    zp_vec c1(coeff.size());
-    // Make sure c1 != coeff.
-    int i = 0;
-    while (i < coeff.size()){
-        if (Field::cmp(c1[i], coeff[i])) pp.field_zp.rand(c1[i]);
-        else ++i;
-    }
-
-    // Compute the second set of coefficients.
-    const auto c2 = pp.field_zp.vec_sub(coeff, c1);
-    // Join the full set of coefficients.
-    const auto full_coeff = Field::vec_join(c1, c2);
-
-    // Copy the selected randomness.
-    zp_vec sel_r(full_coeff.size());
-    zp_vec sel_bi(full_coeff.size());
-    for (i = 0; i < full_coeff.size(); ++i){
-        Field::init_zp(sel_r[i]);
-        Field::init_zp(sel_bi[i]);
-    }
-
-    // Copy over the values now.
-    for (i = 0; i < sel.size(); ++i){
-        for (int j = 0; j <= pp.d; ++j){
-            Field::copy(sel_r[i * (pp.d + 1) + j], msk.r[sel[i] * (pp.d + 1) + j]);
-            Field::copy(
-                sel_r[sel.size() / 2 + i * (pp.d + 1) + j],
-                msk.r[msk.r.size() / 2 + sel[i] * (pp.d + 1) + j]
-            );
-            Field::copy(sel_bi[i * (pp.d + 1) + j], msk.bi[sel[i] * (pp.d + 1) + j]);
-            Field::copy(
-                sel_bi[sel_bi.size() / 2 + i * (pp.d + 1) + j],
-                msk.bi[msk.bi.size() / 2 + sel[i] * (pp.d + 1) + j]
-            );
-        }
-    }
-
-    // Compute beta * c.
-    const auto bc = pp.field_zp.vec_mul(full_coeff, beta);
-    // Compute beta * bi * c.
-    const auto bbic = pp.field_zp.vec_mul(bc, sel_bi);
-    // Compute the last point to join to the vector.
-    zp last;
-    Field::init_zp(last);
-    pp.field_zp.vec_ip(last, full_coeff, sel_r);
-    pp.field_zp.mul(last, last, msk.di);
-    pp.field_zp.mul(last, last, beta);
-
-    // Raise to g2 and return.
-    return pp.group_bp.g2_raise(Field::vec_join(bbic, last));
-}
+//
+// g2_vec Filter::keygen(const pp& pp, const FilterMsk& msk, const zp_mat& y, const int_vec& sel){
+//     // Sample the random point beta.
+//     zp beta;
+//     Field::init_zp(beta);
+//     pp.field_zp.rand(beta);
+//
+//     // We compute the coefficient for when mat y equals to zero.
+//     const auto coeff = poly_key(pp, y);
+//
+//     // Sample the first set of coefficients.
+//     zp_vec c1(coeff.size());
+//     // Make sure c1 != coeff.
+//     int i = 0;
+//     while (i < coeff.size()){
+//         if (Field::cmp(c1[i], coeff[i])) pp.field_zp.rand(c1[i]);
+//         else ++i;
+//     }
+//
+//     // Compute the second set of coefficients.
+//     const auto c2 = pp.field_zp.vec_sub(coeff, c1);
+//     // Join the full set of coefficients.
+//     const auto full_coeff = Field::vec_join(c1, c2);
+//
+//     // Copy the selected randomness.
+//     zp_vec sel_r(full_coeff.size());
+//     zp_vec sel_bi(full_coeff.size());
+//     for (i = 0; i < full_coeff.size(); ++i){
+//         Field::init_zp(sel_r[i]);
+//         Field::init_zp(sel_bi[i]);
+//     }
+//
+//     // Copy over the values now.
+//     for (i = 0; i < sel.size(); ++i){
+//         for (int j = 0; j <= pp.d; ++j){
+//             Field::copy(sel_r[i * (pp.d + 1) + j], msk.r[sel[i] * (pp.d + 1) + j]);
+//             Field::copy(
+//                 sel_r[sel.size() / 2 + i * (pp.d + 1) + j],
+//                 msk.r[msk.r.size() / 2 + sel[i] * (pp.d + 1) + j]
+//             );
+//             Field::copy(sel_bi[i * (pp.d + 1) + j], msk.bi[sel[i] * (pp.d + 1) + j]);
+//             Field::copy(
+//                 sel_bi[sel_bi.size() / 2 + i * (pp.d + 1) + j],
+//                 msk.bi[msk.bi.size() / 2 + sel[i] * (pp.d + 1) + j]
+//             );
+//         }
+//     }
+//
+//     // Compute beta * c.
+//     const auto bc = pp.field_zp.vec_mul(full_coeff, beta);
+//     // Compute beta * bi * c.
+//     const auto bbic = pp.field_zp.vec_mul(bc, sel_bi);
+//     // Compute the last point to join to the vector.
+//     zp last;
+//     Field::init_zp(last);
+//     pp.field_zp.vec_ip(last, full_coeff, sel_r);
+//     pp.field_zp.mul(last, last, msk.di);
+//     pp.field_zp.mul(last, last, beta);
+//
+//     // Raise to g2 and return.
+//     return pp.group_bp.g2_raise(Field::vec_join(bbic, last));
+// }

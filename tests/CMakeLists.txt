@@ -12,3 +12,7 @@ add_executable(test_crypto test_crypto.cpp)
 target_link_libraries(test_crypto EEJ ${GTEST_LIB})
 gtest_discover_tests(test_crypto)
 # -----------------------------------------------------
+add_executable(test_filter test_filter.cpp)
+target_link_libraries(test_filter EEJ ${GTEST_LIB})
+gtest_discover_tests(test_filter)
+# -----------------------------------------------------

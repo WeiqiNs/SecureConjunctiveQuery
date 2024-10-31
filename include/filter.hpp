@@ -3,19 +3,18 @@
 #include "crypto.hpp"
 
 struct pp{
-    int d = 0;
-    BP* pairing_group = nullptr;
+    // Suppose by default the degree is 1.
+    int d = 1;
+    // Create a pointer to hold the bilinear pairing group object.
+    std::unique_ptr<BP> pairing_group;
 };
 
 struct FilterMsk{
     Fp d;
     Fp di;
     FpVec r;
-    FpVec rp;
     FpVec b;
     FpVec bi;
-    FpVec bp;
-    FpVec bpi;
     Hash hash;
 };
 
@@ -23,37 +22,15 @@ class Filter{
 public:
     static pp pp_gen(const int& degree, const bool& pre = true);
 
-    static FilterMsk msk_gen(const pp& pp, const int& input_len);
+    static FilterMsk msk_gen(pp& pp, const int& input_len);
 
-    static G1Vec enc(const pp& pp, const FilterMsk& msk, const IntVec& x);
+    static G1Vec enc(const pp& pp, const FilterMsk& msk, const Vec& x);
 
-    static G1Vec enc(const pp& pp, const FilterMsk& msk, const StrVec& x);
+    static G2Vec keygen(const pp& pp, const FilterMsk& msk, const VecMat& y);
 
-    static G1Vec enc(const pp& pp, const FilterMsk& msk, const FpVec& x);
+    static G2Vec keygen(const pp& pp, const FilterMsk& msk, const VecMat& y, const IntVec& sel);
 
+    static bool dec(const G1Vec& ct, const G2Vec& sk);
 
-    //
-    // static zp_vec poly_msg(const pp& pp, const zp_vec& x);
-    //
-    // static zp_vec poly_key(const pp& pp, const zp_mat& y);
-
-
-    // static g2_vec keygen(const pp& pp, const FilterMsk& msk, const int_mat& y);
-
-    // static g2_vec keygen(const pp& pp, const FilterMsk& msk, const str_mat& y);
-
-    // static g2_vec keygen(const pp& pp, const FilterMsk& msk, const int_mat& y, const int_vec& sel);
-    //
-    // static g2_vec keygen(const pp& pp, const FilterMsk& msk, const str_mat& y, const int_vec& sel);
-
-    // static bool dec(g1_vec& ct, g2_vec& sk);
-
-    // static bool dec(const pp& pp, g1_vec& ct, g2_vec& sk, const int_vec& sel);
-
-
-
-    // static g2_vec keygen(const pp& pp, const FilterMsk& msk, const zp_mat& y);
-
-    // static g2_vec keygen(const pp& pp, const FilterMsk& msk, const zp_mat& y, const int_vec& sel);
-
+    static bool dec(const pp& pp, const G1Vec& ct, const G2Vec& sk, const IntVec& sel);
 };

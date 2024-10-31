@@ -64,4 +64,40 @@ public:
      * @return a matrix of random integers.
      */
     static IntMat rand_int_mat(const int& row, const int& col, const int& min_v, const int& max_v);
+
+    /**
+     * Compute the polynomial of powers for the input vector x.
+     * Given (x1, x2, ..., xn), output (x1^d, x1^(d-1), ..., xn^1, n).
+     * Note that the output length is n * d + 1, where n is the input length.
+     * @param d the desired degree of the polynomial.
+     * @param pairing_group the bilinear pairing group object.
+     * @param x a vector of field point values.
+     * @return a vector of powers of the input.
+     */
+    static FpVec power_poly(int d, const BP& pairing_group, const FpVec& x);
+
+    /**
+     *
+     * @param d the desired degree of the polynomial.
+     * @param pairing_group the bilinear pairing group object.
+     * @param x a matrix of field point values. Note that each row may contain different number of elements though.
+     * @return a vector of interpolated coefficients of the input matrix.
+     */
+    static FpVec coeff_poly(int d, const BP& pairing_group, const FpMat& x);
+
+    /**
+     * Given a vector x, find two vectors x1 + x2 = x, where no point in x1 and x2 are zeros.
+     * @param pairing_group the bilinear pairing group object.
+     * @param x a vector of field point values.
+     * @return a vector of double the length of input.
+     */
+    static FpVec split_poly(const BP& pairing_group, const FpVec& x);
+
+    /**
+     * 
+     * @param degree
+     * @param sel 
+     * @return 
+     */
+    static IntVec get_sel_index(int degree, const IntVec& sel);
 };

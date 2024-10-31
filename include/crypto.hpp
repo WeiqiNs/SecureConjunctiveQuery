@@ -1,9 +1,16 @@
 #pragma once
 
+#include <variant>
 #include <openssl/rand.h>
 #include "helper.hpp"
 
+// Set the hash output size to be 128 bits.
 static int HASH_SIZE = 16;
+
+// Set name alias for the commonly used type.
+using Vec = std::variant<IntVec, StrVec>;
+using Mat = std::variant<IntMat, StrMat>;
+using VecMat = std::variant<IntVec, StrVec, IntMat, StrMat>;
 
 class Aes{
 public:
@@ -85,6 +92,22 @@ public:
      * @return 
      */
     [[nodiscard]] FpVec digest_str_vec(const StrVec& x) const;
+
+    /**
+     *
+     * @param pairing_group
+     * @param x
+     * @return
+     */
+    [[nodiscard]] FpVec digest_vec_to_fp(const BP& pairing_group, const Vec& x) const;
+
+    /**
+     *
+     * @param pairing_group
+     * @param x
+     * @return
+     */
+    [[nodiscard]] FpMat digest_mat_to_fp(const BP& pairing_group, const Mat& x) const;
 
 private:
     /// Vectors of characters to hold the IV and the key.

@@ -161,3 +161,62 @@ FpVec Hash::digest_str_vec(const StrVec& x) const{
 
     return r;
 }
+
+FpVec Hash::digest_vec_to_fp(const BP& pairing_group, const Vec& x) const{
+    // Declare the hash result.
+    FpVec r;
+
+    // Depending on the input type, hash the input x vector.
+    std::visit([&r, this](auto&& input_x){
+        // Get the type of the input.
+        using T = std::decay_t<decltype(input_x)>;
+
+        if constexpr (std::is_same_v<T, IntVec>){
+            // If input is integer vector, hash integers.
+            r = digest_int_vec(input_x);
+        }
+        else if constexpr (std::is_same_v<T, StrVec>){
+            // If input is string vector, hash strings.
+            r = digest_str_vec(input_x);
+        }
+    }, x);
+
+    // Convert the hash values in to Zp.
+    for (auto i : r) pairing_group.Zp->mod(i);
+
+    return r;
+}
+
+FpMat Hash::digest_mat_to_fp(const BP& pairing_group, const Mat& x) const{
+    FpMat r;
+
+    // Depending on the input type, hash the input x matrix.
+    std::visit([&r, &pairing_group, this](auto&& input_x){
+        // Get the type of the input.
+        using T = std::decay_t<decltype(input_x)>;
+
+        if constexpr (std::is_same_v<T, IntMat>){
+            // Find the hash of the x values.
+            for (const auto& i : input_x){
+                // Hash one row and convert the hash values to Zp.
+                auto temp = digest_int_vec(i);
+                for (auto j : temp) pairing_group.Zp->mod(j);
+                // Add this value to the matrix.
+                r.push_back(temp);
+            }
+        }
+        else if constexpr (std::is_same_v<T, StrMat>){
+            // Find the hash of the x values.
+            for (const auto& i : input_x){
+                // Hash one row and convert the hash values to Zp.
+                auto temp = digest_str_vec(i);
+                for (auto j : temp) pairing_group.Zp->mod(j);
+                // Add this value to the matrix.
+                r.push_back(temp);
+            }
+        }
+    }, x);
+
+    return r;
+}
+
