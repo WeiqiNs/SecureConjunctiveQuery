@@ -16,3 +16,7 @@ add_executable(test_filter test_filter.cpp)
 target_link_libraries(test_filter EEJ ${GTEST_LIB})
 gtest_discover_tests(test_filter)
 # -----------------------------------------------------
+add_executable(test_aggre test_aggre.cpp)
+target_link_libraries(test_aggre EEJ ${GTEST_LIB})
+gtest_discover_tests(test_aggre)
+# -----------------------------------------------------
