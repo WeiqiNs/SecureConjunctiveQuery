@@ -10,7 +10,7 @@ static int HASH_SIZE = 16;
 // Set name alias for the commonly used type.
 using Vec = std::variant<IntVec, StrVec>;
 using Mat = std::variant<IntMat, StrMat>;
-using VecMat = std::variant<IntVec, StrVec, IntMat, StrMat>;
+using VecOrMat = std::variant<IntVec, StrVec, IntMat, StrMat>;
 
 class Aes{
 public:

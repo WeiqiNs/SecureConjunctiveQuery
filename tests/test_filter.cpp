@@ -2,8 +2,8 @@
 #include "filter.hpp"
 
 TEST(FilterTests, DegOneIntTrue){
-    auto pp = Filter::pp_gen(1);
-    const auto msk = Filter::msk_gen(pp, 10);
+    const auto pp = Filter::pp_gen(1, 10);
+    const auto msk = Filter::msk_gen(pp);
 
     const IntVec x = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     const IntVec y = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
@@ -16,8 +16,8 @@ TEST(FilterTests, DegOneIntTrue){
 }
 
 TEST(FilterTests, DegOneIntFalse){
-    auto pp = Filter::pp_gen(1);
-    const auto msk = Filter::msk_gen(pp, 10);
+    const auto pp = Filter::pp_gen(1, 10);
+    const auto msk = Filter::msk_gen(pp);
 
     const IntVec x = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     const IntVec y = {0, 1, 2, 3, 4, 5, 6, 7, 8, 100};
@@ -30,8 +30,8 @@ TEST(FilterTests, DegOneIntFalse){
 }
 
 TEST(FilterTests, DegOneStrTrue){
-    auto pp = Filter::pp_gen(1);
-    const auto msk = Filter::msk_gen(pp, 10);
+    const auto pp = Filter::pp_gen(1, 10);
+    const auto msk = Filter::msk_gen(pp);
 
     const StrVec x = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
     const StrVec y = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
@@ -44,8 +44,8 @@ TEST(FilterTests, DegOneStrTrue){
 }
 
 TEST(FilterTests, DegOneStrFalse){
-    auto pp = Filter::pp_gen(1);
-    const auto msk = Filter::msk_gen(pp, 10);
+    const auto pp = Filter::pp_gen(1, 10);
+    const auto msk = Filter::msk_gen(pp);
 
     const StrVec x = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
     const StrVec y = {"0", "1", "2", "3", "Wrong", "5", "6", "7", "8", "9"};
@@ -58,8 +58,8 @@ TEST(FilterTests, DegOneStrFalse){
 }
 
 TEST(FilterTests, DegMulIntTrue){
-    auto pp = Filter::pp_gen(5);
-    const auto msk = Filter::msk_gen(pp, 10);
+    const auto pp = Filter::pp_gen(5, 10);
+    const auto msk = Filter::msk_gen(pp);
 
     const IntVec x = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     const IntMat y = {
@@ -83,8 +83,8 @@ TEST(FilterTests, DegMulIntTrue){
 }
 
 TEST(FilterTests, DegMulIntFalse){
-    auto pp = Filter::pp_gen(5);
-    const auto msk = Filter::msk_gen(pp, 10);
+    const auto pp = Filter::pp_gen(5, 10);
+    const auto msk = Filter::msk_gen(pp);
 
     const IntVec x = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     const IntMat y = {
@@ -109,8 +109,8 @@ TEST(FilterTests, DegMulIntFalse){
 
 TEST(FilterTests, DegMulStrTrue){
     // int main() {
-    auto pp = Filter::pp_gen(5);
-    const auto msk = Filter::msk_gen(pp, 10);
+    const auto pp = Filter::pp_gen(5, 10);
+    const auto msk = Filter::msk_gen(pp);
 
     const StrVec x = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
     const StrMat y = {
@@ -135,8 +135,8 @@ TEST(FilterTests, DegMulStrTrue){
 
 TEST(FilterTests, DegMulStrFalse){
     // int main() {
-    auto pp = Filter::pp_gen(5);
-    const auto msk = Filter::msk_gen(pp, 10);
+    const auto pp = Filter::pp_gen(5, 10);
+    const auto msk = Filter::msk_gen(pp);
 
     const StrVec x = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
     const StrMat y = {
@@ -160,8 +160,8 @@ TEST(FilterTests, DegMulStrFalse){
 }
 
 TEST(FilterTests, DegOneSelIntTrue){
-    auto pp = Filter::pp_gen(1);
-    const auto msk = Filter::msk_gen(pp, 10);
+    const auto pp = Filter::pp_gen(1, 10);
+    const auto msk = Filter::msk_gen(pp);
 
     const IntVec x = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     const IntVec y = {0, 1, 2, 3, 4};
@@ -175,8 +175,8 @@ TEST(FilterTests, DegOneSelIntTrue){
 }
 
 TEST(FilterTests, DegOneSelIntFalse){
-    auto pp = Filter::pp_gen(1);
-    const auto msk = Filter::msk_gen(pp, 10);
+    const auto pp = Filter::pp_gen(1, 10);
+    const auto msk = Filter::msk_gen(pp);
 
     const IntVec x = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     const IntVec y = {0, 100};
@@ -190,8 +190,8 @@ TEST(FilterTests, DegOneSelIntFalse){
 }
 
 TEST(FilterTests, DegMulSelIntTrue){
-    auto pp = Filter::pp_gen(5);
-    const auto msk = Filter::msk_gen(pp, 10);
+    const auto pp = Filter::pp_gen(5, 10);
+    const auto msk = Filter::msk_gen(pp);
 
     const IntVec x = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     const IntMat y = {
@@ -211,8 +211,8 @@ TEST(FilterTests, DegMulSelIntTrue){
 }
 
 TEST(FilterTests, DegMulSelIntFalse){
-    auto pp = Filter::pp_gen(5);
-    const auto msk = Filter::msk_gen(pp, 10);
+    const auto pp = Filter::pp_gen(5, 10);
+    const auto msk = Filter::msk_gen(pp);
 
     const IntVec x = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     const IntMat y = {

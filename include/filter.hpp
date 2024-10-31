@@ -25,18 +25,18 @@ public:
     /**
      * Generate the required public parameters.
      * @param degree the degree of the polynomial.
+     * @param length the length of vectors to the encryption algorithm.
      * @param pre whether we want to use the precomputed table for group exponentiation.
      * @return the generated public parameters.
      */
-    static pp pp_gen(const int& degree, const bool& pre = true);
+    static pp pp_gen(int degree, int length, bool pre = true);
 
     /**
      * Generate master secret key.
      * @param pp the public parameters.
-     * @param input_len the length of vectors to the encryption algorithm.
      * @return the generated master secret key.
      */
-    static FilterMsk msk_gen(pp& pp, const int& input_len);
+    static FilterMsk msk_gen(const pp& pp);
 
     /**
      * Perform the Filter FE encryption.
@@ -54,7 +54,7 @@ public:
      * @param y a vector or matrix of strings or integers. Use matrix only when you are selecting set of inputs.
      * @return the function key.
      */
-    static G2Vec keygen(const pp& pp, const FilterMsk& msk, const VecMat& y);
+    static G2Vec keygen(const pp& pp, const FilterMsk& msk, const VecOrMat& y);
 
     /**
      * Perform the Filter FE key generation with select selecting columns.
@@ -64,7 +64,7 @@ public:
      * @param sel a vector of integers indicating which columns to select.
      * @return the function key.
      */
-    static G2Vec keygen(const pp& pp, const FilterMsk& msk, const VecMat& y, const IntVec& sel);
+    static G2Vec keygen(const pp& pp, const FilterMsk& msk, const VecOrMat& y, const IntVec& sel);
 
     /**
      * Perform the Filter FE decryption.
