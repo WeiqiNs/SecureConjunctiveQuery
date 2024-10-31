@@ -7,12 +7,16 @@ RUN apt install -y git build-essential libgmp-dev libmpfr-dev libssl-dev gdb cma
 # Clean up.
 RUN apt clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Download library and extract. (One could use git clone but this is easier for swithing to published versions.
+# Download the RELIC library and the RBP library.
 RUN git clone https://github.com/relic-toolkit/relic.git
+RUN git clone https://github.com/Weiqi97/LibRBP.git
 
-## Relic library installation.
+# RELIC library installation.
 RUN mkdir /relic/build
 WORKDIR "/relic/build"
-RUN ../preset/gmp-pbc-bls381.sh ../ && \
-    make && \
-    make install
+RUN ../preset/gmp-pbc-bls381.sh .. && make && make install
+
+# RBP library installation.
+RUN mkdir /LibRBP/build
+WORKDIR "/LibRBP/build"
+RUN cmake .. && make && make install

@@ -69,7 +69,7 @@ public:
     /**
      * Perform the Filter FE decryption.
      * @param ct the ciphertext.
-     * @param sk the secret key.
+     * @param sk the function key.
      * @return a boolean indicating the result of Filter.
      */
     static bool dec(const G1Vec& ct, const G2Vec& sk);
@@ -78,7 +78,7 @@ public:
      * Perform the Filter FE decryption with selecting columns.
      * @param pp the public parameters.
      * @param ct the ciphertext.
-     * @param sk the secret key.
+     * @param sk the function key.
      * @param sel a vector of integers indicating which columns to select.
      * @return a boolean indicating the result of Filter.
      */
