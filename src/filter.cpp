@@ -1,8 +1,8 @@
 #include "filter.hpp"
 
-pp Filter::pp_gen(int degree, int length, bool pre){
+FilterPP Filter::pp_gen(const int degree, const int length, const bool pre){
     // Create the pp instance.
-    pp pp;
+    FilterPP pp;
     // Update the degree according to input.
     pp.d = degree;
     // Update the input length according to input.
@@ -13,7 +13,7 @@ pp Filter::pp_gen(int degree, int length, bool pre){
     return pp;
 }
 
-FilterMsk Filter::msk_gen(const pp& pp){
+FilterMsk Filter::msk_gen(const FilterPP& pp){
     // Create the msk instance.
     FilterMsk msk;
 
@@ -22,7 +22,7 @@ FilterMsk Filter::msk_gen(const pp& pp){
         msk.r = pp.pairing_group->Zp->rand_vec(pp.l);
     }
     else{
-        // Sample a random point and its inverse.
+        // Sample a random point and find its inverse.
         msk.d = pp.pairing_group->Zp->rand();
         msk.di = pp.pairing_group->Zp->inv(msk.d);
         // If degree is higher than 1, we need the length to be 2 * (length * degree + 1).
@@ -36,7 +36,7 @@ FilterMsk Filter::msk_gen(const pp& pp){
     return msk;
 }
 
-G1Vec Filter::enc(const pp& pp, const FilterMsk& msk, const Vec& x){
+G1Vec Filter::enc(const FilterPP& pp, const FilterMsk& msk, const Vec& x){
     // Generate hash of the input x vector.
     const FpVec x_digest = msk.hash.digest_vec_to_fp(*pp.pairing_group, x);
 
@@ -73,7 +73,7 @@ G1Vec Filter::enc(const pp& pp, const FilterMsk& msk, const Vec& x){
     return pp.pairing_group->Gp->g1_raise(abxxr);
 }
 
-G2Vec Filter::keygen(const pp& pp, const FilterMsk& msk, const VecOrMat& y){
+G2Vec Filter::keygen(const FilterPP& pp, const FilterMsk& msk, const VecOrMat& y){
     // Sample the random point beta.
     const Fp beta = pp.pairing_group->Zp->rand();
 
@@ -131,7 +131,7 @@ G2Vec Filter::keygen(const pp& pp, const FilterMsk& msk, const VecOrMat& y){
     return pp.pairing_group->Gp->g2_raise(bbic);
 }
 
-G2Vec Filter::keygen(const pp& pp, const FilterMsk& msk, const VecOrMat& y, const IntVec& sel){
+G2Vec Filter::keygen(const FilterPP& pp, const FilterMsk& msk, const VecOrMat& y, const IntVec& sel){
     // Sample the random point beta.
     const Fp beta = pp.pairing_group->Zp->rand();
 
@@ -207,11 +207,9 @@ G2Vec Filter::keygen(const pp& pp, const FilterMsk& msk, const VecOrMat& y, cons
     return pp.pairing_group->Gp->g2_raise(bbic);
 }
 
-bool Filter::dec(const G1Vec& ct, const G2Vec& sk){
-    return gt_is_unity(Group::pair(ct, sk).value);
-}
+bool Filter::dec(const G1Vec& ct, const G2Vec& sk){ return gt_is_unity(Group::pair(ct, sk).value); }
 
-bool Filter::dec(const pp& pp, const G1Vec& ct, const G2Vec& sk, const IntVec& sel){
+bool Filter::dec(const FilterPP& pp, const G1Vec& ct, const G2Vec& sk, const IntVec& sel){
     if (pp.d == 1){
         // We select desired things from ct.
         G1Vec sel_ct;

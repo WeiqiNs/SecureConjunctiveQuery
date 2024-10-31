@@ -2,7 +2,7 @@
 
 #include "crypto.hpp"
 
-struct pp{
+struct FilterPP{
     // Suppose by default the degree is 1.
     int d = 1;
     // Suppose by default the length is 1.
@@ -29,14 +29,14 @@ public:
      * @param pre whether we want to use the precomputed table for group exponentiation.
      * @return the generated public parameters.
      */
-    static pp pp_gen(int degree, int length, bool pre = true);
+    static FilterPP pp_gen(int degree, int length, bool pre = true);
 
     /**
      * Generate master secret key.
      * @param pp the public parameters.
      * @return the generated master secret key.
      */
-    static FilterMsk msk_gen(const pp& pp);
+    static FilterMsk msk_gen(const FilterPP& pp);
 
     /**
      * Perform the Filter FE encryption.
@@ -45,7 +45,7 @@ public:
      * @param x a vector of strings or integers.
      * @return the ciphertext.
      */
-    static G1Vec enc(const pp& pp, const FilterMsk& msk, const Vec& x);
+    static G1Vec enc(const FilterPP& pp, const FilterMsk& msk, const Vec& x);
 
     /**
      * Perform the Filter FE key generation.
@@ -54,7 +54,7 @@ public:
      * @param y a vector or matrix of strings or integers. Use matrix only when you are selecting set of inputs.
      * @return the function key.
      */
-    static G2Vec keygen(const pp& pp, const FilterMsk& msk, const VecOrMat& y);
+    static G2Vec keygen(const FilterPP& pp, const FilterMsk& msk, const VecOrMat& y);
 
     /**
      * Perform the Filter FE key generation with select selecting columns.
@@ -64,7 +64,7 @@ public:
      * @param sel a vector of integers indicating which columns to select.
      * @return the function key.
      */
-    static G2Vec keygen(const pp& pp, const FilterMsk& msk, const VecOrMat& y, const IntVec& sel);
+    static G2Vec keygen(const FilterPP& pp, const FilterMsk& msk, const VecOrMat& y, const IntVec& sel);
 
     /**
      * Perform the Filter FE decryption.
@@ -82,5 +82,5 @@ public:
      * @param sel a vector of integers indicating which columns to select.
      * @return a boolean indicating the result of Filter.
      */
-    static bool dec(const pp& pp, const G1Vec& ct, const G2Vec& sk, const IntVec& sel);
+    static bool dec(const FilterPP& pp, const G1Vec& ct, const G2Vec& sk, const IntVec& sel);
 };

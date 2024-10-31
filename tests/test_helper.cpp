@@ -58,9 +58,9 @@ TEST(HelperTests, CoeffPoly){
     // Check correctness.
     EXPECT_TRUE(
         Field::cmp(r[0], 11) &&
-        Field::cmp(r[1], pairing_group.Zp->neg(Fp(6))) &&
+        Field::cmp(r[1], pairing_group.Zp->from_int(-6)) &&
         Field::cmp(r[2], 1) &&
-        Field::cmp(r[3], pairing_group.Zp->neg(Fp(9))) &&
+        Field::cmp(r[3], pairing_group.Zp->from_int(-9)) &&
         Field::cmp(r[4], 1) &&
         Field::cmp(r[5], 0) &&
         Field::cmp(r[9], 8)
