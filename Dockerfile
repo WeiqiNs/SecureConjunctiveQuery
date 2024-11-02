@@ -3,7 +3,7 @@ FROM ubuntu:latest
 # Update libraries.
 RUN apt update && apt upgrade -y
 # Install needed libraries.
-RUN apt install -y git build-essential libgmp-dev libmpfr-dev libssl-dev gdb cmake
+RUN apt install -y git build-essential libgmp-dev libmpfr-dev libssl-dev libgtest-dev gdb cmake
 # Clean up.
 RUN apt clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -20,3 +20,9 @@ RUN ../preset/gmp-pbc-bls381.sh .. && make && make install
 RUN mkdir /LibRBP/build
 WORKDIR "/LibRBP/build"
 RUN cmake .. && make && make install
+
+# Copy the files over to working directory.
+RUN mkdir -p /EEJ/build
+COPY . /EEJ
+WORKDIR "/EEJ/build"
+RUN cmake .. && make && ctest
