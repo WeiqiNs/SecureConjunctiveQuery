@@ -20,8 +20,7 @@ jobs:
 
       - name: Install RELIC
         run: |
-          mkdir relic/build
-          cd relic/build
+          mkdir relic/build && cd relic/build
           ../preset/gmp-pbc-bls381.sh .. && sudo make && sudo make install
 
       - name: Checkout LibRBP
@@ -32,8 +31,7 @@ jobs:
 
       - name: Install LibRBP
         run: |
-          mkdir LibRBP/build
-          cd LibRBP/build
+          mkdir LibRBP/build && cd LibRBP/build
           cmake .. && sudo make && sudo make install
 
       - name: Checkout main repository
@@ -41,11 +39,9 @@ jobs:
 
       - name: Build the EEJ project
         run: |
-          mkdir build
-          cd build
+          mkdir build && cd build
           cmake .. && sudo make
 
       - name: Run tests
         run: |
-          cd build
-          ctest
+          cd build && ctest
