@@ -22,7 +22,8 @@ jobs:
         run: |
           mkdir relic/build
           cd relic/build
-          sudo ../preset/gmp-pbc-bls381.sh .. && make && make install
+          ../preset/gmp-pbc-bls381.sh .. 
+          sudo make && make install
 
       - name: Checkout LibRBP
         uses: actions/checkout@v4
@@ -34,7 +35,8 @@ jobs:
         run: |
           mkdir LibRBP/build
           cd LibRBP/build
-          sudo cmake .. && make && make install
+          cmake .. 
+          sudo make && make install
 
       - name: Checkout main repository
         uses: actions/checkout@v4
@@ -43,7 +45,8 @@ jobs:
         run: |
           mkdir build
           cd build
-          sudo cmake .. && make
+          cmake .. 
+          sudo make
 
       - name: Run tests
         run: |
