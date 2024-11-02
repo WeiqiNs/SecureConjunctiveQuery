@@ -52,8 +52,8 @@ G1Vec IpeJoin::enc(const IpeJoinPP& pp, const IpeJoinMsk& msk, const Vec& x, con
     ax.push_back(pp.pairing_group->Zp->rand());
     ax.emplace_back(0);
 
-    // Insert the join value at the front.
-    ax.insert(ax.begin(), join_on);
+    // Insert the join on.
+    ax.push_back(join_on);
 
     // Multiply with the matrix Bi.
     const auto axb = pp.pairing_group->Zp->mat_mul(ax, msk.b);
@@ -68,11 +68,11 @@ G2Vec IpeJoin::keygen(const IpeJoinPP& pp, const IpeJoinMsk& msk, const Mat& y){
 
     // We compute the polynomial of y.
     auto poly_y = Helper::coeff_poly(pp.d, *pp.pairing_group, y_digest);
-    // Insert the randomness in the key to the front.
-    poly_y.insert(poly_y.begin(), msk.k);
     // Attach (0, r).
     poly_y.emplace_back(0);
     poly_y.push_back(pp.pairing_group->Zp->rand());
+    // Push the randomness in the key to the back.
+    poly_y.push_back(msk.k);
 
     // Multiply with the matrix B.
     const auto yb = pp.pairing_group->Zp->mat_mul(poly_y, msk.bi);
