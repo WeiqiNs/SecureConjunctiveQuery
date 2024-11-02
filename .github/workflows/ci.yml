@@ -1,0 +1,51 @@
+name: LibEEJ CI
+
+on: [push, pull_request]
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential libgmp-dev libmpfr-dev libssl-dev libgtest-dev cmake
+
+      - name: Checkout RELIC
+        uses: actions/checkout@v4
+        with:
+          repository: relic-toolkit/relic
+          path: relic
+
+      - name: Install RELIC
+        run: |
+          mkdir relic/build
+          cd relic/build
+          sudo ../preset/gmp-pbc-bls381.sh .. && make && make install
+
+      - name: Checkout LibRBP
+        uses: actions/checkout@v4
+        with:
+          repository: Weiqi97/LibRBP
+          path: LibRBP
+
+      - name: Install LibRBP
+        run: |
+          mkdir LibRBP/build
+          cd LibRBP/build
+          sudo cmake .. && make && make install
+
+      - name: Checkout main repository
+        uses: actions/checkout@v4
+
+      - name: Build the EEJ project
+        run: |
+          mkdir build
+          cd build
+          sudo cmake .. && make
+
+      - name: Run tests
+        run: |
+          cd build
+          ctest
