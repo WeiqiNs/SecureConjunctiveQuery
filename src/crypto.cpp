@@ -198,8 +198,15 @@ FpMat Hash::digest_mat_to_fp(const BP& pairing_group, const Mat& x) const{
         if constexpr (std::is_same_v<T, IntMat>){
             // Find the hash of the x values.
             for (const auto& i : input_x){
-                // Hash one row and convert the hash values to Zp.
-                auto temp = digest_int_vec(i);
+                FpVec temp;
+                // Note that if this row is a zero vector, we don't hash it.
+                if (i.size() == 1 && i[0] == 0){
+                    temp.emplace_back(0);
+                } else{
+                    // Hash one row and convert the hash values to Zp.
+                    temp = digest_int_vec(i);
+                }
+
                 for (auto j : temp) pairing_group.Zp->mod(j);
                 // Add this value to the matrix.
                 r.push_back(temp);

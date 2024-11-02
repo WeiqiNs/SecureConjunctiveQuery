@@ -38,10 +38,10 @@ FilterMsk Filter::msk_gen(const FilterPP& pp){
 
 G1Vec Filter::enc(const FilterPP& pp, const FilterMsk& msk, const Vec& x){
     // Generate hash of the input x vector.
-    const FpVec x_digest = msk.hash.digest_vec_to_fp(*pp.pairing_group, x);
+    const auto x_digest = msk.hash.digest_vec_to_fp(*pp.pairing_group, x);
 
     // Sample the random point alpha.
-    const Fp alpha = pp.pairing_group->Zp->rand();
+    const auto alpha = pp.pairing_group->Zp->rand();
 
     // Depends on whether the degree is 1 or higher, we perform encryption differently.
     if (pp.d == 1){
@@ -75,7 +75,7 @@ G1Vec Filter::enc(const FilterPP& pp, const FilterMsk& msk, const Vec& x){
 
 G2Vec Filter::keygen(const FilterPP& pp, const FilterMsk& msk, const VecOrMat& y){
     // Sample the random point beta.
-    const Fp beta = pp.pairing_group->Zp->rand();
+    const auto beta = pp.pairing_group->Zp->rand();
 
     // Depends on whether the degree is 1 or higher, we perform key generation differently.
     if (pp.d == 1){
@@ -133,7 +133,7 @@ G2Vec Filter::keygen(const FilterPP& pp, const FilterMsk& msk, const VecOrMat& y
 
 G2Vec Filter::keygen(const FilterPP& pp, const FilterMsk& msk, const VecOrMat& y, const IntVec& sel){
     // Sample the random point beta.
-    const Fp beta = pp.pairing_group->Zp->rand();
+    const auto beta = pp.pairing_group->Zp->rand();
 
     // Depends on whether the degree is 1 or higher, we perform key generation differently.
     if (pp.d == 1){
@@ -207,7 +207,7 @@ G2Vec Filter::keygen(const FilterPP& pp, const FilterMsk& msk, const VecOrMat& y
     return pp.pairing_group->Gp->g2_raise(bbic);
 }
 
-bool Filter::dec(const G1Vec& ct, const G2Vec& sk){ return gt_is_unity(Group::pair(ct, sk).value); }
+bool Filter::dec(const G1Vec& ct, const G2Vec& sk){ return Group::check_gt_unity(Group::pair(ct, sk)); }
 
 bool Filter::dec(const FilterPP& pp, const G1Vec& ct, const G2Vec& sk, const IntVec& sel){
     if (pp.d == 1){
