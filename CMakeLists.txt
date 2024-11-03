@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.20)
 # Project name and language.
 project(
         EncryptedEqualJoin
-        VERSION 0.1
+        VERSION 0.2
         DESCRIPTION "This project implements the encrypted equal join protocol."
         LANGUAGES CXX
 )
@@ -37,4 +37,4 @@ endif()
 # Add desired subdirectories.
 add_subdirectory(src)
 add_subdirectory(tests)
-#add_subdirectory(experiments)
+add_subdirectory(experiments)

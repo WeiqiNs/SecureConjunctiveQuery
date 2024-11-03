@@ -1,17 +1,5 @@
-add_executable(client_enc_setup_time client_enc_setup_time.cpp)
-target_link_libraries(client_enc_setup_time PRIVATE ej_lib)
+add_executable(flesch_time flesch_time.cpp)
+target_link_libraries(flesch_time PUBLIC EEJ)
 
-add_executable(client_keygen_time client_keygen_time.cpp)
-target_link_libraries(client_keygen_time PRIVATE ej_lib)
-
-add_executable(server_filter_time server_filter_time.cpp)
-target_link_libraries(server_filter_time PRIVATE ej_lib)
-
-add_executable(server_aggre server_aggre.cpp)
-target_link_libraries(server_aggre PRIVATE ej_lib)
-
-add_executable(server_tpc server_tpc.cpp)
-target_link_libraries(server_tpc PRIVATE ej_lib)
-
-add_executable(server_join server_join.cpp)
-target_link_libraries(server_join PRIVATE ej_lib)
+add_executable(fixsch_time fixsch_time.cpp)
+target_link_libraries(fixsch_time PUBLIC EEJ)
