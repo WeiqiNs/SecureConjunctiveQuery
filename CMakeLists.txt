@@ -37,4 +37,4 @@ endif()
 # Add desired subdirectories.
 add_subdirectory(src)
 add_subdirectory(test)
-add_subdirectory(experiments)
+add_subdirectory(experiment)
