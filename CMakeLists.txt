@@ -9,7 +9,7 @@ project(
         LANGUAGES CXX
 )
 
-# Set standards and include tests.
+# Set standards.
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -36,5 +36,5 @@ endif()
 
 # Add desired subdirectories.
 add_subdirectory(src)
-add_subdirectory(tests)
+add_subdirectory(test)
 add_subdirectory(experiments)

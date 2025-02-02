@@ -1,6 +1,4 @@
-
 # Reduce Leakages in Query Processing on Encrypted Multi-dimensional Data with Practicality
-
 Xinle Cao, Weiqi Feng, Quanqing Xu, Chuanhui Yang, Jian Liu and Kui Ren.
 
 (**Abstract**) Encrypted databases (EDBs) have been a prominent focus in the database community with the rise of cloud computing. However, many challenging open problems in EDBs make most existing solutions undeployable in real-world applications. One significant issue is how to avoid dangerous unexpected leakages when querying encrypted multi-dimensional data. For example, given one query SELECT $user\_id$ FROM $T$ WHERE $\mathsf{Age}=30$ AND $\mathsf{Salary}=1000$, the minimal leakage should be the records that satisfy both conditions. However, most existing EDBs reveal separate frequency leakages: 1) records that satisfy $\mathsf{Age}=30$, and 2) records that satisfy $\mathsf{Salary} = 1000$. As numerous works have shown, frequency leakage is very dangerous for EDBs, making it crucial to reduce additional frequency leakage when querying multi-dimensional data. In this paper, we build upon a line of works, including the SOTA work in ICDE 2022, to address the additional leakage. Compared to prior works, our proposed approach elegantly eliminates leakage in a more efficient and flexible manner. The experimental results demonstrate that our work outperforms the SOTA work in a series of common queries over multi-dimensional data, such as equality tests on a single table and equi-joins over two tables where each table consists of multiple columns to be filtered.
@@ -23,5 +21,4 @@ The full version of the paper is listed in this repo [here](Full%20Version%20Red
 - The [tests](tests) folder consists of test cases for validating correctness of our implementations.
 
 ## How to run this code
-
 You need to first install the RELIC library and the LibRBP library; note that our experiment is done on the BLS12-381 curve. One could refer to the [Dockerfile](Dockerfile) to see how to create the dev environment (or use it to build a container directly).
