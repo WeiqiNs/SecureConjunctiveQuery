@@ -1,6 +1,7 @@
 #pragma once
 
 #include <variant>
+#include <openssl/evp.h>
 #include <openssl/rand.h>
 #include "helper.hpp"
 
@@ -48,36 +49,29 @@ private:
 
 class Hash{
 public:
-    /// Default constructor of the hash function, note we use AES128CBC.
-    Hash();
-
-
-    /// Return the IV used. (IV is fixed so that hash can be deterministic.)
-    CharVec get_iv();
-
-    /// Return the key used.
-    CharVec get_key();
+    /// Default constructor of the hash function, note we use BLAKE2.
+    Hash() = default;
 
     /**
      * Perform the hash digestion.
      * @param data a vector of unsigned characters.
      * @return a vector of unsigned characters.
      */
-    [[nodiscard]] CharVec digest(const CharVec& data) const;
+    [[nodiscard]] static CharVec digest(const CharVec& data);
 
     /**
      * Hash a vector of integers to field elements.
      * @param x a vector of integers.
      * @return a vector of field elements.
      */
-    [[nodiscard]] FpVec digest_int_vec(const IntVec& x) const;
+    [[nodiscard]] static FpVec digest_int_vec(const IntVec& x);
 
     /**
      * Hash a vector of strings to field elements.
      * @param x a vector of strings.
      * @return a vector of field elements.
      */
-    [[nodiscard]] FpVec digest_str_vec(const StrVec& x) const;
+    [[nodiscard]] static FpVec digest_str_vec(const StrVec& x);
 
     /**
      * Digest a string or an integer vector to a vector of field element.

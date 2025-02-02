@@ -100,52 +100,26 @@ CharVec Aes::decrypt(const CharVec& ciphertext) const{
     return plaintext;
 }
 
-Hash::Hash(){
-    iv.resize(HASH_SIZE);
-    key.resize(HASH_SIZE);
-    RAND_bytes(iv.data(), HASH_SIZE);
-    RAND_bytes(key.data(), HASH_SIZE);
+
+CharVec Hash::digest(const CharVec& data){
+    // Initialize Blake2b container.
+    EVP_MD_CTX *ctx = EVP_MD_CTX_new();
+    EVP_DigestInit_ex(ctx, EVP_blake2b512(), nullptr);
+
+    // Digest the data.
+    EVP_DigestUpdate(ctx, data.data(), data.size());
+
+    // Finalize and save the output.
+    CharVec out(EVP_MAX_MD_SIZE);
+    EVP_DigestFinal_ex(ctx, out.data(), nullptr);
+
+    // Cleanup.
+    EVP_MD_CTX_free(ctx);
+
+    return out;
 }
 
-CharVec Hash::get_iv(){ return iv; }
-
-CharVec Hash::get_key(){ return key; }
-
-CharVec Hash::digest(const CharVec& data) const{
-    CharVec ciphertext(data.size() + EVP_CIPHER_block_size(EVP_aes_128_cbc()));
-
-    int len;
-    const int plaintext_len = static_cast<int>(data.size());
-
-    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
-    if (!ctx) throw std::runtime_error("Failed to create EVP_CIPHER_CTX");
-
-    if (EVP_EncryptInit_ex(ctx, EVP_aes_128_cbc(), nullptr, key.data(), iv.data()) != 1){
-        EVP_CIPHER_CTX_free(ctx);
-        throw std::runtime_error("EVP_EncryptInit_ex failed");
-    }
-
-    if (EVP_EncryptUpdate(ctx, ciphertext.data(), &len, data.data(), plaintext_len) != 1){
-        EVP_CIPHER_CTX_free(ctx);
-        throw std::runtime_error("EVP_EncryptUpdate failed");
-    }
-
-    int ciphertext_len = len;
-
-    if (EVP_EncryptFinal_ex(ctx, ciphertext.data() + len, &len) != 1){
-        EVP_CIPHER_CTX_free(ctx);
-        throw std::runtime_error("EVP_EncryptFinal_ex failed");
-    }
-
-    EVP_CIPHER_CTX_free(ctx);
-
-    ciphertext_len += len;
-    ciphertext.resize(ciphertext_len);
-
-    return {ciphertext.end() - HASH_SIZE, ciphertext.end()};
-}
-
-FpVec Hash::digest_int_vec(const IntVec& x) const{
+FpVec Hash::digest_int_vec(const IntVec& x){
     FpVec r;
 
     for (const int& i : x) r.push_back(Helper::char_vec_to_fp(digest(Helper::int_to_char_vec(i))));
@@ -154,7 +128,7 @@ FpVec Hash::digest_int_vec(const IntVec& x) const{
 }
 
 
-FpVec Hash::digest_str_vec(const StrVec& x) const{
+FpVec Hash::digest_str_vec(const StrVec& x){
     FpVec r;
 
     for (const str& i : x) r.push_back(Helper::char_vec_to_fp(digest(Helper::str_to_char_vec(i))));
