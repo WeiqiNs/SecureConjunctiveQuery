@@ -1,6 +1,84 @@
 #include "crypto.hpp"
 
-const EVP_CIPHER* Aes::get_cipher() const{
+AES::AES(const int& key_length){
+    // Compute the byte length.
+    const int byte_length = key_length / 8;
+    // Get the cipher object.
+    cipher_ = get_cipher(byte_length);
+    // Sample a random key.
+    key_.resize(byte_length);
+    RAND_bytes(key_.data(), byte_length);
+    // Get the cipher ctx.
+    ctx_ = EVP_CIPHER_CTX_new();
+}
+
+AES::AES(const CharVec& key){
+    // Get the cipher object.
+    cipher_ = get_cipher(key.size());
+    // Set the key.
+    key_ = key;
+    // Get the cipher ctx.
+    ctx_ = EVP_CIPHER_CTX_new();
+}
+
+AES::~AES(){
+    EVP_CIPHER_CTX_free(ctx_);
+}
+
+CharVec AES::get_key(){ return key_; }
+
+void AES::set_key(const CharVec& key){ key_ = key; }
+
+CharVec AES::encrypt(const CharVec& plaintext) const{
+    // Sample the random IV.
+    CharVec iv(EVP_MAX_IV_LENGTH);
+    RAND_bytes(iv.data(), EVP_MAX_IV_LENGTH);
+
+    // Declare length variable and get space for ciphertext.
+    int len;
+    CharVec ciphertext(plaintext.size() + EVP_CIPHER_block_size(cipher_));
+
+    // Init the encryption scheme and update with ciphertext.
+    EVP_EncryptInit(ctx_, cipher_, key_.data(), iv.data());
+    EVP_EncryptUpdate(ctx_, ciphertext.data(), &len, plaintext.data(), plaintext.size());
+
+    // Record the ciphertext length and finalize.
+    int ciphertext_len = len;
+    EVP_EncryptFinal_ex(ctx_, ciphertext.data() + len, &len);
+
+    // Insert the IV to the beginning.
+    ciphertext_len += len;
+    ciphertext.resize(ciphertext_len);
+    ciphertext.insert(ciphertext.begin(), iv.begin(), iv.end());
+
+    return ciphertext;
+}
+
+CharVec AES::decrypt(const CharVec& ciphertext) const{
+    // Split IV and the actual ciphertext.
+    const CharVec iv(ciphertext.begin(), ciphertext.begin() + EVP_MAX_IV_LENGTH);
+    const CharVec actual_ciphertext(ciphertext.begin() + EVP_MAX_IV_LENGTH, ciphertext.end());
+
+    // Declare length variable and get space for plaintext.
+    int len;
+    CharVec plaintext(actual_ciphertext.size() + EVP_CIPHER_block_size(cipher_));
+
+    // Init the decryption scheme and update with ciphertext.
+    EVP_DecryptInit(ctx_, cipher_, key_.data(), iv.data());
+    EVP_DecryptUpdate(ctx_, plaintext.data(), &len, actual_ciphertext.data(), actual_ciphertext.size());
+
+    // Record the plaintext length and finalize.
+    int plaintext_len = len;
+    EVP_DecryptFinal_ex(ctx_, plaintext.data() + len, &len);
+
+    // Resize the plaintext and output.
+    plaintext_len += len;
+    plaintext.resize(plaintext_len);
+
+    return plaintext;
+}
+
+const EVP_CIPHER* AES::get_cipher(const int byte_length){
     switch (byte_length){
     case 16:
         return EVP_aes_128_cbc();
@@ -13,191 +91,199 @@ const EVP_CIPHER* Aes::get_cipher() const{
     }
 }
 
-Aes::Aes(const int& key_length){
-    if (key_length != 128 && key_length != 192 && key_length != 256){
-        throw std::invalid_argument("Key length must be 128, 192, or 256 bits.");
+HMAC::HMAC(const CharVec& key){
+    // If key is not provided, sample a random key, we use BLAKE2B and manually set the key size to 64.
+    if (key.empty()){
+        key_.resize(64);
+        RAND_bytes(key_.data(), 64);
+    }
+    else{
+        if (key.size() != 64) throw std::invalid_argument("Key length must be 64 bytes.");
+        key_ = key;
     }
 
-    byte_length = key_length / 8;
+    // Fetch the desired algorithm to use.
+    mac_ = EVP_MAC_fetch(nullptr, "HMAC", nullptr);
 
-    // Sample a random key and an IV.
-    key.resize(byte_length);
-    RAND_bytes(key.data(), byte_length);
+    // Get the ctx object.
+    ctx_ = EVP_MAC_CTX_new(mac_);
 }
 
-CharVec Aes::get_key(){ return key; }
-
-CharVec Aes::encrypt(const CharVec& plaintext) const{
-    CharVec iv(EVP_MAX_IV_LENGTH);
-    RAND_bytes(iv.data(), EVP_MAX_IV_LENGTH);
-    CharVec ciphertext(plaintext.size() + EVP_CIPHER_block_size(get_cipher()));
-
-    int len;
-    const int plaintext_len = static_cast<int>(plaintext.size());
-
-    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
-    if (!ctx) throw std::runtime_error("Failed to create EVP_CIPHER_CTX");
-
-    if (EVP_EncryptInit_ex(ctx, get_cipher(), nullptr, key.data(), iv.data()) != 1){
-        EVP_CIPHER_CTX_free(ctx);
-        throw std::runtime_error("EVP_EncryptInit_ex failed");
-    }
-
-    if (EVP_EncryptUpdate(ctx, ciphertext.data(), &len, plaintext.data(), plaintext_len) != 1){
-        EVP_CIPHER_CTX_free(ctx);
-        throw std::runtime_error("EVP_EncryptUpdate failed");
-    }
-
-    int ciphertext_len = len;
-
-    if (EVP_EncryptFinal_ex(ctx, ciphertext.data() + len, &len) != 1){
-        EVP_CIPHER_CTX_free(ctx);
-        throw std::runtime_error("EVP_EncryptFinal_ex failed");
-    }
-
-    EVP_CIPHER_CTX_free(ctx);
-
-    ciphertext_len += len;
-    ciphertext.resize(ciphertext_len);
-    ciphertext.insert(ciphertext.begin(), iv.begin(), iv.end());
-
-    return ciphertext;
+HMAC::~HMAC(){
+    EVP_MAC_CTX_free(ctx_);
+    EVP_MAC_free(mac_);
 }
 
-CharVec Aes::decrypt(const CharVec& ciphertext) const{
-    const CharVec iv(ciphertext.begin(), ciphertext.begin() + EVP_MAX_IV_LENGTH);
-    const CharVec actual_ciphertext(ciphertext.begin() + EVP_MAX_IV_LENGTH, ciphertext.end());
-    CharVec plaintext(actual_ciphertext.size() + EVP_CIPHER_block_size(get_cipher()));
+CharVec HMAC::get_key(){ return key_; }
 
-    int len;
-    const int ciphertext_len = static_cast<int>(actual_ciphertext.size());
+void HMAC::set_key(const CharVec& key){ key_ = key; }
 
-    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
-    if (!ctx) throw std::runtime_error("Failed to create EVP_CIPHER_CTX");
+CharVec HMAC::digest(const CharVec& data){
+    // Set the parameters.
+    const OSSL_PARAM params[] = {
+            OSSL_PARAM_construct_utf8_string(OSSL_MAC_PARAM_DIGEST, digest_.data(), digest_.size()),
+            OSSL_PARAM_construct_end()
+        };
 
-    if (EVP_DecryptInit_ex(ctx, get_cipher(), nullptr, key.data(), iv.data()) != 1){
-        EVP_CIPHER_CTX_free(ctx);
-        throw std::runtime_error("EVP_DecryptInit_ex failed");
-    }
-
-    if (EVP_DecryptUpdate(ctx, plaintext.data(), &len, actual_ciphertext.data(), ciphertext_len) != 1){
-        EVP_CIPHER_CTX_free(ctx);
-        throw std::runtime_error("EVP_DecryptUpdate failed");
-    }
-
-    int plaintext_len = len;
-
-    if (EVP_DecryptFinal_ex(ctx, plaintext.data() + len, &len) != 1){
-        EVP_CIPHER_CTX_free(ctx);
-        throw std::runtime_error("EVP_DecryptFinal_ex failed");
-    }
-
-    EVP_CIPHER_CTX_free(ctx);
-
-    plaintext_len += len;
-    plaintext.resize(plaintext_len);
-
-    return plaintext;
-}
-
-
-CharVec Hash::digest(const CharVec& data){
-    // Initialize Blake2b container.
-    EVP_MD_CTX *ctx = EVP_MD_CTX_new();
-    EVP_DigestInit_ex(ctx, EVP_blake2b512(), nullptr);
-
-    // Digest the data.
-    EVP_DigestUpdate(ctx, data.data(), data.size());
-
-    // Finalize and save the output.
-    CharVec out(EVP_MAX_MD_SIZE);
-    EVP_DigestFinal_ex(ctx, out.data(), nullptr);
-
-    // Cleanup.
-    EVP_MD_CTX_free(ctx);
+    // Initialize the HMAC.
+    EVP_MAC_init(ctx_, key_.data(), key_.size(), params);
+    // Update HMAC with input data.
+    EVP_MAC_update(ctx_, data.data(), data.size());
+    // Create the holder for output.
+    CharVec out(64);
+    // Finalize the HMAC.
+    EVP_MAC_final(ctx_, out.data(), nullptr, 64);
 
     return out;
 }
 
-FpVec Hash::digest_int_vec(const IntVec& x){
-    FpVec r;
-
-    for (const int& i : x) r.push_back(Helper::char_vec_to_fp(digest(Helper::int_to_char_vec(i))));
-
-    return r;
-}
-
-
-FpVec Hash::digest_str_vec(const StrVec& x){
-    FpVec r;
-
-    for (const str& i : x) r.push_back(Helper::char_vec_to_fp(digest(Helper::str_to_char_vec(i))));
-
-    return r;
-}
-
-FpVec Hash::digest_vec_to_fp(const BP& pairing_group, const Vec& x) const{
-    // Declare the hash result.
+FpVec HMAC::digest_vec_to_fp(const Vec& x, const IntVec& sel){
+    // Create holder for the hash result.
     FpVec r;
 
     // Depending on the input type, hash the input x vector.
-    std::visit([&r, this](auto&& input_x){
+    std::visit([&r, sel, this](auto&& vec_x){
         // Get the type of the input.
-        using T = std::decay_t<decltype(input_x)>;
+        using T = std::decay_t<decltype(vec_x)>;
 
+        // For integer vectors.
         if constexpr (std::is_same_v<T, IntVec>){
-            // If input is integer vector, hash integers.
-            r = digest_int_vec(input_x);
+            // If the selective is emtpy, we hash x_i + i.
+            if (sel.empty())
+                for (int i = 0; i < vec_x.size(); ++i){
+                    auto more_temp = Helper::int_to_char_vec(vec_x[i] + i);
+                    auto temp = digest(Helper::int_to_char_vec(vec_x[i] + i));
+                    r.push_back(Helper::char_vec_to_fp(
+                        digest(Helper::int_to_char_vec(vec_x[i] + i))
+                    ));
+                }
+            else
+                // Otherwise we hash x_i + sel[i].
+                for (int i = 0; i < vec_x.size(); ++i)
+                    r.push_back(Helper::char_vec_to_fp(
+                        digest(Helper::int_to_char_vec(vec_x[i] + sel[i]))
+                    ));
         }
+
+        // For string vectors.
         else if constexpr (std::is_same_v<T, StrVec>){
-            // If input is string vector, hash strings.
-            r = digest_str_vec(input_x);
+            if (sel.empty())
+                // If the selective is emtpy, we hash x_i || i.
+                for (int i = 0; i < vec_x.size(); ++i)
+                    r.push_back(Helper::char_vec_to_fp(
+                        digest(Helper::str_to_char_vec(vec_x[i] + std::to_string(i)))
+                    ));
+            else
+                // Otherwise we hash x_i || sel[i].
+                for (int i = 0; i < vec_x.size(); ++i)
+                    r.push_back(Helper::char_vec_to_fp(
+                        digest(Helper::str_to_char_vec(vec_x[i] + std::to_string(sel[i])))
+                    ));
+        }
+
+        // Otherwise the type is not supported.
+        else{
+            throw std::runtime_error("Unsupported hash type");
         }
     }, x);
-
-    // Convert the hash values in to Zp.
-    for (auto i : r) pairing_group.Zp->mod(i);
 
     return r;
 }
 
-FpMat Hash::digest_mat_to_fp(const BP& pairing_group, const Mat& x) const{
+FpMat HMAC::digest_mat_to_fp(const Mat& x, const IntVec& sel){
+    // Create holder for the hash result.
     FpMat r;
 
     // Depending on the input type, hash the input x matrix.
-    std::visit([&r, &pairing_group, this](auto&& input_x){
+    std::visit([&r, sel, this](auto&& mat_x){
         // Get the type of the input.
-        using T = std::decay_t<decltype(input_x)>;
+        using T = std::decay_t<decltype(mat_x)>;
 
+        // For integer matrix.
         if constexpr (std::is_same_v<T, IntMat>){
-            // Find the hash of the x values.
-            for (const auto& i : input_x){
-                FpVec temp;
-                // Note that if this row is a zero vector, we don't hash it.
-                if (i.size() == 1 && i[0] == 0){
-                    temp.emplace_back(0);
-                } else{
-                    // Hash one row and convert the hash values to Zp.
-                    temp = digest_int_vec(i);
-                }
+            // If we do not need to select values.
+            if (sel.empty()){
+                for (int i = 0; i < mat_x.size(); ++i){
+                    // Create holder for hash result of this row.
+                    FpVec row_hash;
 
-                for (auto j : temp) pairing_group.Zp->mod(j);
-                // Add this value to the matrix.
-                r.push_back(temp);
+                    // This row is hashed with row + i.
+                    for (const auto& each_x : mat_x[i])
+                        row_hash.push_back(Helper::char_vec_to_fp(
+                            digest(Helper::int_to_char_vec(each_x + i))
+                        ));
+
+                    // Add the hashed value back to r.
+                    r.push_back(row_hash);
+                }
+            }
+            else{
+                for (int i = 0; i < mat_x.size(); ++i){
+                    // Create holder for hash result of this row.
+                    FpVec row_hash;
+
+                    // This row is hashed with row + sel[i].
+                    for (const auto& each_x : mat_x[i])
+                        row_hash.push_back(Helper::char_vec_to_fp(
+                            digest(Helper::int_to_char_vec(each_x + sel[i]))
+                        ));
+
+                    // Add the hashed value back to r.
+                    r.push_back(row_hash);
+                }
             }
         }
         else if constexpr (std::is_same_v<T, StrMat>){
-            // Find the hash of the x values.
-            for (const auto& i : input_x){
-                // Hash one row and convert the hash values to Zp.
-                auto temp = digest_str_vec(i);
-                for (auto j : temp) pairing_group.Zp->mod(j);
-                // Add this value to the matrix.
-                r.push_back(temp);
+            // If we do not need to select values.
+            if (sel.empty()){
+                for (int i = 0; i < mat_x.size(); ++i){
+                    // Create holder for hash result of this row.
+                    FpVec row_hash;
+
+                    // This row is hashed with row + i.
+                    for (const auto& each_x : mat_x[i])
+                        row_hash.push_back(Helper::char_vec_to_fp(
+                            digest(Helper::str_to_char_vec(each_x + std::to_string(i)))
+                        ));
+
+                    // Add the hashed value back to r.
+                    r.push_back(row_hash);
+                }
             }
+            else{
+                for (int i = 0; i < mat_x.size(); ++i){
+                    // Create holder for hash result of this row.
+                    FpVec row_hash;
+
+                    // This row is hashed with row + sel[i].
+                    for (const auto& each_x : mat_x[i])
+                        row_hash.push_back(Helper::char_vec_to_fp(
+                            digest(Helper::str_to_char_vec(each_x + std::to_string(sel[i])))
+                        ));
+
+                    // Add the hashed value back to r.
+                    r.push_back(row_hash);
+                }
+            }
+        }
+        else{
+            throw std::runtime_error("Unsupported hash type");
         }
     }, x);
 
     return r;
 }
 
+FpVec HMAC::digest_vec_to_fp_mod(const BP& pairing_group, const Vec& x, const IntVec& sel){
+    // Get the hash result and perform modulo.
+    FpVec r = digest_vec_to_fp(x, sel);
+    pairing_group.Zp->mod(r);
+    return r;
+}
+
+FpMat HMAC::digest_mat_to_fp_mod(const BP& pairing_group, const Mat& x, const IntVec& sel){
+    // Get the hash result and perform modulo.
+    FpMat r = digest_mat_to_fp(x, sel);
+    pairing_group.Zp->mod(r);
+    return r;
+}
