@@ -1,6 +1,5 @@
 #pragma once
 
-#include <string>
 #include <openssl/evp.h>
 #include <openssl/rand.h>
 #include <openssl/core_names.h>
@@ -117,4 +116,3 @@ private:
     /// Define the digest that we will use.
     std::string digest_ = "BLAKE2B-512";
 };
-

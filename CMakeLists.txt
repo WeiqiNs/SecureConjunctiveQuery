@@ -4,7 +4,6 @@ cmake_minimum_required(VERSION 3.20)
 # Project name and language.
 project(
         EncryptedEqualJoin
-        VERSION 0.2
         DESCRIPTION "This project implements the encrypted equal join protocol."
         LANGUAGES CXX
 )
@@ -22,7 +21,7 @@ find_package(OpenSSL REQUIRED)
 
 # Find the google test library for testing.
 find_package(GTest)
-if(NOT GTest_FOUND)
+if (NOT GTest_FOUND)
     include(FetchContent)
     FetchContent_Declare(
             googletest
@@ -32,7 +31,7 @@ if(NOT GTest_FOUND)
     # For Windows: Prevent overriding the parent project's compiler/linker settings
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
     FetchContent_MakeAvailable(googletest)
-endif()
+endif ()
 
 # Add desired subdirectories.
 add_subdirectory(src)
