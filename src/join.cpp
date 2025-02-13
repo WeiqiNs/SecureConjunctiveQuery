@@ -97,71 +97,6 @@ G1Vec Join::enc(const JoinPP& pp, const JoinMsk& msk, const Vec& x, const int jo
     return pp.pairing_group->Gp->g1_raise(abxxr);
 }
 
-// G2Vec Join::keygen(const JoinPP& pp, const JoinMsk& msk, const VecOrMat& y){
-//     // Sample the random point beta.
-//     const auto beta = pp.pairing_group->Zp->rand();
-//
-//     // Depends on whether the degree is 1 or higher, we perform key generation differently.
-//     if (pp.d == 1){
-//         // Generate the hash of the input y vector.
-//         FpVec y_digest;
-//         // Make sure the input y is vector type.
-//         std::visit([&pp, &msk, &y_digest](auto&& input_y){
-//             using T = std::decay_t<decltype(input_y)>;
-//             if constexpr (std::is_same_v<T, IntVec> || std::is_same_v<T, StrVec>)
-//                 y_digest = msk.hash.digest_vec_to_fp(*pp.pairing_group, input_y);
-//             else throw std::invalid_argument("The degree must be 1 when inputting a y vector.");
-//         }, y);
-//
-//         // Compute by.
-//         auto by = pp.pairing_group->Zp->vec_mul(y_digest, beta);
-//         // Compute the last element beta * (<y, y> + <y, r>) + phi * k.
-//         auto temp = pp.pairing_group->Zp->add(
-//             pp.pairing_group->Zp->vec_ip(y_digest, y_digest),
-//             pp.pairing_group->Zp->vec_ip(y_digest, msk.r)
-//         );
-//         temp = pp.pairing_group->Zp->mul(temp, beta);
-//         // Append it to the result.
-//         by.push_back(pp.pairing_group->Zp->add(temp, pp.pairing_group->Zp->mul(msk.k, msk.l)));
-//         // Also append the extra term phi.
-//         by.push_back(msk.l);
-//
-//         // Raise the vector to g2 and return.
-//         return pp.pairing_group->Gp->g2_raise(by);
-//     }
-//
-//     // Generate the hash of the input y vector.
-//     FpMat y_digest;
-//     // Make sure the input y is vector type.
-//     std::visit([&pp, &msk, &y_digest](auto&& input_y){
-//         using T = std::decay_t<decltype(input_y)>;
-//         if constexpr (std::is_same_v<T, IntMat> || std::is_same_v<T, StrMat>)
-//             y_digest = msk.hash.digest_mat_to_fp(*pp.pairing_group, input_y);
-//         else throw std::invalid_argument("The degree must be more than 1 when inputting a y matrix.");
-//     }, y);
-//
-//     // We compute the coefficient for when mat y equals to zero.
-//     auto coeff = Helper::coeff_poly(pp.d, *pp.pairing_group, y_digest);
-//     // Split the coefficient to two parts.
-//     coeff = Helper::split_poly(*pp.pairing_group, coeff);
-//
-//     // Compute beta * c.
-//     const auto bc = pp.pairing_group->Zp->vec_mul(coeff, beta);
-//     // Compute beta * bi * c.
-//     auto bbic = pp.pairing_group->Zp->vec_mul(bc, msk.bi);
-//
-//     // Compute the last point to join to the vector.
-//     auto temp = pp.pairing_group->Zp->vec_ip(coeff, msk.r);
-//     temp = pp.pairing_group->Zp->mul(temp, beta);
-//     temp = pp.pairing_group->Zp->add(temp, pp.pairing_group->Zp->mul(msk.k, msk.l));
-//     bbic.push_back(pp.pairing_group->Zp->mul(temp, msk.di));
-//     // Also append the extra term phi.
-//     bbic.push_back(msk.l);
-//
-//     // Raise to g2 and return.
-//     return pp.pairing_group->Gp->g2_raise(bbic);
-// }
-
 G2Vec Join::keygen(const JoinPP& pp, const JoinMsk& msk, const VecOrMat& y, const IntVec& sel){
     // Sample the random point beta.
     const auto beta = pp.pairing_group->Zp->rand();
@@ -239,8 +174,6 @@ G2Vec Join::keygen(const JoinPP& pp, const JoinMsk& msk, const VecOrMat& y, cons
     // Raise to g2 and return.
     return pp.pairing_group->Gp->g2_raise(bbic);
 }
-
-// Gt Join::dec(const G1Vec& ct, const G2Vec& sk){ return Group::pair(ct, sk); }
 
 Gt Join::dec(const JoinPP& pp, const G1Vec& ct, const G2Vec& sk, const IntVec& sel){
     if (pp.d == 1){
