@@ -1,7 +1,6 @@
 #pragma once
 
 #include "crypto.hpp"
-#include "ipe_join.hpp"
 
 
 struct IpeJoinPP{
@@ -17,7 +16,7 @@ struct IpeJoinMsk{
     Fp k;
     FpMat b;
     FpMat bi;
-    Hash hash;
+    std::unique_ptr<HMAC> hmac;
 };
 
 class IpeJoin{
@@ -34,9 +33,10 @@ public:
     /**
      * Generate master secret key.
      * @param pp the public parameters.
+     * @param key the HMAC key to use.
      * @return the generated master secret key.
      */
-    static IpeJoinMsk msk_gen(const IpeJoinPP& pp);
+    static IpeJoinMsk msk_gen(const IpeJoinPP& pp, const CharVec& key = {});
 
     /**
      * Perform the Equal-Join FE encryption.
