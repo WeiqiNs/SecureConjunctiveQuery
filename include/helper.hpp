@@ -2,12 +2,17 @@
 
 #include <string>
 #include <random>
+#include <variant>
 #include "RBP/bp.hpp"
 
+// Define some useful type alias that we use in this library.
 using str = std::string;
 using StrVec = std::vector<str>;
 using StrMat = std::vector<StrVec>;
 using CharVec = std::vector<unsigned char>;
+using Vec = std::variant<IntVec, StrVec>;
+using Mat = std::variant<IntMat, StrMat>;
+using VecOrMat = std::variant<IntVec, StrVec, IntMat, StrMat>;
 
 class Helper{
 public:
