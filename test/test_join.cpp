@@ -6,16 +6,16 @@ TEST(JoinTests, JoinDegOneTrue){
     const auto msk = Join::msk_gen(pp);
 
     const IntVec x1 = {1, 100, 2, 3, 4, 5, 6, 7, 8, 9};
-    const IntVec x2 = {6, 3, 100, 4, 5, 6, 7, 8, 9, 10};
+    const IntVec x2 = {1, 3, 100, 4, 5, 6, 7, 8, 9, 10};
     const IntVec y1 = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-    const IntVec y2 = {6, 3, 4, 5, 6, 7, 8, 9, 10};
+    const IntVec y2 = {1, 3, 4, 5, 6, 7, 8, 9, 10};
 
     const auto ct1 = Join::enc(pp, msk, x1, 1);
     const auto ct2 = Join::enc(pp, msk, x2, 2);
     const auto sk1 = Join::keygen(pp, msk, y1);
     const auto sk2 = Join::keygen(pp, msk, y2);
 
-    EXPECT_TRUE(Group::cmp_gt(Join::dec(ct1, sk1), Join::dec(ct2, sk2)));
+    EXPECT_TRUE(Group::cmp_gt(Join::dec(pp, ct1, sk1), Join::dec(pp, ct2, sk2)));
 }
 
 TEST(JoinTests, JoinDegOneStr){
@@ -24,15 +24,13 @@ TEST(JoinTests, JoinDegOneStr){
 
     const StrVec x1 = {"HERE", "a", "b", "c", "d", "e", "f"};
     const StrVec x2 = {"a", "b", "c", "d", "e", "f", "HERE"};
-    const StrVec y1 = {"a", "b", "c", "d", "e", "f"};
-    const StrVec y2 = {"a", "b", "c", "d", "e", "f"};
+    const StrVec y = {"a", "b", "c", "d", "e", "f"};
 
     const auto ct1 = Join::enc(pp, msk, x1, 0);
     const auto ct2 = Join::enc(pp, msk, x2, 6);
-    const auto sk1 = Join::keygen(pp, msk, y1);
-    const auto sk2 = Join::keygen(pp, msk, y2);
+    const auto sk = Join::keygen(pp, msk, y);
 
-    EXPECT_TRUE(Group::cmp_gt(Join::dec(ct1, sk1), Join::dec(ct2, sk2)));
+    EXPECT_TRUE(Group::cmp_gt(Join::dec(pp, ct1, sk), Join::dec(pp, ct2, sk)));
 }
 
 TEST(JoinTests, JoinDegOneFalseJoin){
@@ -49,7 +47,7 @@ TEST(JoinTests, JoinDegOneFalseJoin){
     const auto sk1 = Join::keygen(pp, msk, y1);
     const auto sk2 = Join::keygen(pp, msk, y2);
 
-    EXPECT_FALSE(Group::cmp_gt(Join::dec(ct1, sk1), Join::dec(ct2, sk2)));
+    EXPECT_FALSE(Group::cmp_gt(Join::dec(pp, ct1, sk1), Join::dec(pp, ct2, sk2)));
 }
 
 TEST(JoinTests, JoinDegOneFalseFilter){
@@ -66,7 +64,7 @@ TEST(JoinTests, JoinDegOneFalseFilter){
     const auto sk1 = Join::keygen(pp, msk, y1);
     const auto sk2 = Join::keygen(pp, msk, y2);
 
-    EXPECT_FALSE(Group::cmp_gt(Join::dec(ct1, sk1), Join::dec(ct2, sk2)));
+    EXPECT_FALSE(Group::cmp_gt(Join::dec(pp, ct1, sk1), Join::dec(pp, ct2, sk2)));
 }
 
 TEST(JoinTests, JoinDegMulTrue){
@@ -87,10 +85,10 @@ TEST(JoinTests, JoinDegMulTrue){
             {0, 1, 2, 3, 9}
         };
     const IntMat y2 = {
-            {0},
-            {0, 1, 2, 3, 4},
-            {0, 1, 2, 3, 4},
-            {0, 1, 2, 3, 5},
+            {6},
+            {3, 4},
+            {2, 3, 4},
+            {1, 2, 3, 5},
             {0, 1, 2, 3, 6},
             {0, 1, 2, 3, 7},
             {0, 1, 2, 3, 8},
@@ -103,7 +101,7 @@ TEST(JoinTests, JoinDegMulTrue){
     const auto sk1 = Join::keygen(pp, msk, y1);
     const auto sk2 = Join::keygen(pp, msk, y2);
 
-    EXPECT_TRUE(Group::cmp_gt(Join::dec(ct1, sk1), Join::dec(ct2, sk2)));
+    EXPECT_TRUE(Group::cmp_gt(Join::dec(pp, ct1, sk1), Join::dec(pp, ct2, sk2)));
 }
 
 TEST(JoinTests, JoinDegMulFalseJoin){
@@ -124,10 +122,10 @@ TEST(JoinTests, JoinDegMulFalseJoin){
             {0, 1, 2, 3, 9}
         };
     const IntMat y2 = {
-            {0, 1, 2, 3, 6},
-            {0, 1, 2, 3, 4},
-            {0, 1, 2, 3, 4},
-            {0, 1, 2, 3, 5},
+            {6},
+            {3, 4},
+            {2, 3, 4},
+            {1, 2, 3, 5},
             {0, 1, 2, 3, 6},
             {0, 1, 2, 3, 7},
             {0, 1, 2, 3, 8},
@@ -140,7 +138,7 @@ TEST(JoinTests, JoinDegMulFalseJoin){
     const auto sk1 = Join::keygen(pp, msk, y1);
     const auto sk2 = Join::keygen(pp, msk, y2);
 
-    EXPECT_FALSE(Group::cmp_gt(Join::dec(ct1, sk1), Join::dec(ct2, sk2)));
+    EXPECT_FALSE(Group::cmp_gt(Join::dec(pp, ct1, sk1), Join::dec(pp, ct2, sk2)));
 }
 
 TEST(JoinTests, JoinDegMulFalseFilter){
@@ -161,10 +159,10 @@ TEST(JoinTests, JoinDegMulFalseFilter){
             {0, 1, 2, 3, 9}
         };
     const IntMat y2 = {
-            {0, 1, 2, 3, 6},
-            {0, 1, 2, 3, 4},
-            {0, 1, 2, 3, 4},
-            {0, 1, 2, 3, 5},
+            {6},
+            {3, 4},
+            {2, 3, 4},
+            {1, 2, 3, 5},
             {0, 1, 2, 3, 6},
             {0, 1, 2, 3, 7},
             {0, 1, 2, 3, 8},
@@ -177,7 +175,7 @@ TEST(JoinTests, JoinDegMulFalseFilter){
     const auto sk1 = Join::keygen(pp, msk, y1);
     const auto sk2 = Join::keygen(pp, msk, y2);
 
-    EXPECT_FALSE(Group::cmp_gt(Join::dec(ct1, sk1), Join::dec(ct2, sk2)));
+    EXPECT_FALSE(Group::cmp_gt(Join::dec(pp, ct1, sk1), Join::dec(pp, ct2, sk2)));
 }
 
 TEST(JoinTests, JoinDegOneSelTrue){
@@ -223,8 +221,8 @@ TEST(JoinTests, JoinDegMulSelTrue){
     const IntVec sel = {2, 4, 6};
     const IntVec x1 = {1, 100, 2, 3, 4, 5, 6, 7, 8, 9};
     const IntVec x2 = {6, 3, 100, 4, 5, 6, 7, 8, 9, 10};
-    const IntMat y1 = {{0, 1, 2, 3, 4}, {0}, {0, 1, 2, 3, 7}};
-    const IntMat y2 = {{0}, {0, 1, 2, 3, 6}, {0, 1, 2, 3, 8}};
+    const IntMat y1 = {{1, 2, 3}, {3, 4, 5, 6}, {5, 6, 7, 8, 9}};
+    const IntMat y2 = {{2, 3, 4}, {6}, {8}};
 
     const auto ct1 = Join::enc(pp, msk, x1, 1);
     const auto ct2 = Join::enc(pp, msk, x2, 2);
@@ -241,8 +239,8 @@ TEST(JoinTests, JoinDegMulSelFalse){
     const IntVec sel = {2, 4, 6};
     const IntVec x1 = {1, 100, 2, 3, 4, 5, 6, 7, 8, 9};
     const IntVec x2 = {6, 3, 100, 4, 5, 6, 7, 8, 9, 10};
-    const IntMat y1 = {{1}, {0, 1, 2, 3, 5}, {0, 1, 2, 3, 7}};
-    const IntMat y2 = {{0}, {0, 1, 2, 3, 6}, {0, 1, 2, 3, 8}};
+    const IntMat y1 = {{1, 2, 3}, {3, 4, 5, 6}, {5, 6, 7, 8, 9}};
+    const IntMat y2 = {{2, 3, 4}, {6}, {9}};
 
     const auto ct1 = Join::enc(pp, msk, x1, 1);
     const auto ct2 = Join::enc(pp, msk, x2, 2);

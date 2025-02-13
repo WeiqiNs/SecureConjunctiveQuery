@@ -13,16 +13,15 @@ struct JoinPP{
 
 struct JoinMsk{
     Fp k;
-    Fp l;
     Fp d;
     Fp di;
     FpVec r;
     FpVec b;
     FpVec bi;
-    Hash hash;
+    std::unique_ptr<HMAC> hmac;
 };
 
-class Join {
+class Join{
 public:
     /**
      * Generate the required public parameters.
@@ -36,9 +35,10 @@ public:
     /**
      * Generate master secret key.
      * @param pp the public parameters.
+     * @param key the HMAC key to use.
      * @return the generated master secret key.
      */
-    static JoinMsk msk_gen(const JoinPP& pp);
+    static JoinMsk msk_gen(const JoinPP& pp, const CharVec& key = {});
 
     /**
      * Perform the Equal-Join encryption.
@@ -51,39 +51,22 @@ public:
     static G1Vec enc(const JoinPP& pp, const JoinMsk& msk, const Vec& x, int join_index);
 
     /**
-     * Perform the Equal-Join key generation.
-     * @param pp the public parameters.
-     * @param msk the master secret key.
-     * @param y a vector or matrix of strings or integers. Use matrix only when you are selecting set of inputs.
-     * @return 
-     */
-    static G2Vec keygen(const JoinPP& pp, const JoinMsk& msk, const VecOrMat& y);
-
-    /**
      * Perform the Equal-Join key generation with selecting columns.
      * @param pp the public parameters.
      * @param msk the master secret key.
      * @param y a vector or matrix of strings or integers. Use matrix only when you are selecting set of inputs.
-     * @param sel a vector of integers indicating which columns to select.
+     * @param sel a vector of integers indicating which columns to select, by default is empty.
      * @return 
      */
-    static G2Vec keygen(const JoinPP& pp, const JoinMsk& msk, const VecOrMat& y, const IntVec& sel);
-
-    /**
-     * Perform the Equal-Join decryption.
-     * @param ct the ciphertext.
-     * @param sk the function key.
-     * @return a Gt element of the pairing, needs to be compared with another to determine whether join can happen.
-     */
-    static Gt dec(const G1Vec& ct, const G2Vec& sk);
+    static G2Vec keygen(const JoinPP& pp, const JoinMsk& msk, const VecOrMat& y, const IntVec& sel = {});
 
     /**
      * Perform the Equal-Join FE decryption with selecting columns.
      * @param pp the public parameters.
      * @param ct the ciphertext.
      * @param sk the function key.
-     * @param sel a vector of integers indicating which columns to select.
+     * @param sel a vector of integers indicating which columns to select, by default is empty.
      * @return a Gt element of the pairing, needs to be compared with another to determine whether join can happen.
      */
-    static Gt dec(const JoinPP& pp, const G1Vec& ct, const G2Vec& sk, const IntVec& sel);
+    static Gt dec(const JoinPP& pp, const G1Vec& ct, const G2Vec& sk, const IntVec& sel = {});
 };
