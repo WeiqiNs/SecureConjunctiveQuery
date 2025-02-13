@@ -72,7 +72,7 @@ public:
      * @param data a vector of unsigned characters.
      * @return a vector of unsigned characters.
      */
-    [[nodiscard]] CharVec digest(const CharVec& data);
+    [[nodiscard]] CharVec digest(const CharVec& data) const;
 
     /**
      * Digest a string or an integer vector to a vector of field element.
@@ -80,7 +80,7 @@ public:
      * @param sel an integer vector to indicate the index of input vector.
      * @return a vector of field elements.
      */
-    [[nodiscard]] FpVec digest_vec_to_fp(const Vec& x, const IntVec& sel = {});
+    [[nodiscard]] FpVec digest_vec_to_fp(const Vec& x, const IntVec& sel = {}) const;
 
     /**
      * Digest a string or an integer matrix to a vector of field element.
@@ -88,7 +88,7 @@ public:
      * @param sel an integer vector to indicate the index of input matrix.
      * @return a matrix of field elements.
      */
-    [[nodiscard]] FpMat digest_mat_to_fp(const Mat& x, const IntVec& sel = {});
+    [[nodiscard]] FpMat digest_mat_to_fp(const Mat& x, const IntVec& sel = {}) const;
 
     /**
      * Digest a string or an integer vector to a vector of field element (in the generated group in pp).
@@ -97,7 +97,7 @@ public:
      * @param sel an integer vector to indicate the index of input vector.
      * @return a vector of field elements.
      */
-    [[nodiscard]] FpVec digest_vec_to_fp_mod(const BP& pairing_group, const Vec& x, const IntVec& sel = {});
+    [[nodiscard]] FpVec digest_vec_to_fp_mod(const BP& pairing_group, const Vec& x, const IntVec& sel = {}) const;
 
     /**
      * Digest a string or an integer matrix to a vector of field element (in the generated group in pp).
@@ -106,7 +106,7 @@ public:
      * @param sel an integer vector to indicate the index of input matrix.
      * @return a vector of field elements.
      */
-    [[nodiscard]] FpMat digest_mat_to_fp_mod(const BP& pairing_group, const Mat& x, const IntVec& sel = {});
+    [[nodiscard]] FpMat digest_mat_to_fp_mod(const BP& pairing_group, const Mat& x, const IntVec& sel = {}) const;
 
 private:
     /// Declare variables used for HMAC.

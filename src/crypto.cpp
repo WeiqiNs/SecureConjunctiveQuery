@@ -118,10 +118,14 @@ CharVec HMAC::get_key(){ return key_; }
 
 void HMAC::set_key(const CharVec& key){ key_ = key; }
 
-CharVec HMAC::digest(const CharVec& data){
+CharVec HMAC::digest(const CharVec& data) const{
     // Set the parameters.
     const OSSL_PARAM params[] = {
-            OSSL_PARAM_construct_utf8_string(OSSL_MAC_PARAM_DIGEST, digest_.data(), digest_.size()),
+            OSSL_PARAM_construct_utf8_string(
+                OSSL_MAC_PARAM_DIGEST,
+                const_cast<char*>(digest_.data()),
+                digest_.size()
+            ),
             OSSL_PARAM_construct_end()
         };
 
@@ -137,7 +141,7 @@ CharVec HMAC::digest(const CharVec& data){
     return out;
 }
 
-FpVec HMAC::digest_vec_to_fp(const Vec& x, const IntVec& sel){
+FpVec HMAC::digest_vec_to_fp(const Vec& x, const IntVec& sel) const{
     // Create holder for the hash result.
     FpVec r;
 
@@ -190,7 +194,7 @@ FpVec HMAC::digest_vec_to_fp(const Vec& x, const IntVec& sel){
     return r;
 }
 
-FpMat HMAC::digest_mat_to_fp(const Mat& x, const IntVec& sel){
+FpMat HMAC::digest_mat_to_fp(const Mat& x, const IntVec& sel) const{
     // Create holder for the hash result.
     FpMat r;
 
@@ -274,14 +278,14 @@ FpMat HMAC::digest_mat_to_fp(const Mat& x, const IntVec& sel){
     return r;
 }
 
-FpVec HMAC::digest_vec_to_fp_mod(const BP& pairing_group, const Vec& x, const IntVec& sel){
+FpVec HMAC::digest_vec_to_fp_mod(const BP& pairing_group, const Vec& x, const IntVec& sel) const{
     // Get the hash result and perform modulo.
     FpVec r = digest_vec_to_fp(x, sel);
     pairing_group.Zp->mod(r);
     return r;
 }
 
-FpMat HMAC::digest_mat_to_fp_mod(const BP& pairing_group, const Mat& x, const IntVec& sel){
+FpMat HMAC::digest_mat_to_fp_mod(const BP& pairing_group, const Mat& x, const IntVec& sel) const{
     // Get the hash result and perform modulo.
     FpMat r = digest_mat_to_fp(x, sel);
     pairing_group.Zp->mod(r);
