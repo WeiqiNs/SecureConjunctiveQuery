@@ -107,9 +107,6 @@ G2Vec Filter::keygen(const FilterPP& pp, const FilterMsk& msk, const VecOrMat& y
     // Split the coefficient to two parts.
     coeff = Helper::split_poly(*pp.pairing_group, coeff);
 
-    // Get the selected index.
-    const auto sel_index = Helper::get_sel_index(pp.d, pp.l, sel);
-
     // Select r and bi.
     FpVec sel_r, sel_bi;
 
@@ -120,6 +117,9 @@ G2Vec Filter::keygen(const FilterPP& pp, const FilterMsk& msk, const VecOrMat& y
     }
     // When sel is provided, filter out the keys.
     else{
+        // Get the selected index.
+        const auto sel_index = Helper::get_sel_index(pp.d, pp.l, sel);
+
         for (const auto i : sel_index){
             sel_r.push_back(msk.r[i]);
             sel_bi.push_back(msk.bi[i]);

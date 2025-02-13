@@ -34,7 +34,7 @@ public:
     /**
      * Generate master secret key.
      * @param pp the public parameters.
-     * @param key
+     * @param key the HMAC key to use.
      * @return the generated master secret key.
      */
     static FilterMsk msk_gen(const FilterPP& pp, const CharVec& key = {});
