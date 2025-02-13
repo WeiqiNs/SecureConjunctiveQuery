@@ -3,7 +3,6 @@
 #include <openssl/evp.h>
 #include <openssl/rand.h>
 #include <openssl/core_names.h>
-
 #include "helper.hpp"
 
 class AES{

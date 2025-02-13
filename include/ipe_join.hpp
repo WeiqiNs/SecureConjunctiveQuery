@@ -2,7 +2,6 @@
 
 #include "crypto.hpp"
 
-
 struct IpeJoinPP{
     // Suppose by default the degree is 1.
     int d = 1;
