@@ -155,17 +155,15 @@ FpVec HMAC::digest_vec_to_fp(const Vec& x, const IntVec& sel) const{
             // If the selective is emtpy, we hash x_i + i.
             if (sel.empty())
                 for (int i = 0; i < vec_x.size(); ++i){
-                    auto more_temp = Helper::int_to_char_vec(vec_x[i] + i);
-                    auto temp = digest(Helper::int_to_char_vec(vec_x[i] + i));
                     r.push_back(Helper::char_vec_to_fp(
-                        digest(Helper::int_to_char_vec(vec_x[i] + i))
+                        digest(Helper::str_to_char_vec(std::to_string(vec_x[i]) + std::to_string(i)))
                     ));
                 }
             else
                 // Otherwise we hash x_i + sel[i].
                 for (int i = 0; i < vec_x.size(); ++i)
                     r.push_back(Helper::char_vec_to_fp(
-                        digest(Helper::int_to_char_vec(vec_x[i] + sel[i]))
+                        digest(Helper::str_to_char_vec(std::to_string(vec_x[i]) + std::to_string(sel[i])))
                     ));
         }
 
@@ -214,7 +212,7 @@ FpMat HMAC::digest_mat_to_fp(const Mat& x, const IntVec& sel) const{
                     // This row is hashed with row + i.
                     for (const auto& each_x : mat_x[i])
                         row_hash.push_back(Helper::char_vec_to_fp(
-                            digest(Helper::int_to_char_vec(each_x + i))
+                            digest(Helper::str_to_char_vec(std::to_string(each_x) + std::to_string(i)))
                         ));
 
                     // Add the hashed value back to r.
@@ -229,7 +227,7 @@ FpMat HMAC::digest_mat_to_fp(const Mat& x, const IntVec& sel) const{
                     // This row is hashed with row + sel[i].
                     for (const auto& each_x : mat_x[i])
                         row_hash.push_back(Helper::char_vec_to_fp(
-                            digest(Helper::int_to_char_vec(each_x + sel[i]))
+                            digest(Helper::str_to_char_vec(std::to_string(each_x) + std::to_string(sel[i])))
                         ));
 
                     // Add the hashed value back to r.

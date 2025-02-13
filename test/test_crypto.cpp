@@ -59,11 +59,11 @@ TEST(CryptoTests, HashIntVec){
     const auto hx = hmac.digest_vec_to_fp(x);
 
     // Perform testing.
-    EXPECT_TRUE(Field::cmp(hx[0], Helper::char_vec_to_fp(hmac.digest(Helper::int_to_char_vec(0)))));
-    EXPECT_TRUE(Field::cmp(hx[5], Helper::char_vec_to_fp(hmac.digest(Helper::int_to_char_vec(10)))));
+    EXPECT_TRUE(Field::cmp(hx[0], Helper::char_vec_to_fp(hmac.digest(Helper::str_to_char_vec("00")))));
+    EXPECT_TRUE(Field::cmp(hx[5], Helper::char_vec_to_fp(hmac.digest(Helper::str_to_char_vec("55")))));
 
     // Random number test.
-    EXPECT_FALSE(Field::cmp(hx[1], Helper::char_vec_to_fp(hmac.digest(Helper::int_to_char_vec(123)))));
+    EXPECT_FALSE(Field::cmp(hx[1], Helper::char_vec_to_fp(hmac.digest(Helper::str_to_char_vec("66")))));
 }
 
 TEST(CryptoTests, HashIntVecSel){
@@ -76,8 +76,8 @@ TEST(CryptoTests, HashIntVecSel){
     const auto hx = hmac.digest_vec_to_fp(x, sel);
 
     // Perform testing.
-    EXPECT_TRUE(Field::cmp(hx[0], Helper::char_vec_to_fp(hmac.digest(Helper::int_to_char_vec(3)))));
-    EXPECT_TRUE(Field::cmp(hx[4], Helper::char_vec_to_fp(hmac.digest(Helper::int_to_char_vec(15)))));
+    EXPECT_TRUE(Field::cmp(hx[0], Helper::char_vec_to_fp(hmac.digest(Helper::str_to_char_vec("12")))));
+    EXPECT_TRUE(Field::cmp(hx[4], Helper::char_vec_to_fp(hmac.digest(Helper::str_to_char_vec("510")))));
 }
 
 TEST(CryptoTests, HashStrVec){
@@ -105,9 +105,9 @@ TEST(CryptoTests, HashIntMat){
     const auto hx = hmac.digest_mat_to_fp(x);
 
     // Perform testing.
-    EXPECT_TRUE(Field::cmp(hx[0][5], Helper::char_vec_to_fp(hmac.digest(Helper::int_to_char_vec(5)))));
-    EXPECT_TRUE(Field::cmp(hx[1][0], Helper::char_vec_to_fp(hmac.digest(Helper::int_to_char_vec(1)))));
-    EXPECT_TRUE(Field::cmp(hx[1][1], Helper::char_vec_to_fp(hmac.digest(Helper::int_to_char_vec(2)))));
-    EXPECT_TRUE(Field::cmp(hx[2][4], Helper::char_vec_to_fp(hmac.digest(Helper::int_to_char_vec(6)))));
-    EXPECT_TRUE(Field::cmp(hx[2][5], Helper::char_vec_to_fp(hmac.digest(Helper::int_to_char_vec(7)))));
+    EXPECT_TRUE(Field::cmp(hx[0][5], Helper::char_vec_to_fp(hmac.digest(Helper::str_to_char_vec("50")))));
+    EXPECT_TRUE(Field::cmp(hx[1][0], Helper::char_vec_to_fp(hmac.digest(Helper::str_to_char_vec("01")))));
+    EXPECT_TRUE(Field::cmp(hx[1][1], Helper::char_vec_to_fp(hmac.digest(Helper::str_to_char_vec("11")))));
+    EXPECT_TRUE(Field::cmp(hx[2][4], Helper::char_vec_to_fp(hmac.digest(Helper::str_to_char_vec("42")))));
+    EXPECT_TRUE(Field::cmp(hx[2][5], Helper::char_vec_to_fp(hmac.digest(Helper::str_to_char_vec("52")))));
 }
