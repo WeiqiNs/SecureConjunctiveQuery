@@ -27,7 +27,7 @@ TEST(CryptoTests, AES256){
 
 TEST(CryptoTests, HMACEq){
     // Create a HMAC object and a testing string.
-    auto hmac = HMAC();
+    const auto hmac = HMAC();
     const CharVec data_vec = Helper::str_to_char_vec("Something to hash.");
 
     // Two digests should be the same.
@@ -42,8 +42,8 @@ TEST(CryptoTests, HMACNeq){
     const CharVec key_2(64, '1');
 
     // Get two HMAC, they will be using different keys.
-    auto hmac_1 = HMAC(key_1);
-    auto hmac_2 = HMAC(key_2);
+    const auto hmac_1 = HMAC(key_1);
+    const auto hmac_2 = HMAC(key_2);
     const CharVec data_vec = Helper::str_to_char_vec("Something to hash.");
 
     // The digest should be not equal as keys are not equal.
@@ -52,7 +52,7 @@ TEST(CryptoTests, HMACNeq){
 
 TEST(CryptoTests, HashIntVec){
     // Create a HMAC object and a testing vector.
-    auto hmac = HMAC();
+    const auto hmac = HMAC();
     const IntVec x{0, 1, 2, 3, 4, 5};
 
     // Hash the vector without sel.
@@ -68,7 +68,7 @@ TEST(CryptoTests, HashIntVec){
 
 TEST(CryptoTests, HashIntVecSel){
     // Create a HMAC object and a testing vector.
-    auto hmac = HMAC();
+    const auto hmac = HMAC();
     const IntVec x{1, 2, 3, 4, 5};
     const IntVec sel{2, 4, 6, 8, 10};
 
@@ -82,7 +82,7 @@ TEST(CryptoTests, HashIntVecSel){
 
 TEST(CryptoTests, HashStrVec){
     // Create a HMAC object and a testing vector.
-    auto hmac = HMAC();
+    const auto hmac = HMAC();
     const StrVec x{"0", "1", "2", "3", "4", "5"};
 
     // Hash the vector without sel.
@@ -98,7 +98,7 @@ TEST(CryptoTests, HashStrVec){
 
 TEST(CryptoTests, HashIntMat){
     // Create a HMAC object and a testing vector.
-    auto hmac = HMAC();
+    const auto hmac = HMAC();
     const IntMat x{{0, 1, 2, 3, 4, 5}, {0, 1, 2, 3, 4, 5}, {0, 1, 2, 3, 4, 5}};
 
     // Hash the vector without sel.
