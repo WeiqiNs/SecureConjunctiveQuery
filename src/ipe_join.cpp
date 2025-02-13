@@ -67,7 +67,7 @@ G1Vec IpeJoin::enc(const IpeJoinPP& pp, const IpeJoinMsk& msk, const Vec& x, con
                 }
             }
         }
-        else throw std::invalid_argument("The degree must be 1 when inputting a y vector.");
+        else throw std::invalid_argument("The input type is not supported.");
     }, x);
 
     // Sample the random point alpha.
@@ -109,7 +109,7 @@ G2Vec IpeJoin::keygen(const IpeJoinPP& pp, const IpeJoinMsk& msk, const Mat& y){
                 y_mat.push_back(temp_vec);
             }
         }
-        else throw std::invalid_argument("The degree must be 1 when inputting a y vector.");
+        else throw std::invalid_argument("The input type is not supported.");
     }, y);
 
     // We compute the polynomial of y.

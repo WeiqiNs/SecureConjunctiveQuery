@@ -44,7 +44,7 @@ G1Vec IpeFilter::enc(const IpeFilterPP& pp, const IpeFilterMsk& msk, const Vec& 
                 x_vec.push_back(temp);
             }
         }
-        else throw std::invalid_argument("The degree must be 1 when inputting a y vector.");
+        else throw std::invalid_argument("The input type is not supported.");
     }, x);
 
     // Sample the random point alpha.
@@ -83,7 +83,7 @@ G2Vec IpeFilter::keygen(const IpeFilterPP& pp, const IpeFilterMsk& msk, const Ma
                 y_mat.push_back(temp_vec);
             }
         }
-        else throw std::invalid_argument("The degree must be 1 when inputting a y vector.");
+        else throw std::invalid_argument("The input type is not supported.");
     }, y);
 
     // We compute the polynomial of y.

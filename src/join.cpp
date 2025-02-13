@@ -57,7 +57,7 @@ G1Vec Join::enc(const JoinPP& pp, const JoinMsk& msk, const Vec& x, const int jo
             pp.pairing_group->Zp->mod(join_on);
             input_x.erase(input_x.begin() + join_index);
         }
-        else throw std::invalid_argument("The degree must be 1 when inputting a y vector.");
+        else throw std::invalid_argument("The input type is not supported.");
     }, x_copy);
 
     // Generate hash of the input x vector.
