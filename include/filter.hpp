@@ -17,7 +17,7 @@ struct FilterMsk{
     FpVec r;
     FpVec b;
     FpVec bi;
-    Hash hash;
+    std::unique_ptr<HMAC> hmac;
 };
 
 class Filter{
@@ -34,9 +34,10 @@ public:
     /**
      * Generate master secret key.
      * @param pp the public parameters.
+     * @param key
      * @return the generated master secret key.
      */
-    static FilterMsk msk_gen(const FilterPP& pp);
+    static FilterMsk msk_gen(const FilterPP& pp, const CharVec& key = {});
 
     /**
      * Perform the Filter FE encryption.
@@ -48,39 +49,22 @@ public:
     static G1Vec enc(const FilterPP& pp, const FilterMsk& msk, const Vec& x);
 
     /**
-     * Perform the Filter FE key generation.
-     * @param pp the public parameters.
-     * @param msk the master secret key.
-     * @param y a vector or matrix of strings or integers. Use matrix only when you are selecting set of inputs.
-     * @return the function key.
-     */
-    static G2Vec keygen(const FilterPP& pp, const FilterMsk& msk, const VecOrMat& y);
-
-    /**
      * Perform the Filter FE key generation with select selecting columns.
      * @param pp the public parameters.
      * @param msk the master secret key.
      * @param y a vector or matrix of strings or integers. Use matrix only when you are selecting set of inputs.
-     * @param sel a vector of integers indicating which columns to select.
+     * @param sel a vector of integers indicating which columns to select, by default is empty.
      * @return the function key.
      */
-    static G2Vec keygen(const FilterPP& pp, const FilterMsk& msk, const VecOrMat& y, const IntVec& sel);
-
-    /**
-     * Perform the Filter FE decryption.
-     * @param ct the ciphertext.
-     * @param sk the function key.
-     * @return a boolean indicating the result of Filter.
-     */
-    static bool dec(const G1Vec& ct, const G2Vec& sk);
+    static G2Vec keygen(const FilterPP& pp, const FilterMsk& msk, const VecOrMat& y, const IntVec& sel = {});
 
     /**
      * Perform the Filter FE decryption with selecting columns.
      * @param pp the public parameters.
      * @param ct the ciphertext.
      * @param sk the function key.
-     * @param sel a vector of integers indicating which columns to select.
+     * @param sel a vector of integers indicating which columns to select, by default is empty.
      * @return a boolean indicating the result of Filter.
      */
-    static bool dec(const FilterPP& pp, const G1Vec& ct, const G2Vec& sk, const IntVec& sel);
+    static bool dec(const FilterPP& pp, const G1Vec& ct, const G2Vec& sk, const IntVec& sel = {});
 };

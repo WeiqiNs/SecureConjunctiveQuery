@@ -11,7 +11,7 @@ TEST(FilterTests, DegOneIntTrue){
     const auto ct = Filter::enc(pp, msk, x);
     const auto sk = Filter::keygen(pp, msk, y);
 
-    EXPECT_TRUE(Filter::dec(ct, sk));
+    EXPECT_TRUE(Filter::dec(pp, ct, sk));
     BP::close();
 }
 
@@ -25,7 +25,7 @@ TEST(FilterTests, DegOneIntFalse){
     const auto ct = Filter::enc(pp, msk, x);
     const auto sk = Filter::keygen(pp, msk, y);
 
-    EXPECT_FALSE(Filter::dec(ct, sk));
+    EXPECT_FALSE(Filter::dec(pp, ct, sk));
     BP::close();
 }
 
@@ -39,7 +39,7 @@ TEST(FilterTests, DegOneStrTrue){
     const auto ct = Filter::enc(pp, msk, x);
     const auto sk = Filter::keygen(pp, msk, y);
 
-    EXPECT_TRUE(Filter::dec(ct, sk));
+    EXPECT_TRUE(Filter::dec(pp, ct, sk));
     BP::close();
 }
 
@@ -53,7 +53,7 @@ TEST(FilterTests, DegOneStrFalse){
     const auto ct = Filter::enc(pp, msk, x);
     const auto sk = Filter::keygen(pp, msk, y);
 
-    EXPECT_FALSE(Filter::dec(ct, sk));
+    EXPECT_FALSE(Filter::dec(pp, ct, sk));
     BP::close();
 }
 
@@ -78,7 +78,7 @@ TEST(FilterTests, DegMulIntTrue){
     const auto ct = Filter::enc(pp, msk, x);
     const auto sk = Filter::keygen(pp, msk, y);
 
-    EXPECT_TRUE(Filter::dec(ct, sk));
+    EXPECT_TRUE(Filter::dec(pp, ct, sk));
     BP::close();
 }
 
@@ -103,7 +103,7 @@ TEST(FilterTests, DegMulIntFalse){
     const auto ct = Filter::enc(pp, msk, x);
     const auto sk = Filter::keygen(pp, msk, y);
 
-    EXPECT_FALSE(Filter::dec(ct, sk));
+    EXPECT_FALSE(Filter::dec(pp, ct, sk));
     BP::close();
 }
 
@@ -129,7 +129,7 @@ TEST(FilterTests, DegMulStrTrue){
     const auto ct = Filter::enc(pp, msk, x);
     const auto sk = Filter::keygen(pp, msk, y);
 
-    EXPECT_TRUE(Filter::dec(ct, sk));
+    EXPECT_TRUE(Filter::dec(pp, ct, sk));
     BP::close();
 }
 
@@ -155,7 +155,7 @@ TEST(FilterTests, DegMulStrFalse){
     const auto ct = Filter::enc(pp, msk, x);
     const auto sk = Filter::keygen(pp, msk, y);
 
-    EXPECT_FALSE(Filter::dec(ct, sk));
+    EXPECT_FALSE(Filter::dec(pp, ct, sk));
     BP::close();
 }
 
