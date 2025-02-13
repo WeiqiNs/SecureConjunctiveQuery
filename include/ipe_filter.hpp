@@ -14,7 +14,6 @@ struct IpeFilterPP{
 struct IpeFilterMsk{
     FpMat b;
     FpMat bi;
-    Hash hash;
 };
 
 class IpeFilter{
