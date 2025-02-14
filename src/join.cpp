@@ -165,7 +165,7 @@ G2Vec Join::keygen(const JoinPP& pp, const JoinMsk& msk, const VecOrMat& y, cons
     auto bbic = pp.pairing_group->Zp->vec_mul(bc, sel_bi);
 
     // Compute the last point to join to the vector.
-    bbic.push_back(Fp{1});
+    bbic.emplace_back(1);
     auto temp = pp.pairing_group->Zp->vec_ip(coeff, sel_r);
     temp = pp.pairing_group->Zp->mul(temp, beta);
     temp = pp.pairing_group->Zp->add(temp, msk.k);
@@ -186,7 +186,7 @@ Gt Join::dec(const JoinPP& pp, const G1Vec& ct, const G2Vec& sk, const IntVec& s
         sel_ct.push_back(ct[ct.size() - 2]);
 
         // Sum the selected ct and add the last point.
-        const G1Vec pair_ct{pp.pairing_group->Gp->g1_add_vec(sel_ct), ct.back()};
+        const G1Vec pair_ct{Group::g1_add_vec(sel_ct), ct.back()};
 
         /// Compute the pairing and output filter result.
         return Group::pair(pair_ct, sk);

@@ -152,7 +152,7 @@ bool Filter::dec(const FilterPP& pp, const G1Vec& ct, const G2Vec& sk, const Int
         else for (const auto i : sel) sel_ct.push_back(ct[i]);
 
         // Sum the selected ct and add the last point.
-        const G1Vec pair_ct{pp.pairing_group->Gp->g1_add_vec(sel_ct), ct.back()};
+        const G1Vec pair_ct{Group::g1_add_vec(sel_ct), ct.back()};
 
         // Compute the pairing and output filter result.
         return Group::check_gt_unity(Group::pair(pair_ct, sk));

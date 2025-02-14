@@ -14,7 +14,7 @@ AES::AES(const int& key_length){
 
 AES::AES(const CharVec& key){
     // Get the cipher object.
-    cipher_ = get_cipher(key.size());
+    cipher_ = get_cipher(static_cast<int>(key.size()));
     // Set the key.
     key_ = key;
     // Get the cipher ctx.
@@ -40,7 +40,7 @@ CharVec AES::encrypt(const CharVec& plaintext) const{
 
     // Init the encryption scheme and update with ciphertext.
     EVP_EncryptInit(ctx_, cipher_, key_.data(), iv.data());
-    EVP_EncryptUpdate(ctx_, ciphertext.data(), &len, plaintext.data(), plaintext.size());
+    EVP_EncryptUpdate(ctx_, ciphertext.data(), &len, plaintext.data(), static_cast<int>(plaintext.size()));
 
     // Record the ciphertext length and finalize.
     int ciphertext_len = len;
@@ -65,7 +65,9 @@ CharVec AES::decrypt(const CharVec& ciphertext) const{
 
     // Init the decryption scheme and update with ciphertext.
     EVP_DecryptInit(ctx_, cipher_, key_.data(), iv.data());
-    EVP_DecryptUpdate(ctx_, plaintext.data(), &len, actual_ciphertext.data(), actual_ciphertext.size());
+    EVP_DecryptUpdate(
+        ctx_, plaintext.data(), &len, actual_ciphertext.data(), static_cast<int>(actual_ciphertext.size())
+    );
 
     // Record the plaintext length and finalize.
     int plaintext_len = len;
