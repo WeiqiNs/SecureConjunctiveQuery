@@ -1,8 +1,8 @@
 #pragma once
 
-#include <openssl/evp.h>
-#include <openssl/rand.h>
 #include <openssl/core_names.h>
+#include <openssl/rand.h>
+#include <openssl/evp.h>
 #include "helper.hpp"
 
 class AES{
@@ -49,8 +49,43 @@ private:
     const EVP_CIPHER* cipher_;
 
     /// Select proper AES object to use base on the key length.
-    [[nodiscard]] static const EVP_CIPHER* get_cipher(int byte_length);
+    [[nodiscard]] static const EVP_CIPHER* get_cipher(size_t byte_length);
 };
+
+
+class PRF{
+public:
+    /**
+     * Initialize the PRF class with a given key.
+     * @param key some char vector, should have required size.
+     */
+    explicit PRF(const CharVec& key = {});
+
+    /// Deconstructor for PRF class.
+    ~PRF();
+
+    /// Get the key used for PRF digestion.
+    CharVec get_key();
+
+    /// Set the key used for PRF digestion.
+    void set_key(const CharVec& key);
+
+    /**
+     * Perform PRF digestion.
+     * @param data a vector of unsigned characters.
+     * @return a vector of unsigned characters.
+     */
+    [[nodiscard]] CharVec digest(const CharVec& data) const;
+
+private:
+    /// Declare variables used for HMAC.
+    CharVec key_;
+    EVP_MAC* mac_;
+    EVP_MAC_CTX* ctx_;
+    /// Define the digest that we will use.
+    std::string cipher_ = "AES-256-CBC";
+};
+
 
 class HMAC{
 public:

@@ -25,6 +25,31 @@ TEST(CryptoTests, AES256){
     EXPECT_EQ(aes.decrypt(ciphertext), plaintext_vec);
 }
 
+TEST(CryptoTests, PRFEq){
+    // Create a HMAC object and a testing string.
+    const auto prf = PRF();
+    const CharVec data_vec = Helper::str_to_char_vec("Something to hash.");
+
+    // Two digests should be the same.
+    EXPECT_EQ(prf.digest(data_vec), prf.digest(data_vec));
+    // Double check digest length.
+    EXPECT_EQ(prf.digest(data_vec).size(), 32);
+}
+
+TEST(CryptoTests, PRFNeq){
+    // Create two keys.
+    const CharVec key_1(32, '0');
+    const CharVec key_2(32, '1');
+
+    // Get two HMAC, they will be using different keys.
+    const auto prf_1 = PRF(key_1);
+    const auto prf_2 = PRF(key_2);
+    const CharVec data_vec = Helper::str_to_char_vec("Something to hash.");
+
+    // The digest should be not equal as keys are not equal.
+    EXPECT_NE(prf_1.digest(data_vec), prf_2.digest(data_vec));
+}
+
 TEST(CryptoTests, HMACEq){
     // Create a HMAC object and a testing string.
     const auto hmac = HMAC();

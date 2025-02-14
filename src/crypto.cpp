@@ -14,7 +14,7 @@ AES::AES(const int& key_length){
 
 AES::AES(const CharVec& key){
     // Get the cipher object.
-    cipher_ = get_cipher(static_cast<int>(key.size()));
+    cipher_ = get_cipher(key.size());
     // Set the key.
     key_ = key;
     // Get the cipher ctx.
@@ -80,7 +80,7 @@ CharVec AES::decrypt(const CharVec& ciphertext) const{
     return plaintext;
 }
 
-const EVP_CIPHER* AES::get_cipher(const int byte_length){
+const EVP_CIPHER* AES::get_cipher(const size_t byte_length){
     switch (byte_length){
     case 16:
         return EVP_aes_128_cbc();
@@ -92,6 +92,61 @@ const EVP_CIPHER* AES::get_cipher(const int byte_length){
         throw std::invalid_argument("Key length must be 128, 192, or 256 bits.");
     }
 }
+
+PRF::PRF(const CharVec& key){
+    // If key is not provided, sample a random key, we use AES-256 and manually set the key size to 32.
+    if (key.empty()){
+        key_.resize(32);
+        RAND_bytes(key_.data(), 32);
+    }
+    else{
+        if (key.size() != 32) throw std::invalid_argument("Key length must be 32 bytes.");
+        key_ = key;
+    }
+
+    // Fetch the desired algorithm to use.
+    mac_ = EVP_MAC_fetch(nullptr, "CMAC", nullptr);
+
+    // Get the ctx object.
+    ctx_ = EVP_MAC_CTX_new(mac_);
+}
+
+PRF::~PRF(){
+    EVP_MAC_CTX_free(ctx_);
+    EVP_MAC_free(mac_);
+}
+
+CharVec PRF::get_key(){
+    return key_;
+}
+
+void PRF::set_key(const CharVec& key){
+    key_ = key;
+}
+
+CharVec PRF::digest(const CharVec& data) const{
+    // Set the parameters.
+    const OSSL_PARAM params[] = {
+            OSSL_PARAM_construct_utf8_string(
+                OSSL_MAC_PARAM_CIPHER,
+                const_cast<char*>(cipher_.data()),
+                cipher_.size()
+            ),
+            OSSL_PARAM_construct_end()
+        };
+
+    // Initialize the CMAC.
+    EVP_MAC_init(ctx_, key_.data(), key_.size(), params);
+    // Update HMAC with input data.
+    EVP_MAC_update(ctx_, data.data(), data.size());
+    // Create the holder for output.
+    CharVec out(32);
+    // Finalize the CMAC.
+    EVP_MAC_final(ctx_, out.data(), nullptr, 32);
+
+    return out;
+}
+
 
 HMAC::HMAC(const CharVec& key){
     // If key is not provided, sample a random key, we use BLAKE2B and manually set the key size to 64.
