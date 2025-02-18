@@ -1,5 +1,7 @@
-add_executable(flesch_time flesch_time.cpp)
-target_link_libraries(flesch_time PUBLIC EEJ)
-
-add_executable(fixsch_time fixsch_time.cpp)
-target_link_libraries(fixsch_time PUBLIC EEJ)
+# -----------------------------------------------------
+add_executable(SetupTime setup_time.cpp)
+target_link_libraries(SetupTime PUBLIC EEJ)
+# -----------------------------------------------------
+add_executable(EncTime encryption_time.cpp)
+target_link_libraries(EncTime PUBLIC EEJ)
+# -----------------------------------------------------
