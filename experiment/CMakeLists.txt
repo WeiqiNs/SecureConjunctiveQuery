@@ -1,7 +1,7 @@
-# -----------------------------------------------------
-add_executable(SetupTime setup_time.cpp)
-target_link_libraries(SetupTime PUBLIC EEJ)
-# -----------------------------------------------------
-add_executable(EncTime encryption_time.cpp)
-target_link_libraries(EncTime PUBLIC EEJ)
-# -----------------------------------------------------
+# Grab all cpp file except the run.
+file(GLOB SOURCES "*.cpp")
+list(REMOVE_ITEM SOURCES "run.cpp")
+
+# Add executable and link the library.
+add_executable(EXP "run.cpp" ${SOURCES})
+target_link_libraries(EXP PUBLIC EEJ)

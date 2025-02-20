@@ -1,13 +1,8 @@
-#include <chrono>
-#include <fstream>
-#include "filter.hpp"
-#include "ipe_filter.hpp"
+#include "exp.hpp"
 
-static int ROUND = 10;
-
-void ipe_setup_time(){
+void ipe_setup_time(const int round){
     // Open the output files.
-    std::ofstream file("ipe_setup_time.txt", std::ios_base::app);
+    std::ofstream file("setup_time.txt", std::ios_base::app);
     file << "IPE Setup Timings" << std::endl << std::endl;
 
     for (int length = 10; length <= 200; length += 10){
@@ -15,7 +10,7 @@ void ipe_setup_time(){
         std::chrono::duration<double, std::milli> time{};
 
         // Perform ROUND number of setup.
-        for (int i = 0; i < ROUND; ++i){
+        for (int i = 0; i < round; ++i){
             // Setup timings.
             auto start = std::chrono::high_resolution_clock::now();
             // Create pp and msk.
@@ -23,18 +18,20 @@ void ipe_setup_time(){
             auto msk = IpeFilter::msk_gen(pp);
             auto end = std::chrono::high_resolution_clock::now();
             time += end - start;
+            // Close the pairing group.
+            BP::close();
         }
 
         // Output the time.
-        file << "(" << length << ", " << time.count() / ROUND << ")" << std::endl;
+        file << "(" << length << ", " << time.count() / round << ")" << std::endl;
     }
     // Create some blank spaces.
     file << std::endl << std::endl;
 }
 
-void our_setup_time(){
+void our_setup_time(const int round){
     // Open the output files.
-    std::ofstream file("our_setup_time.txt", std::ios_base::app);
+    std::ofstream file("setup_time.txt", std::ios_base::app);
     file << "Our Setup Timings" << std::endl << std::endl;
 
     for (int length = 10; length <= 200; length += 10){
@@ -42,7 +39,7 @@ void our_setup_time(){
         std::chrono::duration<double, std::milli> time{};
 
         // Perform ROUND number of setup.
-        for (int i = 0; i < ROUND; ++i){
+        for (int i = 0; i < round; ++i){
             // Setup timings.
             auto start = std::chrono::high_resolution_clock::now();
             // Create pp and msk.
@@ -50,18 +47,20 @@ void our_setup_time(){
             auto msk = Filter::msk_gen(pp);
             auto end = std::chrono::high_resolution_clock::now();
             time += end - start;
+            // Close the pairing group.
+            BP::close();
         }
 
         // Output the time.
-        file << "(" << length << ", " << time.count() / ROUND << ")" << std::endl;
+        file << "(" << length << ", " << time.count() / round << ")" << std::endl;
     }
     // Create some blank spaces.
     file << std::endl << std::endl;
 }
 
-void sse_setup_time(){
+void sse_setup_time(const int round){
     // Open the output files.
-    std::ofstream file("sse_setup_time.txt", std::ios_base::app);
+    std::ofstream file("setup_time.txt", std::ios_base::app);
     file << "SSE Setup Timings" << std::endl << std::endl;
 
     for (int length = 10; length <= 200; length += 10){
@@ -69,7 +68,7 @@ void sse_setup_time(){
         std::chrono::duration<double, std::milli> time{};
 
         // Perform ROUND number of setup.
-        for (int i = 0; i < ROUND; ++i){
+        for (int i = 0; i < round; ++i){
             // Setup timings.
             auto start = std::chrono::high_resolution_clock::now();
             // Create the PRF object.
@@ -79,15 +78,14 @@ void sse_setup_time(){
         }
 
         // Output the time.
-        file << "(" << length << ", " << time.count() / ROUND << ")" << std::endl;
+        file << "(" << length << ", " << time.count() / round << ")" << std::endl;
     }
     // Create some blank spaces.
     file << std::endl << std::endl;
 }
 
-
-int main(){
-    ipe_setup_time();
-    our_setup_time();
-    sse_setup_time();
+void bench_setup_time(const int round){
+    ipe_setup_time(round);
+    our_setup_time(round);
+    sse_setup_time(round);
 }
