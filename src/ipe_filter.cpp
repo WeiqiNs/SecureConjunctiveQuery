@@ -34,7 +34,7 @@ G1Vec IpeFilter::enc(const IpeFilterPP& pp, const IpeFilterMsk& msk, const Vec& 
     // Create the x vector in Fp.
     FpVec x_vec;
 
-    // Compute the hash of value to join and remove the join value from x copy.
+    // Convert the input x vector to Fp.
     std::visit([&pp, &x_vec](auto&& input_x){
         using T = std::decay_t<decltype(input_x)>;
         if constexpr (std::is_same_v<T, IntVec> || std::is_same_v<T, StrVec>){
@@ -66,10 +66,10 @@ G1Vec IpeFilter::enc(const IpeFilterPP& pp, const IpeFilterMsk& msk, const Vec& 
 }
 
 G2Vec IpeFilter::keygen(const IpeFilterPP& pp, const IpeFilterMsk& msk, const Mat& y){
-    // Create the x vector in Fp.
+    // Create the y matrix in Fp.
     FpMat y_mat;
 
-    // Compute the hash of value to join and remove the join value from x copy.
+    // Convert the input y matrix to Fp.
     std::visit([&pp, &y_mat](auto&& input_y){
         using T = std::decay_t<decltype(input_y)>;
         if constexpr (std::is_same_v<T, IntMat> || std::is_same_v<T, StrMat>){
