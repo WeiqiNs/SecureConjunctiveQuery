@@ -35,6 +35,21 @@ Fp Helper::char_vec_to_fp(const CharVec& x){
     return Fp(x);
 }
 
+CharVec Helper::xor_char_vec(const CharMat& x){
+    // Create a copy of x.
+    CharVec r = x[0];
+
+    // Perform XOR.
+    for (size_t i = 1; i < x.size(); ++i){
+        std::transform(
+            r.begin(), r.end(), x[i].begin(), r.begin(),
+            [](const unsigned char a, const unsigned char b){ return a ^ b; }
+        );
+    }
+
+    return r;
+}
+
 IntVec Helper::rand_int_vec(const int& length, const int& min_v, const int& max_v){
     IntVec r(length);
 
@@ -128,7 +143,7 @@ IntVec Helper::get_sel_index(const int degree, const int length, const IntVec& s
     IntVec r;
 
     // Add the selected index.
-    for (const auto i: sel) for (int j = 0; j < degree; ++j) r.emplace_back(i * degree + j);
+    for (const auto i : sel) for (int j = 0; j < degree; ++j) r.emplace_back(i * degree + j);
 
     // Add the last index.
     r.push_back(degree * length);

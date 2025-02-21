@@ -10,6 +10,7 @@ using str = std::string;
 using StrVec = std::vector<str>;
 using StrMat = std::vector<StrVec>;
 using CharVec = std::vector<unsigned char>;
+using CharMat = std::vector<CharVec>;
 using Vec = std::variant<IntVec, StrVec>;
 using Mat = std::variant<IntMat, StrMat>;
 using VecOrMat = std::variant<IntVec, StrVec, IntMat, StrMat>;
@@ -50,6 +51,13 @@ public:
      * @return a field point.
      */
     static Fp char_vec_to_fp(const CharVec& x);
+
+    /**
+     * Perform xor between a vector of character vectors.
+     * @param x a matrix of characters.
+     * @return a vector of characters.
+     */
+    static CharVec xor_char_vec(const CharMat& x);
 
     /**
      * Return a vector of random integers with in a bound.

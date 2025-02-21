@@ -33,6 +33,15 @@ TEST(HelperTests, CharFpConversion){
     EXPECT_TRUE(Field::cmp(x, 4660));
 }
 
+TEST(HelperTests, XorCharVec){
+    const CharMat x_mat = {{0x12, 0x34}};
+    EXPECT_EQ(x_mat[0], Helper::xor_char_vec(x_mat));
+
+    const CharMat y_mat = {{0x12, 0x34}, {0x23, 0x45}, {0x34, 0x56}, {0x00, 0x00}};
+    const CharVec y_xor = {0x05, 0x27};
+    EXPECT_EQ(y_xor, Helper::xor_char_vec(y_mat));
+}
+
 TEST(HelperTests, PowerPoly){
     const IntVec x_vec = {1, 2, 3};
 

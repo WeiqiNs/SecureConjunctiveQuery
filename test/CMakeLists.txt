@@ -32,3 +32,7 @@ add_executable(test_ipe_join test_ipe_join.cpp)
 target_link_libraries(test_ipe_join EEJ ${GTEST_LIB})
 gtest_discover_tests(test_ipe_join)
 # -----------------------------------------------------
+add_executable(test_sse_filter test_sse_filter.cpp)
+target_link_libraries(test_sse_filter EEJ ${GTEST_LIB})
+gtest_discover_tests(test_sse_filter)
+# -----------------------------------------------------
