@@ -47,7 +47,7 @@ G1Vec Aggre::enc(const AggrePP& pp, const AggreMsk& msk, const IntVec& x){
     return pp.pairing_group->Gp->g1_raise(abxr);
 }
 
-G2Vec Aggre::keygen(const AggrePP& pp, const AggreMsk& msk, const IntVec& y, int p){
+G2Vec Aggre::keygen(const AggrePP& pp, const AggreMsk& msk, const IntVec& y, const int p){
     // First convert y to field elements.
     const auto y_vec = pp.pairing_group->Zp->from_int(y);
 
