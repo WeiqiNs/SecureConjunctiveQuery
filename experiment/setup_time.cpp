@@ -3,7 +3,7 @@
 void ipe_setup_time(const int round){
     // Open the output files.
     std::ofstream file("setup_time.txt", std::ios_base::app);
-    file << "IPE Setup Timings" << std::endl << std::endl;
+    file << "IPE Setup Timings" << std::endl;
 
     for (int length = 10; length <= 200; length += 10){
         // Create holder for timings.
@@ -32,7 +32,7 @@ void ipe_setup_time(const int round){
 void our_setup_time(const int round){
     // Open the output files.
     std::ofstream file("setup_time.txt", std::ios_base::app);
-    file << "Our Setup Timings" << std::endl << std::endl;
+    file << "Our Setup Timings" << std::endl;
 
     for (int length = 10; length <= 200; length += 10){
         // Create holder for timings.
@@ -61,7 +61,7 @@ void our_setup_time(const int round){
 void sse_setup_time(const int round){
     // Open the output files.
     std::ofstream file("setup_time.txt", std::ios_base::app);
-    file << "SSE Setup Timings" << std::endl << std::endl;
+    file << "SSE Setup Timings" << std::endl;
 
     for (int length = 10; length <= 200; length += 10){
         // Create holder for timings.
@@ -72,7 +72,7 @@ void sse_setup_time(const int round){
             // Setup timings.
             auto start = std::chrono::high_resolution_clock::now();
             // Create the PRF object.
-            auto prf = PRF();
+            auto msk = SseFilter::msk_gen();
             auto end = std::chrono::high_resolution_clock::now();
             time += end - start;
         }

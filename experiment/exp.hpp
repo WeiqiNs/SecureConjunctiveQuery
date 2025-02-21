@@ -5,6 +5,7 @@
 #include <fstream>
 #include "filter.hpp"
 #include "ipe_filter.hpp"
+#include "sse_filter.hpp"
 
 /// Benchmark for setup.
 void ipe_setup_time(int round);

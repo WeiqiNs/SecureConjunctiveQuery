@@ -25,7 +25,7 @@ void ipe_mul_row_time(const int round){
             // Create a random vector of desired length.
             auto y = Helper::rand_int_mat(20, 1, 1, std::numeric_limits<int>::max());
 
-            // Encryption timings.
+            // Keygen timings.
             auto start = std::chrono::high_resolution_clock::now();
             sk = IpeFilter::keygen(pp, msk, y);
             auto end = std::chrono::high_resolution_clock::now();
@@ -71,7 +71,7 @@ void our_mul_row_time(const int round){
             // Create a random vector of desired length.
             auto y = Helper::rand_int_vec(20, 1, std::numeric_limits<int>::max());
 
-            // Encryption timings.
+            // Keygen timings.
             auto start = std::chrono::high_resolution_clock::now();
             sk = Filter::keygen(pp, msk, y);
             auto end = std::chrono::high_resolution_clock::now();
@@ -111,7 +111,7 @@ void sse_mul_row_time(const int round){
         int pow_row = static_cast<int>(std::pow(2, num_row));
 
         // Create pp and msk.
-        auto prf = PRF();
+        auto msk = SseFilter::msk_gen();
         CharVec sk;
 
         // Perform ROUND number of setup.
@@ -120,16 +120,16 @@ void sse_mul_row_time(const int round){
                 // Create a random vector of desired length.
                 auto y = Helper::rand_int_vec(20, 1, std::numeric_limits<int>::max());
 
-                // Enc timings.
+                // Keygen timings.
                 auto start = std::chrono::high_resolution_clock::now();
-                for (const auto each_y : y) sk = prf.digest(Helper::int_to_char_vec(each_y));
+                sk = SseFilter::keygen(msk, y);
                 auto end = std::chrono::high_resolution_clock::now();
                 time += end - start;
             }
         }
 
         // Also create holder for size.
-        unsigned long sk_size = sk.size() * sizeof(unsigned char) * 20 * pow_row;
+        unsigned long sk_size = sk.size() * sizeof(unsigned char) * pow_row;
 
         // Output the time.
         time_file << "(" << num_row << ", " << time.count() / round << ")" << std::endl;

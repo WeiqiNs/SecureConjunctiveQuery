@@ -21,7 +21,7 @@ void ipe_sel_col_time(const int round){
             // Set the unselected portion to zero.
             for (int j = num_col + 1; j < 20; ++j){ y[num_col][0] = 0; }
 
-            // Encryption timings.
+            // Keygen timings.
             auto start = std::chrono::high_resolution_clock::now();
             auto sk = IpeFilter::keygen(pp, msk, y);
             auto end = std::chrono::high_resolution_clock::now();
@@ -60,7 +60,7 @@ void our_sel_col_time(const int round){
             IntVec sel;
             for (int j = 0; j < num_col; ++j){ sel.push_back(j); }
 
-            // Encryption timings.
+            // Keygen timings.
             auto start = std::chrono::high_resolution_clock::now();
             auto sk = Filter::keygen(pp, msk, y, sel);
             auto end = std::chrono::high_resolution_clock::now();
@@ -87,16 +87,16 @@ void sse_sel_col_time(const int round){
         std::chrono::duration<double, std::milli> time{};
 
         // Create pp and msk.
-        auto prf = PRF();
+        auto msk = SseFilter::msk_gen();
 
         // Perform round number of Enc.
         for (int i = 0; i < round; ++i){
             // Create a random vector of desired length.
             auto y = Helper::rand_int_vec(num_col, 1, std::numeric_limits<int>::max());
 
-            // Enc timings.
+            // Keygen timings.
             auto start = std::chrono::high_resolution_clock::now();
-            for (const auto each_y : y) auto sk = prf.digest(Helper::int_to_char_vec(each_y));
+            auto sk = SseFilter::keygen(msk, y);
             auto end = std::chrono::high_resolution_clock::now();
             time += end - start;
         }

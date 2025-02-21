@@ -81,16 +81,16 @@ void sse_enc_time(const int round){
         std::chrono::duration<double, std::milli> time{};
 
         // Create pp and msk.
-        auto prf = PRF();
+        auto msk = SseFilter::msk_gen();
 
         // Perform ROUND number of setup.
         for (int i = 0; i < round; ++i){
             // Create a random vector of desired length.
             auto x = Helper::rand_int_vec(length, 1, std::numeric_limits<int>::max());
 
-            // Setup timings.
+            // Encryption timings.
             auto start = std::chrono::high_resolution_clock::now();
-            for (const auto each_x : x) auto ct = prf.digest(Helper::int_to_char_vec(each_x));
+            auto ct = SseFilter::enc(msk, x);
             auto end = std::chrono::high_resolution_clock::now();
             time += end - start;
         }
