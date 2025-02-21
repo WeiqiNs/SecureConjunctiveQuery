@@ -24,6 +24,10 @@ add_executable(test_aggre test_aggre.cpp)
 target_link_libraries(test_aggre EEJ ${GTEST_LIB})
 gtest_discover_tests(test_aggre)
 # -----------------------------------------------------
+add_executable(test_ipe_aggre test_ipe_aggre.cpp)
+target_link_libraries(test_ipe_aggre EEJ ${GTEST_LIB})
+gtest_discover_tests(test_ipe_aggre)
+# -----------------------------------------------------
 add_executable(test_ipe_filter test_ipe_filter.cpp)
 target_link_libraries(test_ipe_filter EEJ ${GTEST_LIB})
 gtest_discover_tests(test_ipe_filter)
