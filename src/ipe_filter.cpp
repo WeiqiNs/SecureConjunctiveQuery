@@ -47,22 +47,17 @@ G1Vec IpeFilter::enc(const IpeFilterPP& pp, const IpeFilterMsk& msk, const Vec& 
         else throw std::invalid_argument("The input type is not supported.");
     }, x);
 
-    // Sample the random point alpha.
-    const auto r = pp.pairing_group->Zp->rand();
-
     // We compute polynomial of x.
-    const auto poly_x = Helper::power_poly(pp.d, *pp.pairing_group, x_vec);
-    // We compute a * x.
-    auto ax = pp.pairing_group->Zp->vec_mul(poly_x, r);
+    auto poly_x = Helper::power_poly(pp.d, *pp.pairing_group, x_vec);
     // Attach (r, 0).
-    ax.push_back(pp.pairing_group->Zp->rand());
-    ax.emplace_back(0);
+    poly_x.push_back(pp.pairing_group->Zp->rand());
+    poly_x.emplace_back(0);
 
-    // Multiply with the matrix Bi.
-    const auto axb = pp.pairing_group->Zp->mat_mul(ax, msk.b);
+    // Multiply with the matrix B.
+    const auto xb = pp.pairing_group->Zp->mat_mul(poly_x, msk.b);
 
     // Raise to g1 and return.
-    return pp.pairing_group->Gp->g1_raise(axb);
+    return pp.pairing_group->Gp->g1_raise(xb);
 }
 
 G2Vec IpeFilter::keygen(const IpeFilterPP& pp, const IpeFilterMsk& msk, const Mat& y){
@@ -91,11 +86,11 @@ G2Vec IpeFilter::keygen(const IpeFilterPP& pp, const IpeFilterMsk& msk, const Ma
     // Attach (0, r).
     poly_y.emplace_back(0);
     poly_y.push_back(pp.pairing_group->Zp->rand());
-    // Multiply with the matrix B.
-    const auto yb = pp.pairing_group->Zp->mat_mul(poly_y, msk.bi);
+    // Multiply with the matrix Bi.
+    const auto ybi = pp.pairing_group->Zp->mat_mul(poly_y, msk.bi);
 
     // Raise to g2 and return.
-    return pp.pairing_group->Gp->g2_raise(yb);
+    return pp.pairing_group->Gp->g2_raise(ybi);
 }
 
 bool IpeFilter::dec(const G1Vec& ct, const G2Vec& sk){ return Group::check_gt_unity(Group::pair(ct, sk)); }
