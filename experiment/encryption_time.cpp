@@ -20,7 +20,7 @@ void ipe_enc_time(const int round){
 
             // Encryption timings.
             auto start = std::chrono::high_resolution_clock::now();
-            auto ct = IpeFilter::enc(pp, msk, x);
+            std::ignore = IpeFilter::enc(pp, msk, x);
             auto end = std::chrono::high_resolution_clock::now();
             time += end - start;
         }
@@ -55,7 +55,7 @@ void our_enc_time(const int round){
 
             // Encryption timings.
             auto start = std::chrono::high_resolution_clock::now();
-            auto ct = Filter::enc(pp, msk, x);
+            std::ignore = Filter::enc(pp, msk, x);
             auto end = std::chrono::high_resolution_clock::now();
             time += end - start;
         }
@@ -90,7 +90,7 @@ void sse_enc_time(const int round){
 
             // Encryption timings.
             auto start = std::chrono::high_resolution_clock::now();
-            auto ct = SseFilter::enc(msk, x);
+            std::ignore = SseFilter::enc(msk, x);
             auto end = std::chrono::high_resolution_clock::now();
             time += end - start;
         }

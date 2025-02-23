@@ -15,7 +15,7 @@ void ipe_setup_time(const int round){
             auto start = std::chrono::high_resolution_clock::now();
             // Create pp and msk.
             auto pp = IpeFilter::pp_gen(1, length);
-            auto msk = IpeFilter::msk_gen(pp);
+            std::ignore = IpeFilter::msk_gen(pp);
             auto end = std::chrono::high_resolution_clock::now();
             time += end - start;
             // Close the pairing group.
@@ -44,7 +44,7 @@ void our_setup_time(const int round){
             auto start = std::chrono::high_resolution_clock::now();
             // Create pp and msk.
             auto pp = Filter::pp_gen(1, length);
-            auto msk = Filter::msk_gen(pp);
+            std::ignore = Filter::msk_gen(pp);
             auto end = std::chrono::high_resolution_clock::now();
             time += end - start;
             // Close the pairing group.
@@ -72,7 +72,7 @@ void sse_setup_time(const int round){
             // Setup timings.
             auto start = std::chrono::high_resolution_clock::now();
             // Create the PRF object.
-            auto msk = SseFilter::msk_gen();
+            std::ignore = SseFilter::msk_gen();
             auto end = std::chrono::high_resolution_clock::now();
             time += end - start;
         }
