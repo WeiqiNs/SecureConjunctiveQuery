@@ -47,19 +47,32 @@ G1Vec Aggre::enc(const AggrePP& pp, const AggreMsk& msk, const IntVec& x){
     return pp.pairing_group->Gp->g1_raise(abxr);
 }
 
-G2Vec Aggre::keygen(const AggrePP& pp, const AggreMsk& msk, const IntVec& y, const int p){
-    // First convert y to field elements.
-    const auto y_vec = pp.pairing_group->Zp->from_int(y);
+G2Vec Aggre::keygen(const AggrePP& pp, const AggreMsk& msk, const IntVec& y, int p, const IntVec& sel){
+    // Convert the input y integer vector to FpVec.
+    FpVec y_vec = pp.pairing_group->Zp->from_int(y);
 
-    // Sample the random point alpha.
+    // Select r and bi based on the input sel.
+    FpVec sel_r, sel_bi;
+    if (sel.empty()){
+        sel_r = msk.r;
+        sel_bi = msk.bi;
+    }
+    else{
+        for (auto& i : sel){
+            sel_r.push_back(msk.r[i]);
+            sel_bi.push_back(msk.bi[i]);
+        }
+    }
+
+    // Sample the random point beta.
     const Fp beta = pp.pairing_group->Zp->rand();
 
     // Compute b' * y.
-    const auto biy = pp.pairing_group->Zp->vec_mul(y_vec, msk.bi);
+    const auto biy = pp.pairing_group->Zp->vec_mul(y_vec, sel_bi);
     // Compute beta * b' * y.
     auto bbiy = pp.pairing_group->Zp->vec_mul(biy, beta);
     // Compute the last point beta * delta' * (p + <r, y>);
-    auto temp = pp.pairing_group->Zp->vec_ip(y_vec, msk.r);
+    auto temp = pp.pairing_group->Zp->vec_ip(y_vec, sel_r);
     temp = pp.pairing_group->Zp->add(temp, Fp(p));
     temp = pp.pairing_group->Zp->mul(temp, msk.di);
     temp = pp.pairing_group->Zp->mul(temp, beta);
@@ -70,4 +83,15 @@ G2Vec Aggre::keygen(const AggrePP& pp, const AggreMsk& msk, const IntVec& y, con
     return pp.pairing_group->Gp->g2_raise(bbiy);
 }
 
-bool Aggre::dec(const G1Vec& ct, const G2Vec& sk){ return gt_is_unity(Group::pair(ct, sk).value); }
+bool Aggre::dec(const G1Vec& ct, const G2Vec& sk, const IntVec& sel){
+    // Select ciphertext that should be used.
+    G1Vec sel_ct;
+    if (sel.empty()) sel_ct = G1Vec(ct.begin(), ct.end() - 1);
+    else for (const auto i : sel) sel_ct.push_back(ct[i]);
+
+    // Also add the last point int ct.
+    sel_ct.push_back(ct.back());
+
+    // Compute the pairing and output filter result.
+    return Group::check_gt_unity(Group::pair(sel_ct, sk));
+}

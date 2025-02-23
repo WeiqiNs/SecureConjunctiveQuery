@@ -17,11 +17,11 @@ CharMat SseFilter::enc(const SseFilterMsk& msk, const Vec& x){
     std::visit([&ct, &msk](auto&& input_x){
         using T = std::decay_t<decltype(input_x)>;
         if constexpr (std::is_same_v<T, IntVec>){
-            for (const auto each_x : input_x)
+            for (const auto& each_x : input_x)
                 ct.push_back(msk.prf->digest(Helper::int_to_char_vec(each_x)));
         }
         else if (std::is_same_v<T, StrVec>){
-            for (const auto each_x : input_x)
+            for (const auto& each_x : input_x)
                 ct.push_back(msk.prf->digest(Helper::str_to_char_vec(each_x)));
         }
         else throw std::invalid_argument("The input type is not supported.");

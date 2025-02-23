@@ -49,15 +49,17 @@ public:
      * @param msk the master secret key.
      * @param y a vector of integers.
      * @param p an integer.
+     * @param sel a vector of integers indicating which columns to select, by default is empty.
      * @return the function key.
      */
-    static G2Vec keygen(const AggrePP& pp, const AggreMsk& msk, const IntVec& y, int p);
+    static G2Vec keygen(const AggrePP& pp, const AggreMsk& msk, const IntVec& y, int p, const IntVec& sel = {});
 
     /**
      * Perform the Aggre FE decryption.
      * @param ct the ciphertext.
      * @param sk the function key.
+     * @param sel a vector of integers indicating which columns to select, by default is empty.
      * @return a boolean indicating the result of Aggre.
      */
-    static bool dec(const G1Vec& ct, const G2Vec& sk);
+    static bool dec(const G1Vec& ct, const G2Vec& sk, const IntVec& sel = {});
 };

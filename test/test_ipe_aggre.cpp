@@ -6,10 +6,10 @@ TEST(IpeAggreTests, AggreTrue){
     const auto msk = IpeAggre::msk_gen(pp);
 
     const IntVec x = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-    const IntVec y = {1, 1, 1, 1, 1, 0, 0, 0, 0, 1};
+    const IntVec y = {1, 1, 1, 1, 1, 0, 0, 0, 0, 2};
 
     const auto ct = IpeAggre::enc(pp, msk, x);
-    const auto sk = IpeAggre::keygen(pp, msk, y, 25);
+    const auto sk = IpeAggre::keygen(pp, msk, y, 35);
 
     EXPECT_TRUE(IpeAggre::dec(ct, sk));
 }
