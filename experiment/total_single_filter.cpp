@@ -78,7 +78,7 @@ void sse_total_single_filter_time(const int round){
 
             // Decryption time.
             start = std::chrono::high_resolution_clock::now();
-            std::ignore = SseFilter::dec(ct, sk);
+            std::ignore = SseFilter::dec(ct, sk[round]);
             end = std::chrono::high_resolution_clock::now();
             time += end - start;
         }

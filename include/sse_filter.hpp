@@ -39,7 +39,7 @@ public:
      * @param sk the function key.
      * @return a boolean indicating the result of Filter.
      */
-    static bool dec(const CharMat& ct, const CharMat& sk);
+    static bool dec(const CharMat& ct, const CharVec& sk);
 
 private:
     /// Make unique pointer for the PRF.

@@ -108,11 +108,11 @@ void sse_server_single_filter_time(const int round){
             auto x = Helper::rand_int_vec(num_col, 1, std::numeric_limits<int>::max());
             auto y = Helper::rand_int_vec(num_col, 1, std::numeric_limits<int>::max());
             auto ct = SseFilter::enc(msk, x);
-            auto sk = SseFilter::keygen(msk, y, static_cast<int>(std::pow(2, 20)));
+            auto sk = SseFilter::keygen(msk, y, 1);
 
             // Decryption timings.
             auto start = std::chrono::high_resolution_clock::now();
-            std::ignore = SseFilter::dec(ct, sk);
+            std::ignore = SseFilter::dec(ct, sk[0]);
             auto end = std::chrono::high_resolution_clock::now();
             time += end - start;
         }

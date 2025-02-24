@@ -9,7 +9,7 @@ TEST(SseFilterTests, FilterTrue){
     const auto ct = SseFilter::enc(msk, x);
     const auto sk = SseFilter::keygen(msk, x, 1);
 
-    EXPECT_TRUE(SseFilter::dec(ct, sk));
+    EXPECT_TRUE(SseFilter::dec(ct, sk[0]));
 }
 
 TEST(SseFilterTests, FilterFalse){
@@ -21,7 +21,7 @@ TEST(SseFilterTests, FilterFalse){
     const auto ct = SseFilter::enc(msk, x);
     const auto sk = SseFilter::keygen(msk, y, 1);
 
-    EXPECT_FALSE(SseFilter::dec(ct, sk));
+    EXPECT_FALSE(SseFilter::dec(ct, sk[0]));
 }
 
 TEST(SseFilterTests, FilterStrTrue){
@@ -32,7 +32,7 @@ TEST(SseFilterTests, FilterStrTrue){
     const auto ct = SseFilter::enc(msk, x);
     const auto sk = SseFilter::keygen(msk, x, 1);
 
-    EXPECT_TRUE(SseFilter::dec(ct, sk));
+    EXPECT_TRUE(SseFilter::dec(ct, sk[0]));
 }
 
 TEST(SseFilterTests, FilterMultiEncTrue){
@@ -47,5 +47,5 @@ TEST(SseFilterTests, FilterMultiEncTrue){
     const auto ctz = SseFilter::enc(msk, z);
     const auto sk = SseFilter::keygen(msk, z, 3);
 
-    EXPECT_TRUE(SseFilter::dec(ctz, sk));
+    EXPECT_TRUE(SseFilter::dec(ctz, sk[2]));
 }

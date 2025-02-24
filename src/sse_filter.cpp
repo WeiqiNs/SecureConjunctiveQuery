@@ -85,10 +85,6 @@ CharMat SseFilter::keygen(const SseFilterMsk& msk, const Vec& y, const int row){
     return sk;
 }
 
-bool SseFilter::dec(const CharMat& ct, const CharMat& sk){
-    auto xor_ct = Helper::xor_char_vec(ct);
-
-    return std::any_of(sk.begin(), sk.end(), [&xor_ct](const auto& each_sk) {
-        return xor_ct == each_sk;
-    });
+bool SseFilter::dec(const CharMat& ct, const CharVec& sk){
+    return Helper::xor_char_vec(ct) == sk;
 }
