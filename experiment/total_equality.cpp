@@ -40,10 +40,11 @@ void ipe_total_equality_time(const int round){
 
         // Output the time.
         file << "(" << num_col << ", " << time.count() / round << ")" << std::endl;
-
-        // Close the BP.
-        BP::close();
     }
+
+    // Close the BP.
+    BP::close();
+
     // Create some blank spaces.
     file << std::endl << std::endl;
 }
@@ -89,10 +90,11 @@ void kim_total_equality_time(const int round){
 
         // Output the time.
         file << "(" << num_col << ", " << time.count() / round << ")" << std::endl;
-
-        // Close the BP.
-        BP::close();
     }
+
+    // Close the BP.
+    BP::close();
+
     // Create some blank spaces.
     file << std::endl << std::endl;
 }
@@ -140,10 +142,11 @@ void our_total_equality_time(const int round){
 
         // Output the time.
         file << "(" << num_col << ", " << time.count() / round << ")" << std::endl;
-
-        // Close the BP.
-        BP::close();
     }
+
+    // Close the BP.
+    BP::close();
+
     // Create some blank spaces.
     file << std::endl << std::endl;
 }

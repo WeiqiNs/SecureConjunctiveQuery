@@ -39,10 +39,11 @@ void ipe_total_multi_filter_time(const int round){
 
         // Output the time.
         file << "(" << num_col << ", " << time.count() / round << ")" << std::endl;
-
-        // Close the BP.
-        BP::close();
     }
+
+    // Close the BP.
+    BP::close();
+
     // Create some blank spaces.
     file << std::endl << std::endl;
 }
@@ -89,10 +90,11 @@ void our_total_multi_filter_time(const int round){
 
         // Output the time.
         file << "(" << num_col << ", " << time.count() / round << ")" << std::endl;
-
-        // Close the BP.
-        BP::close();
     }
+
+    // Close the BP.
+    BP::close();
+
     // Create some blank spaces.
     file << std::endl << std::endl;
 }

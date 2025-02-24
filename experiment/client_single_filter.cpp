@@ -37,10 +37,10 @@ void ipe_client_single_filter_time(const int round){
 
         // Output the storage.
         storage_file << "(" << num_row << ", " << sk_size << ")" << std::endl;
-
-        // Close the BP.
-        BP::close();
     }
+
+    // Close the BP.
+    BP::close();
 
     // Create some blank spaces.
     time_file << std::endl << std::endl;
@@ -127,10 +127,10 @@ void our_client_single_filter_time(const int round){
 
         // Output the storage.
         storage_file << "(" << num_row << ", " << sk_size << ")" << std::endl;
-
-        // Close the BP.
-        BP::close();
     }
+
+    // Close the BP.
+    BP::close();
 
     // Create some blank spaces.
     time_file << std::endl << std::endl;
