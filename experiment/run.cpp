@@ -1,12 +1,12 @@
 #include "exp.hpp"
 
 int main(){
-    bench_setup_time(1000);
-    bench_enc_time(1000);
-    bench_mul_row_time(1000);
-    bench_sel_col_time(1000);
-    bench_single_dec_time(1000);
-    bench_multi_dec_time(1000);
-    bench_equality_time(1000);
+    bench_client_setup_time(100);
+    bench_enc_time(100);
+    bench_client_single_filter_time(100);
+    bench_total_single_filter_time(100);
+    bench_server_single_filter_time(100);
+    bench_total_multi_filter_time(100);
+    bench_total_equality_time(100);
     return 0;
 }
