@@ -1,6 +1,6 @@
 # Reduce Leakages in Query Processing on Encrypted Multi-dimensional Data with Practicality
 
-Xinle Cao, Weiqi Feng, Quanqing Xu, Chuanhui Yang, and Jian Liu.
+Xinle Cao, Weiqi Feng, Rui Zhang, Quanqing Xu, Chuanhui Yang, and Jian Liu.
 
 (**Abstract**) Encrypted databases (EDBs) have been a prominent focus in the database community with the rise of cloud computing. However, many challenging open problems in EDBs make most existing solutions undeployable in real-world applications. One significant issue is how to avoid dangerous unexpected leakages when querying encrypted multi-dimensional data. For example, given one query SELECT $user\_id$ FROM $T$ WHERE $\mathsf{Garde}=\mathsf{A}$ AND $\mathsf{Depart}= \mathsf{CS}$, the minimal leakage should be the records that satisfy both the two conditions. However, most existing EDBs reveal separate frequency leakages: 1) records that satisfy $\mathsf{Garde}=\mathsf{A}$, and 2) records that satisfy $\mathsf{Depart} = \mathsf{CS}$. This incurs additional leakage of frequency information which has been widely recognized as very sensitive and dangerous information in EDBs.
 
