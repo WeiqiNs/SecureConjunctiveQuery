@@ -3,6 +3,7 @@
 #include "crypto.hpp"
 
 struct SseFilterMsk{
+    int counter;
     std::unique_ptr<PRF> prf;
 };
 
@@ -21,15 +22,16 @@ public:
      * @param x a vector of strings or integers.
      * @return the ciphertext.
      */
-    static CharMat enc(const SseFilterMsk& msk, const Vec& x);
+    static CharMat enc(SseFilterMsk& msk, const Vec& x);
 
     /**
      * Perform the Filter FE key generation.
      * @param msk the master secret key.
      * @param y a vector of strings or integers.
+     * @param row the number of rows to select from.
      * @return the function key.
      */
-    static CharVec keygen(const SseFilterMsk& msk, const Vec& y);
+    static CharMat keygen(const SseFilterMsk& msk, const Vec& y, int row);
 
     /**
      * Perform the Filter FE decryption.
@@ -37,7 +39,7 @@ public:
      * @param sk the function key.
      * @return a boolean indicating the result of Filter.
      */
-    static bool dec(const CharMat& ct, const CharVec& sk);
+    static bool dec(const CharMat& ct, const CharMat& sk);
 
 private:
     /// Make unique pointer for the PRF.
