@@ -36,3 +36,6 @@
 
 # CMake
 cmake-build-*/
+
+# Ignore the the data folder in experiment.
+experiment/data/
