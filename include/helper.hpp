@@ -3,6 +3,8 @@
 #include <string>
 #include <random>
 #include <variant>
+#include <fstream>
+#include <sstream>
 #include "RBP/bp.hpp"
 
 // Define some useful type alias that we use in this library.
@@ -17,6 +19,14 @@ using VecOrMat = std::variant<IntVec, StrVec, IntMat, StrMat>;
 
 class Helper{
 public:
+    /**
+     * Read number of rows from a table file, the data are stored as strings.
+     * @param filename the name of the file to read.
+     * @param row number of rows to read.
+     * @return the parsed data as a string matrix.
+     */
+    static StrMat read_tbl(const std::string& filename, int row);
+
     /**
      * Convert an integer to a vector of unsigned characters.
      * @param x an integer.

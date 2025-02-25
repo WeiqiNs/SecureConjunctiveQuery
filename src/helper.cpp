@@ -1,5 +1,29 @@
 #include "helper.hpp"
 
+StrMat Helper::read_tbl(const std::string& filename, int row){
+    // Create the result table.
+    StrMat table;
+
+    // Read the file.
+    std::ifstream file(filename);
+
+    // Some holders for values.
+    str line, value;
+
+    for (int i = 0; i < row; i++){
+        std::getline(file, line);
+        std::stringstream ss(line);
+
+        StrVec temp;
+        while (std::getline(ss, value, '|')){
+            temp.push_back(value);
+        }
+        table.push_back(temp);
+    }
+
+    return table;
+}
+
 CharVec Helper::int_to_char_vec(const int& x){
     // Declare the return object, a vector of unsigned characters.
     CharVec r;
