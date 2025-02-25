@@ -27,14 +27,16 @@ void ipe_total_multi_filter_time(const int round){
             auto end = std::chrono::high_resolution_clock::now();
             time += end - start;
 
-            // Compute ciphertext.
-            auto ct = IpeFilter::enc(pp, msk, x);
+            for (int j = 0; j < pow(2, 20); ++j){
+                // Compute ciphertext.
+                auto ct = IpeFilter::enc(pp, msk, x);
 
-            // Add decryption time.
-            start = std::chrono::high_resolution_clock::now();
-            std::ignore = IpeFilter::dec(ct, sk);
-            end = std::chrono::high_resolution_clock::now();
-            time += end - start;
+                // Add decryption time.
+                start = std::chrono::high_resolution_clock::now();
+                std::ignore = IpeFilter::dec(ct, sk);
+                end = std::chrono::high_resolution_clock::now();
+                time += end - start;
+            }
         }
 
         // Output the time.
@@ -78,14 +80,16 @@ void our_total_multi_filter_time(const int round){
             auto end = std::chrono::high_resolution_clock::now();
             time += end - start;
 
-            // Compute ciphertext.
-            auto ct = Filter::enc(pp, msk, x);
+            for (int j = 0; j < pow(2, 20); ++j){
+                // Compute ciphertext.
+                auto ct = Filter::enc(pp, msk, x);
 
-            // Add decryption time.
-            start = std::chrono::high_resolution_clock::now();
-            std::ignore = Filter::dec(pp, ct, sk, sel);
-            end = std::chrono::high_resolution_clock::now();
-            time += end - start;
+                // Add decryption time.
+                start = std::chrono::high_resolution_clock::now();
+                std::ignore = Filter::dec(pp, ct, sk, sel);
+                end = std::chrono::high_resolution_clock::now();
+                time += end - start;
+            }
         }
 
         // Output the time.

@@ -1,5 +1,4 @@
 #include "exp.hpp"
-#include "kim_aggre.hpp"
 
 void ipe_total_equality_time(const int round){
     // Open the output files.
@@ -17,7 +16,6 @@ void ipe_total_equality_time(const int round){
         // Perform round number of Enc.
         for (int i = 0; i < round; ++i){
             // Create a random vector of desired length.
-            auto x = Helper::rand_int_vec(20, 1, std::numeric_limits<int>::max());
             auto y = Helper::rand_int_vec(20, 1, 5);
             // Set the unselected portion to zero.
             for (int j = num_col + 1; j < 20; ++j){ y[j] = 0; }
@@ -28,14 +26,16 @@ void ipe_total_equality_time(const int round){
             auto end = std::chrono::high_resolution_clock::now();
             time += end - start;
 
-            // Compute ciphertext.
-            auto ct = IpeAggre::enc(pp, msk, x);
+            for (int j = 0; j < pow(2, 20); ++j){
+                // Compute ciphertext.
+                auto ct = IpeAggre::enc(pp, msk, Helper::rand_int_vec(20, 1, std::numeric_limits<int>::max()));
 
-            // Decryption timings.
-            start = std::chrono::high_resolution_clock::now();
-            std::ignore = IpeAggre::dec(ct, sk);
-            end = std::chrono::high_resolution_clock::now();
-            time += end - start;
+                // Decryption timings.
+                start = std::chrono::high_resolution_clock::now();
+                std::ignore = IpeAggre::dec(ct, sk);
+                end = std::chrono::high_resolution_clock::now();
+                time += end - start;
+            }
         }
 
         // Output the time.
@@ -78,14 +78,16 @@ void kim_total_equality_time(const int round){
             auto end = std::chrono::high_resolution_clock::now();
             time += end - start;
 
-            // Compute ciphertext.
-            auto ct = KimAggre::enc(pp, msk, x);
+            for (int j = 0; j < pow(2, 20); ++j){
+                // Compute ciphertext.
+                auto ct = KimAggre::enc(pp, msk, x);
 
-            // Add decryption time.
-            start = std::chrono::high_resolution_clock::now();
-            std::ignore = KimAggre::dec(ct, sk);
-            end = std::chrono::high_resolution_clock::now();
-            time += end - start;
+                // Add decryption time.
+                start = std::chrono::high_resolution_clock::now();
+                std::ignore = KimAggre::dec(ct, sk);
+                end = std::chrono::high_resolution_clock::now();
+                time += end - start;
+            }
         }
 
         // Output the time.
@@ -129,15 +131,16 @@ void our_total_equality_time(const int round){
             auto end = std::chrono::high_resolution_clock::now();
             time += end - start;
 
-            // Compute ciphertext.
-            auto ct = Aggre::enc(pp, msk, x);
+            for (int j = 0; j < pow(2, 20); ++j){
+                // Compute ciphertext.
+                auto ct = Aggre::enc(pp, msk, x);
 
-            // Add decryption time.
-            start = std::chrono::high_resolution_clock::now();
-            std::ignore = Aggre::dec(ct, sk, sel);
-            end = std::chrono::high_resolution_clock::now();
-            time += end - start;
-
+                // Add decryption time.
+                start = std::chrono::high_resolution_clock::now();
+                std::ignore = Aggre::dec(ct, sk, sel);
+                end = std::chrono::high_resolution_clock::now();
+                time += end - start;
+            }
         }
 
         // Output the time.
