@@ -29,7 +29,7 @@ IpeJoinMsk IpeJoin::msk_gen(const IpeJoinPP& pp, const CharVec& key){
     Fp det;
     msk.bi = pp.pairing_group->Zp->mat_inv_with_det(msk.b, det);
     // Find its transpose multiplied with determinant.
-    msk.bi = Field::mat_transpose(pp.pairing_group->Zp->mat_mul(msk.bi, det));
+    msk.bi = Field::mat_transpose(msk.bi);
 
     return msk;
 }

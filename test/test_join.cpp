@@ -249,3 +249,26 @@ TEST(JoinTests, JoinDegMulSelFalse){
 
     EXPECT_FALSE(Group::cmp_gt(Join::dec(pp, ct1, sk1, sel), Join::dec(pp, ct2, sk2, sel)));
 }
+
+TEST(JoinTests, JoinDifferentLengthTrue){
+    // Generate two set of pp and msk.
+    const auto pp1 = Join::pp_gen(1, 10);
+    const auto msk1 = Join::msk_gen(pp1);
+    const auto pp2 = Join::pp_gen(1, 8);
+    auto msk2 = Join::msk_gen(pp2, msk1.hmac->get_key());
+
+    // We need to unify the k used. This k should be updated for each query.
+    msk2.k = msk1.k;
+
+    const IntVec x1 = {1, 100, 2, 3, 4, 5, 6, 7, 8, 9};
+    const IntVec y1 = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    const auto ct1 = Join::enc(pp1, msk1, x1, 1);
+    const auto sk1 = Join::keygen(pp1, msk1, y1);
+
+    const IntVec x2 = {6, 3, 100, 4, 5, 6, 7, 8};
+    const IntVec y2 = {6, 3, 4, 5, 6, 7, 8};
+    const auto ct2 = Join::enc(pp2, msk2, x2, 2);
+    const auto sk2 = Join::keygen(pp2, msk2, y2);
+
+    EXPECT_TRUE(Group::cmp_gt(Join::dec(pp1, ct1, sk1), Join::dec(pp2, ct2, sk2)));
+}
