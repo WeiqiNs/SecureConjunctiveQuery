@@ -18,42 +18,47 @@ void ipe_total_single_join_time(const int round){
     auto pp_customer = IpeJoin::pp_gen(1, 8);
     auto msk_customer = IpeJoin::msk_gen(pp_customer);
 
-    // Create holder for timings.
-    std::chrono::duration<double, std::milli> time{};
+    for (int num_col = 2; num_col <= 15; ++num_col){
+        // Create holder for timings.
+        std::chrono::duration<double, std::milli> time{};
 
-    // Create a random vector of desired length.
-    auto y_order = Helper::rand_int_mat(8, 1, 1, std::numeric_limits<int>::max());
-    auto y_customer = Helper::rand_int_mat(7, 1, 1, std::numeric_limits<int>::max());
+        // Compute round number of total time.
+        for (int i = 0; i < round; ++i){
+            // Create a random vector of desired length.
+            auto y_order = Helper::rand_int_mat(8, 1, 1, std::numeric_limits<int>::max());
+            auto y_customer = Helper::rand_int_mat(7, 1, 1, std::numeric_limits<int>::max());
 
-    // Total timings.
-    auto start = std::chrono::high_resolution_clock::now();
-    auto sk_order = IpeJoin::keygen(pp_order, msk_order, y_order);
-    auto sk_customer = IpeJoin::keygen(pp_customer, msk_customer, y_customer);
-    auto end = std::chrono::high_resolution_clock::now();
-    time += end - start;
+            // Total timings.
+            auto start = std::chrono::high_resolution_clock::now();
+            auto sk_order = IpeJoin::keygen(pp_order, msk_order, y_order);
+            auto sk_customer = IpeJoin::keygen(pp_customer, msk_customer, y_customer);
+            auto end = std::chrono::high_resolution_clock::now();
+            time += end - start;
 
-    // Timing for order.
-    for (auto& order_row: order){
-        auto ct_order = IpeJoin::enc(pp_order, msk_order, order_row, 1);
-        // Total timings.
-        start = std::chrono::high_resolution_clock::now();
-        std::ignore = IpeJoin::dec(ct_order, sk_order);
-        end = std::chrono::high_resolution_clock::now();
-        time += end - start;
+            // Timing for order.
+            for (auto& order_row: order){
+                auto ct_order = IpeJoin::enc(pp_order, msk_order, order_row, 1);
+                // Total timings.
+                start = std::chrono::high_resolution_clock::now();
+                std::ignore = IpeJoin::dec(ct_order, sk_order);
+                end = std::chrono::high_resolution_clock::now();
+                time += end - start;
+            }
+
+            // Timing for customer.
+            for (auto& customer_row: customer){
+                auto ct_customer = IpeJoin::enc(pp_order, msk_order, customer_row, 1);
+                // Total timings.
+                start = std::chrono::high_resolution_clock::now();
+                std::ignore = IpeJoin::dec(ct_customer, sk_customer);
+                end = std::chrono::high_resolution_clock::now();
+                time += end - start;
+            }
+        }
+
+        // Output the time.
+        file << "(" << num_col << ", " << time.count() / round << ")" << std::endl;
     }
-
-    // Timing for customer.
-    for (auto& customer_row: customer){
-        auto ct_customer = IpeJoin::enc(pp_order, msk_order, customer_row, 1);
-        // Total timings.
-        start = std::chrono::high_resolution_clock::now();
-        std::ignore = IpeJoin::dec(ct_customer, sk_customer);
-        end = std::chrono::high_resolution_clock::now();
-        time += end - start;
-    }
-
-    // Output the time.
-    file << time.count() / round << std::endl;
 
     // Close the BP.
     BP::close();
