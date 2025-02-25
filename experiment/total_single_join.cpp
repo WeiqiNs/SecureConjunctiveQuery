@@ -32,14 +32,22 @@ void ipe_total_single_join_time(const int round){
     auto end = std::chrono::high_resolution_clock::now();
     time += end - start;
 
-    for (int j = 0; j < pow(2, 20); ++j){
-        // Generate ciphertext.
-        auto ct_order = IpeJoin::enc(pp_order, msk_order, order[round], 1);
-        auto ct_customer = IpeJoin::enc(pp_customer, msk_customer, customer[round], 1);
-
+    // Timing for order.
+    for (auto& order_row: order){
+        auto ct_order = IpeJoin::enc(pp_order, msk_order, order_row, 1);
         // Total timings.
         start = std::chrono::high_resolution_clock::now();
-        std::ignore = Group::cmp_gt(IpeJoin::dec(ct_order, sk_order), IpeJoin::dec(ct_customer, sk_customer));
+        std::ignore = IpeJoin::dec(ct_order, sk_order);
+        end = std::chrono::high_resolution_clock::now();
+        time += end - start;
+    }
+
+    // Timing for customer.
+    for (auto& customer_row: customer){
+        auto ct_customer = IpeJoin::enc(pp_order, msk_order, customer_row, 1);
+        // Total timings.
+        start = std::chrono::high_resolution_clock::now();
+        std::ignore = IpeJoin::dec(ct_customer, sk_customer);
         end = std::chrono::high_resolution_clock::now();
         time += end - start;
     }
@@ -104,17 +112,22 @@ void our_total_single_join_time(const int round){
             auto end = std::chrono::high_resolution_clock::now();
             time += end - start;
 
-            for (int j = 0; j < pow(2, 20); ++j){
-                // Generate ciphertext.
-                auto ct_order = Join::enc(pp_order, msk_order, order[round], 1);
-                auto ct_customer = Join::enc(pp_customer, msk_customer, customer[round], 1);
-
+            // Timing for order.
+            for (auto& order_row: order){
+                auto ct_order = Join::enc(pp_order, msk_order, order_row, 1);
                 // Total timings.
                 start = std::chrono::high_resolution_clock::now();
-                std::ignore = Group::cmp_gt(
-                    Join::dec(pp_order, ct_order, sk_order, sel_order),
-                    Join::dec(pp_customer, ct_customer, sk_customer, sel_customer)
-                );
+                std::ignore = Join::dec(pp_order, ct_order, sk_order, sel_order);
+                end = std::chrono::high_resolution_clock::now();
+                time += end - start;
+            }
+
+            // Timing for customer.
+            for (auto& customer_row: customer){
+                auto ct_customer = Join::enc(pp_customer, msk_customer, customer_row, 1);
+                // Total timings.
+                start = std::chrono::high_resolution_clock::now();
+                std::ignore = Join::dec(pp_customer, ct_customer, sk_customer, sel_customer);
                 end = std::chrono::high_resolution_clock::now();
                 time += end - start;
             }
