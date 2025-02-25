@@ -1,6 +1,6 @@
 #include "exp.hpp"
 
-size_t TOTAL = 150000 * 1500000;
+constexpr size_t TOTAL = static_cast<size_t>(150000) * 1500000;
 
 void bench_server_join_time(const int round){
     // Open the output files.
