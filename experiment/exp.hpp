@@ -36,6 +36,9 @@ void sse_server_single_filter_time(int round);
 void our_server_single_filter_time(int round);
 void bench_server_single_filter_time(int round);
 
+/// Benchmark for performing the final join step.
+void bench_server_join_time(int round);
+
 /// Benchmark for total time of single value filter.
 void ipe_total_single_filter_time(int round);
 void sse_total_single_filter_time(int round);

@@ -8,6 +8,7 @@ int main(){
 
     // Bench for server side timings.
     bench_server_single_filter_time(100);
+    bench_server_join_time(100);
 
     // Bench for total timings.
     bench_total_single_filter_time(100);
