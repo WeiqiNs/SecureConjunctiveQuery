@@ -89,7 +89,7 @@ G2Vec Filter::keygen(const FilterPP& pp, const FilterMsk& msk, const VecOrMat& y
         }, y);
 
         // Raise the vector to g2 and return.
-        return pp.pairing_group->Gp->g2_raise(FpVec{Fp(1), digest_sum});
+        return pp.pairing_group->Gp->g2_raise(FpVec{beta, pp.pairing_group->Zp->mul(digest_sum, beta)});
     }
 
     // Generate the hash of the input y vector.
