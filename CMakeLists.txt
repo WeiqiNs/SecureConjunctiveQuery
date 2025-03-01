@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.20)
 
 # Project name and language.
 project(
-        EncryptedEqualJoin
-        DESCRIPTION "This project implements the encrypted equal join protocol."
+        SecureConjunctiveQuery
+        DESCRIPTION "This project implements a few methods to process conjunctive queries securely over an encrypted database."
         LANGUAGES CXX
 )
 

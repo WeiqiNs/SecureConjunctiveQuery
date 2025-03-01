@@ -1,4 +1,4 @@
-name: LibEEJ CI
+name: SCQ CI
 
 on: [ push, pull_request ]
 

@@ -4,7 +4,7 @@ list(REMOVE_ITEM SOURCES "run.cpp")
 
 # Add executable and link the library.
 add_executable(EXP "run.cpp" ${SOURCES})
-target_link_libraries(EXP PUBLIC EEJ)
+target_link_libraries(EXP PUBLIC SCQ)
 
 # Move experimental data to compiled location if exists.
 if (EXISTS ${CMAKE_SOURCE_DIR}/experiment/data)
