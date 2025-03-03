@@ -1,6 +1,6 @@
 #pragma once
 
-#include "helper.hpp"
+#include "crypto.hpp"
 
 struct AggrePP{
     // Suppose by default the length is 1.
@@ -15,6 +15,11 @@ struct AggreMsk{
     FpVec r;
     FpVec b;
     FpVec bi;
+    int d_int = 0;
+    int r_int = 0;
+    int b_int = 0;
+    bool compress;
+    std::unique_ptr<HMAC> hmac;
 };
 
 class Aggre{
@@ -30,9 +35,11 @@ public:
     /**
      * Generate master secret key.
      * @param pp the public parameters.
+    * @param key the HMAC key to use.
+     * @param compress boolean to indicate whether to compress the private keys.
      * @return the generated master secret key.
      */
-    static AggreMsk msk_gen(const AggrePP& pp);
+    static AggreMsk msk_gen(const AggrePP& pp, const CharVec& key = {}, const bool& compress = false);
 
     /**
      * Perform the Aggre FE encryption.

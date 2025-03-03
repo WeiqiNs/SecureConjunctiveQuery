@@ -20,7 +20,6 @@ struct FilterMsk{
     int d_int = 0;
     int r_int = 0;
     int b_int = 0;
-    int vec_len = 0;
     bool compress;
     std::unique_ptr<HMAC> hmac;
 };
@@ -40,6 +39,7 @@ public:
      * Generate master secret key.
      * @param pp the public parameters.
      * @param key the HMAC key to use.
+     * @param compress boolean to indicate whether to compress the private keys.
      * @return the generated master secret key.
      */
     static FilterMsk msk_gen(const FilterPP& pp, const CharVec& key = {}, const bool& compress = false);

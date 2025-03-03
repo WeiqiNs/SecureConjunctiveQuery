@@ -3,6 +3,20 @@
 
 TEST(FilterTests, DegOneIntTrue){
     const auto pp = Filter::pp_gen(1, 10);
+    const auto msk = Filter::msk_gen(pp);
+
+    const IntVec x = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    const IntVec y = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+
+    const auto ct = Filter::enc(pp, msk, x);
+    const auto sk = Filter::keygen(pp, msk, y);
+
+    EXPECT_TRUE(Filter::dec(pp, ct, sk));
+    BP::close();
+}
+
+TEST(FilterTests, DegOneIntTrueWithCompress){
+    const auto pp = Filter::pp_gen(1, 10);
     const auto msk = Filter::msk_gen(pp, {}, true);
 
     const IntVec x = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
@@ -58,6 +72,31 @@ TEST(FilterTests, DegOneStrFalse){
 }
 
 TEST(FilterTests, DegMulIntTrue){
+    const auto pp = Filter::pp_gen(5, 10);
+    const auto msk = Filter::msk_gen(pp);
+
+    const IntVec x = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    const IntMat y = {
+            {0, 1, 2, 3, 4},
+            {0, 1, 2, 3, 4},
+            {0, 1, 2, 3, 4},
+            {0, 1, 2, 3, 4},
+            {0, 1, 2, 3, 4},
+            {0, 1, 2, 3, 5},
+            {0, 1, 2, 3, 6},
+            {0, 1, 2, 3, 7},
+            {0, 1, 2, 3, 8},
+            {0, 1, 2, 3, 9}
+        };
+
+    const auto ct = Filter::enc(pp, msk, x);
+    const auto sk = Filter::keygen(pp, msk, y);
+
+    EXPECT_TRUE(Filter::dec(pp, ct, sk));
+    BP::close();
+}
+
+TEST(FilterTests, DegMulIntTrueWithCompress){
     const auto pp = Filter::pp_gen(5, 10);
     const auto msk = Filter::msk_gen(pp, {}, true);
 
@@ -210,15 +249,36 @@ TEST(FilterTests, DegMulSelIntTrue){
     BP::close();
 }
 
+TEST(FilterTests, DegMulSelIntTrueWithCompress){
+    const auto pp = Filter::pp_gen(5, 10);
+    const auto msk = Filter::msk_gen(pp, {}, true);
+
+    const IntVec x = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    const IntMat y = {
+            {0, 1, 2, 3, 4},
+            {0, 1, 2, 3, 4},
+            {0, 1, 2, 3, 4},
+            {0, 1, 2, 3, 4},
+            {0, 1, 2, 3, 4}
+        };
+    const IntVec sel = {0, 1, 2, 3, 4};
+
+    const auto ct = Filter::enc(pp, msk, x);
+    const auto sk = Filter::keygen(pp, msk, y, sel);
+
+    EXPECT_TRUE(Filter::dec(pp, ct, sk, sel));
+    BP::close();
+}
+
 TEST(FilterTests, DegMulSelIntFalse){
     const auto pp = Filter::pp_gen(5, 10);
     const auto msk = Filter::msk_gen(pp);
 
     const IntVec x = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     const IntMat y = {
-        {0, 1, 2, 3, 4},
-        {0, 1, 2, 3, 4}
-    };
+            {0, 1, 2, 3, 4},
+            {0, 1, 2, 3, 4}
+        };
     const IntVec sel = {0, 8};
 
     const auto ct = Filter::enc(pp, msk, x);
