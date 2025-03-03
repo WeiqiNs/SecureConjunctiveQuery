@@ -263,17 +263,22 @@ FpMat HMAC::digest_mat_to_fp(const Mat& x, const IntVec& sel) const{
             // If we do not need to select values.
             if (sel.empty()){
                 for (int i = 0; i < mat_x.size(); ++i){
-                    // Create holder for hash result of this row.
-                    FpVec row_hash;
+                    if (mat_x[i].empty()){
+                        r.push_back({Fp(0)});
+                    }
+                    else{
+                        // Create holder for hash result of this row.
+                        FpVec row_hash;
 
-                    // This row is hashed with row + i.
-                    for (const auto& each_x : mat_x[i])
-                        row_hash.push_back(Helper::char_vec_to_fp(
-                            digest(Helper::str_to_char_vec(std::to_string(each_x) + std::to_string(i)))
-                        ));
+                        // This row is hashed with row + i.
+                        for (const auto& each_x : mat_x[i])
+                            row_hash.push_back(Helper::char_vec_to_fp(
+                                digest(Helper::str_to_char_vec(std::to_string(each_x) + std::to_string(i)))
+                            ));
 
-                    // Add the hashed value back to r.
-                    r.push_back(row_hash);
+                        // Add the hashed value back to r.
+                        r.push_back(row_hash);
+                    }
                 }
             }
             else{
@@ -296,17 +301,22 @@ FpMat HMAC::digest_mat_to_fp(const Mat& x, const IntVec& sel) const{
             // If we do not need to select values.
             if (sel.empty()){
                 for (int i = 0; i < mat_x.size(); ++i){
-                    // Create holder for hash result of this row.
-                    FpVec row_hash;
+                    if (mat_x[i].empty()){
+                        r.push_back({Fp(0)});
+                    }
+                    else{
+                        // Create holder for hash result of this row.
+                        FpVec row_hash;
 
-                    // This row is hashed with row + i.
-                    for (const auto& each_x : mat_x[i])
-                        row_hash.push_back(Helper::char_vec_to_fp(
-                            digest(Helper::str_to_char_vec(each_x + std::to_string(i)))
-                        ));
+                        // This row is hashed with row + i.
+                        for (const auto& each_x : mat_x[i])
+                            row_hash.push_back(Helper::char_vec_to_fp(
+                                digest(Helper::str_to_char_vec(each_x + std::to_string(i)))
+                            ));
 
-                    // Add the hashed value back to r.
-                    r.push_back(row_hash);
+                        // Add the hashed value back to r.
+                        r.push_back(row_hash);
+                    }
                 }
             }
             else{
@@ -333,6 +343,21 @@ FpMat HMAC::digest_mat_to_fp(const Mat& x, const IntVec& sel) const{
     return r;
 }
 
+FpVec HMAC::digest_int_to_fp_vec(const int& x, const int& len) const{
+    // Get the hash of the input integer first.
+    CharMat r;
+    r.push_back(digest(Helper::int_to_char_vec(x)));
+
+    // Compute the hash based on prior hash values.
+    for (int i = 1; i < len; ++i) r.push_back(digest(r[i - 1]));
+
+    // Convert hashes to field point values.
+    FpVec fp_r;
+    for (auto& each_r : r) fp_r.push_back(Helper::char_vec_to_fp(each_r));
+
+    return fp_r;
+}
+
 FpVec HMAC::digest_vec_to_fp_mod(const BP& pairing_group, const Vec& x, const IntVec& sel) const{
     // Get the hash result and perform modulo.
     FpVec r = digest_vec_to_fp(x, sel);
@@ -343,6 +368,13 @@ FpVec HMAC::digest_vec_to_fp_mod(const BP& pairing_group, const Vec& x, const In
 FpMat HMAC::digest_mat_to_fp_mod(const BP& pairing_group, const Mat& x, const IntVec& sel) const{
     // Get the hash result and perform modulo.
     FpMat r = digest_mat_to_fp(x, sel);
+    pairing_group.Zp->mod(r);
+    return r;
+}
+
+FpVec HMAC::digest_int_to_fp_vec_mod(const BP& pairing_group, const int& x, const int& len) const{
+    // Get the hash result and perform modulo.
+    FpVec r = digest_int_to_fp_vec(x, len);
     pairing_group.Zp->mod(r);
     return r;
 }

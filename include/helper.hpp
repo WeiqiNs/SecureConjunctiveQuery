@@ -1,5 +1,6 @@
 #pragma once
 
+#include <limits>
 #include <string>
 #include <random>
 #include <variant>
@@ -26,6 +27,9 @@ public:
      * @return the parsed data as a string matrix.
      */
     static StrMat read_tbl(const std::string& filename, int row);
+
+    /// Return a random integer from 1 to the largest.
+    static int rand_int();
 
     /**
      * Convert an integer to a vector of unsigned characters.

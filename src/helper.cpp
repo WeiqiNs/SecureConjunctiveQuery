@@ -24,6 +24,17 @@ StrMat Helper::read_tbl(const std::string& filename, int row){
     return table;
 }
 
+int Helper::rand_int(){
+    // Seed for the random number engine.
+    static std::random_device rd;
+    // Mersenne Twister engine.
+    static std::mt19937 gen(rd());
+    // Set the distribution from 1 to largest int.
+    std::uniform_int_distribution dist(1, std::numeric_limits<int>::max());
+
+    return dist(gen);
+}
+
 CharVec Helper::int_to_char_vec(const int& x){
     // Declare the return object, a vector of unsigned characters.
     CharVec r;

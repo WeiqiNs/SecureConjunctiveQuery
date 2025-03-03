@@ -14,6 +14,7 @@ struct IpeFilterPP{
 struct IpeFilterMsk{
     FpMat b;
     FpMat bi;
+    std::unique_ptr<HMAC> hmac;
 };
 
 class IpeFilter{
@@ -30,9 +31,10 @@ public:
     /**
      * Generate master secret key.
      * @param pp the public parameters.
+     * @param key the HMAC key to use.
      * @return the generated master secret key.
      */
-    static IpeFilterMsk msk_gen(const IpeFilterPP& pp);
+    static IpeFilterMsk msk_gen(const IpeFilterPP& pp, const CharVec& key = {});
 
     /**
      * Perform the Filter FE encryption.

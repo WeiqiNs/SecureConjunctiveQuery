@@ -136,3 +136,16 @@ TEST(CryptoTests, HashIntMat){
     EXPECT_TRUE(Field::cmp(hx[2][4], Helper::char_vec_to_fp(hmac.digest(Helper::str_to_char_vec("42")))));
     EXPECT_TRUE(Field::cmp(hx[2][5], Helper::char_vec_to_fp(hmac.digest(Helper::str_to_char_vec("52")))));
 }
+
+TEST(CryptoTests, HashIntToVec){
+    // Create a HMAC object and a testing vector.
+    const auto hmac = HMAC();
+
+    // Hash the vector without sel.
+    const auto x = hmac.digest_int_to_fp_vec(10, 10);
+    const auto y = hmac.digest_int_to_fp_vec(10, 10);
+
+    // Perform testing.
+    EXPECT_TRUE(Field::cmp(x[0], y[0]));
+    EXPECT_TRUE(Field::cmp(x[9], y[9]));
+}

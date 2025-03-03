@@ -13,10 +13,11 @@ IpeFilterPP IpeFilter::pp_gen(const int degree, const int length, const bool pre
     return pp;
 }
 
-IpeFilterMsk IpeFilter::msk_gen(const IpeFilterPP& pp){
+IpeFilterMsk IpeFilter::msk_gen(const IpeFilterPP& pp, const CharVec& key){
     // Create the msk instance.
     IpeFilterMsk msk;
-
+    // Get the unique point for HMAC.
+    msk.hmac = std::make_unique<HMAC>(key);
     // Compute the matrix size.
     const int mat_size = pp.l * pp.d + 3;
     // Generate the random matrix of desired size.
@@ -31,24 +32,12 @@ IpeFilterMsk IpeFilter::msk_gen(const IpeFilterPP& pp){
 }
 
 G1Vec IpeFilter::enc(const IpeFilterPP& pp, const IpeFilterMsk& msk, const Vec& x){
-    // Create the x vector in Fp.
-    FpVec x_vec;
-
-    // Convert the input x vector to Fp.
-    std::visit([&pp, &x_vec](auto&& input_x){
-        using T = std::decay_t<decltype(input_x)>;
-        if constexpr (std::is_same_v<T, IntVec> || std::is_same_v<T, StrVec>){
-            for (auto& i : input_x){
-                Fp temp(i);
-                pp.pairing_group->Zp->mod(temp);
-                x_vec.push_back(temp);
-            }
-        }
-        else throw std::invalid_argument("The input type is not supported.");
-    }, x);
+    // Generate hash of the input x vector.
+    const auto x_digest = msk.hmac->digest_vec_to_fp_mod(*pp.pairing_group, x);
 
     // We compute polynomial of x.
-    auto poly_x = Helper::power_poly(pp.d, *pp.pairing_group, x_vec);
+    auto poly_x = Helper::power_poly(pp.d, *pp.pairing_group, x_digest);
+
     // Attach (r, 0).
     poly_x.push_back(pp.pairing_group->Zp->rand());
     poly_x.emplace_back(0);
@@ -61,31 +50,16 @@ G1Vec IpeFilter::enc(const IpeFilterPP& pp, const IpeFilterMsk& msk, const Vec& 
 }
 
 G2Vec IpeFilter::keygen(const IpeFilterPP& pp, const IpeFilterMsk& msk, const Mat& y){
-    // Create the y matrix in Fp.
-    FpMat y_mat;
-
-    // Convert the input y matrix to Fp.
-    std::visit([&pp, &y_mat](auto&& input_y){
-        using T = std::decay_t<decltype(input_y)>;
-        if constexpr (std::is_same_v<T, IntMat> || std::is_same_v<T, StrMat>){
-            for (auto& row : input_y){
-                FpVec temp_vec;
-                for (auto& i : row){
-                    Fp temp(i);
-                    pp.pairing_group->Zp->mod(temp);
-                    temp_vec.push_back(temp);
-                }
-                y_mat.push_back(temp_vec);
-            }
-        }
-        else throw std::invalid_argument("The input type is not supported.");
-    }, y);
+    // Generate hash of the input y matrix.
+    const auto y_digest = msk.hmac->digest_mat_to_fp_mod(*pp.pairing_group, y);
 
     // We compute the polynomial of y.
-    auto poly_y = Helper::coeff_poly(pp.d, *pp.pairing_group, y_mat);
+    auto poly_y = Helper::coeff_poly(pp.d, *pp.pairing_group, y_digest);
+
     // Attach (0, r).
     poly_y.emplace_back(0);
     poly_y.push_back(pp.pairing_group->Zp->rand());
+
     // Multiply with the matrix Bi.
     const auto ybi = pp.pairing_group->Zp->mat_mul(poly_y, msk.bi);
 

@@ -3,7 +3,7 @@
 
 TEST(FilterTests, DegOneIntTrue){
     const auto pp = Filter::pp_gen(1, 10);
-    const auto msk = Filter::msk_gen(pp);
+    const auto msk = Filter::msk_gen(pp, {}, true);
 
     const IntVec x = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     const IntVec y = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
@@ -59,7 +59,7 @@ TEST(FilterTests, DegOneStrFalse){
 
 TEST(FilterTests, DegMulIntTrue){
     const auto pp = Filter::pp_gen(5, 10);
-    const auto msk = Filter::msk_gen(pp);
+    const auto msk = Filter::msk_gen(pp, {}, true);
 
     const IntVec x = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     const IntMat y = {

@@ -108,6 +108,7 @@ public:
      */
     [[nodiscard]] CharVec digest(const CharVec& data) const;
 
+
     /**
      * Digest a string or an integer vector to a vector of field element.
      * @param x a string or an integer vector.
@@ -123,6 +124,14 @@ public:
      * @return a matrix of field elements.
      */
     [[nodiscard]] FpMat digest_mat_to_fp(const Mat& x, const IntVec& sel = {}) const;
+
+    /**
+     * Given an integer, generate len number of random field number.
+     * @param x the starting integer.
+     * @param len the number of desired random values to be generated.
+     * @return len number of random field numbers.
+     */
+    [[nodiscard]] FpVec digest_int_to_fp_vec(const int& x, const int& len) const;
 
     /**
      * Digest a string or an integer vector to a vector of field element (in the generated group in pp).
@@ -141,6 +150,15 @@ public:
      * @return a vector of field elements.
      */
     [[nodiscard]] FpMat digest_mat_to_fp_mod(const BP& pairing_group, const Mat& x, const IntVec& sel = {}) const;
+
+    /**
+     * Given an integer, generate len number of random field number.
+     * @param pairing_group a bilinear pairing group object.
+     * @param x the starting integer.
+     * @param len the number of desired random values to be generated.
+     * @return len number of random field numbers.
+     */
+    [[nodiscard]] FpVec digest_int_to_fp_vec_mod(const BP& pairing_group, const int& x, const int& len) const;
 
 private:
     /// Declare variables used for HMAC.

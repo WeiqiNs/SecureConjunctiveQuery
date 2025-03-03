@@ -6,7 +6,8 @@ TEST(IpeFilterTests, FilterTrue){
     const auto msk = IpeFilter::msk_gen(pp);
 
     const IntVec x = {100, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-    const IntMat y = {{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}};
+    // You could use {} as a wild card to filter anything.
+    const IntMat y = {{}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}};
 
     const auto ct = IpeFilter::enc(pp, msk, x);
     const auto sk = IpeFilter::keygen(pp, msk, y);
@@ -19,7 +20,7 @@ TEST(IpeFilterTests, FilterFalse){
     const auto msk = IpeFilter::msk_gen(pp);
 
     const IntVec x = {100, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-    const IntMat y = {{10}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}};
+    const IntMat y = {{1}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}};
 
     const auto ct = IpeFilter::enc(pp, msk, x);
     const auto sk = IpeFilter::keygen(pp, msk, y);
@@ -33,8 +34,8 @@ TEST(IpeFilterTests, FilterHighDegTrue){
 
     const IntVec x = {100, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     const IntMat y = {
-            // You could use 0 as a wild card to filter anything.
-            {0}, {1, 2, 3, 4, 5}, {2, 3}, {3, 4}, {4, 5},
+            // You could use {} as a wild card to filter anything.
+            {}, {1, 2, 3, 4, 5}, {2, 3}, {3, 4}, {4, 5},
             {5, 6}, {6, 7}, {7, 8}, {8, 9}, {9, 10}
         };
 

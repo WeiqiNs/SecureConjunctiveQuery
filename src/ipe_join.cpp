@@ -37,41 +37,32 @@ IpeJoinMsk IpeJoin::msk_gen(const IpeJoinPP& pp, const CharVec& key){
 G1Vec IpeJoin::enc(const IpeJoinPP& pp, const IpeJoinMsk& msk, const Vec& x, const int join_index){
     // Declare variable to hold the point to join on.
     Fp join_on;
-    // Create the x vector in Fp.
-    FpVec x_vec;
+
+    // Make a copy of the input x.
+    Vec x_copy = x;
 
     // Compute the hash of value to join and remove the join value from x copy.
-    std::visit([&pp, &msk, &join_on, &x_vec, join_index](auto&& input_x){
+    std::visit([&pp, &msk, &join_on, join_index](auto&& input_x){
         using T = std::decay_t<decltype(input_x)>;
         if constexpr (std::is_same_v<T, IntVec>){
-            for (int i = 0; i < input_x.size(); ++i){
-                if (i == join_index){
-                    join_on = Helper::char_vec_to_fp(msk.hmac->digest(Helper::int_to_char_vec(input_x[join_index])));
-                }
-                else{
-                    Fp temp(input_x[i]);
-                    pp.pairing_group->Zp->mod(temp);
-                    x_vec.push_back(temp);
-                }
-            }
+            join_on = Helper::char_vec_to_fp(msk.hmac->digest(Helper::int_to_char_vec(input_x[join_index])));
+            pp.pairing_group->Zp->mod(join_on);
+            input_x.erase(input_x.begin() + join_index);
         }
         else if constexpr (std::is_same_v<T, StrVec>){
-            for (int i = 0; i < input_x.size(); ++i){
-                if (i == join_index){
-                    join_on = Helper::char_vec_to_fp(msk.hmac->digest(Helper::str_to_char_vec(input_x[join_index])));
-                }
-                else{
-                    Fp temp(input_x[i]);
-                    pp.pairing_group->Zp->mod(temp);
-                    x_vec.push_back(temp);
-                }
-            }
+            join_on = Helper::char_vec_to_fp(msk.hmac->digest(Helper::str_to_char_vec(input_x[join_index])));
+            pp.pairing_group->Zp->mod(join_on);
+            input_x.erase(input_x.begin() + join_index);
         }
         else throw std::invalid_argument("The input type is not supported.");
-    }, x);
+    }, x_copy);
+
+    // Generate hash of the input x vector.
+    const auto x_digest = msk.hmac->digest_vec_to_fp_mod(*pp.pairing_group, x_copy);
 
     // We compute polynomial of x.
-    auto poly_x = Helper::power_poly(pp.d, *pp.pairing_group, x_vec);
+    auto poly_x = Helper::power_poly(pp.d, *pp.pairing_group, x_digest);
+
     // Attach (r, 0).
     poly_x.push_back(pp.pairing_group->Zp->rand());
     poly_x.emplace_back(0);
@@ -87,31 +78,16 @@ G1Vec IpeJoin::enc(const IpeJoinPP& pp, const IpeJoinMsk& msk, const Vec& x, con
 }
 
 G2Vec IpeJoin::keygen(const IpeJoinPP& pp, const IpeJoinMsk& msk, const Mat& y){
-    // Create the x vector in Fp.
-    FpMat y_mat;
-
-    // Compute the hash of value to join and remove the join value from x copy.
-    std::visit([&pp, &y_mat](auto&& input_y){
-        using T = std::decay_t<decltype(input_y)>;
-        if constexpr (std::is_same_v<T, IntMat> || std::is_same_v<T, StrMat>){
-            for (auto& row : input_y){
-                FpVec temp_vec;
-                for (auto& i : row){
-                    Fp temp(i);
-                    pp.pairing_group->Zp->mod(temp);
-                    temp_vec.push_back(temp);
-                }
-                y_mat.push_back(temp_vec);
-            }
-        }
-        else throw std::invalid_argument("The input type is not supported.");
-    }, y);
+    // Compute the hash of filtered values.
+    const auto y_digest = msk.hmac->digest_mat_to_fp_mod(*pp.pairing_group, y);
 
     // We compute the polynomial of y.
-    auto poly_y = Helper::coeff_poly(pp.d, *pp.pairing_group, y_mat);
+    auto poly_y = Helper::coeff_poly(pp.d, *pp.pairing_group, y_digest);
+
     // Attach (0, r).
     poly_y.emplace_back(0);
     poly_y.push_back(pp.pairing_group->Zp->rand());
+
     // Push the randomness in the key to the back.
     poly_y.push_back(msk.k);
 

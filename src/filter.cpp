@@ -1,5 +1,7 @@
 #include "filter.hpp"
 
+#include <iostream>
+
 FilterPP Filter::pp_gen(const int degree, const int length, const bool pre){
     // Create the pp instance.
     FilterPP pp;
@@ -13,22 +15,33 @@ FilterPP Filter::pp_gen(const int degree, const int length, const bool pre){
     return pp;
 }
 
-FilterMsk Filter::msk_gen(const FilterPP& pp, const CharVec& key){
+FilterMsk Filter::msk_gen(const FilterPP& pp, const CharVec& key, const bool& compress){
     // Create the msk instance.
     FilterMsk msk;
+    // Save whether the values need to be compressed.
+    msk.compress = compress;
     // Get the unique point for HMAC.
     msk.hmac = std::make_unique<HMAC>(key);
 
     // Only when degree is larger than 1, the vectors are needed.
     if (pp.d > 1){
-        // Sample a random point and find its inverse.
-        msk.d = pp.pairing_group->Zp->rand();
-        msk.di = pp.pairing_group->Zp->inv(msk.d);
-        // If degree is higher than 1, we need the length to be 2 * (length * degree + 1).
-        // This utilizes the optimization of adding the constant together.
-        msk.r = pp.pairing_group->Zp->rand_vec(2 * (pp.l * pp.d + 1));
-        msk.b = pp.pairing_group->Zp->rand_vec(2 * (pp.l * pp.d + 1));
-        msk.bi = pp.pairing_group->Zp->vec_inv(msk.b);
+        if (compress){
+            // Sample the starting point.
+            msk.d_int = Helper::rand_int();
+            msk.r_int = Helper::rand_int();
+            msk.b_int = Helper::rand_int();
+            msk.vec_len = 2 * (pp.l * pp.d + 1);
+        }
+        else{
+            // Sample a random point and find its inverse.
+            msk.d = pp.pairing_group->Zp->rand();
+            msk.di = pp.pairing_group->Zp->inv(msk.d);
+            // If degree is higher than 1, we need the length to be 2 * (length * degree + 1).
+            // This utilizes the optimization of adding the constant together.
+            msk.r = pp.pairing_group->Zp->rand_vec(2 * (pp.l * pp.d + 1));
+            msk.b = pp.pairing_group->Zp->rand_vec(2 * (pp.l * pp.d + 1));
+            msk.bi = pp.pairing_group->Zp->vec_inv(msk.b);
+        }
     }
 
     // Return the master secret key.
@@ -52,18 +65,40 @@ G1Vec Filter::enc(const FilterPP& pp, const FilterMsk& msk, const Vec& x){
         return pp.pairing_group->Gp->g1_raise(ax);
     }
 
+    // Create pointers for values that needs to be used.
+    const Fp* d;
+    const FpVec *r, *b;
+
+    // In this case, first figure out whether the msk values needs to be sampled.
+    if (msk.compress){
+        // Only one value is generated.
+        const Fp temp_d = msk.hmac->digest_int_to_fp_vec_mod(*pp.pairing_group, msk.d_int, 1)[0];
+        // Sample r and b.
+        const FpVec temp_r = msk.hmac->digest_int_to_fp_vec_mod(*pp.pairing_group, msk.r_int, msk.vec_len);
+        const FpVec temp_b = msk.hmac->digest_int_to_fp_vec_mod(*pp.pairing_group, msk.b_int, msk.vec_len);
+        // Assign the pointers with generated value.
+        d = &temp_d;
+        r = &temp_r;
+        b = &temp_b;
+    } else{
+        // Assign the pointers with values from msk.
+        d = &msk.d;
+        r = &msk.r;
+        b = &msk.b;
+    }
+
     // Here is the case where the degree is higher than 1, we compute the value for evaluating polynomial at x.
     const auto poly_x = Helper::power_poly(pp.d, *pp.pairing_group, x_digest);
     // Duplicate the poly(x).
     const auto xx = Field::vec_join(poly_x, poly_x);
     // Compute poly(x)||poly(x) + r.
-    const auto xxr = pp.pairing_group->Zp->vec_add(xx, msk.r);
+    const auto xxr = pp.pairing_group->Zp->vec_add(xx, *r);
     // Compute alpha * (poly(x)||poly(x) + r).
     const auto axxr = pp.pairing_group->Zp->vec_mul(xxr, alpha);
     // Compute alpha * vec_b * (poly(x)||poly(x) + r).
-    auto abxxr = pp.pairing_group->Zp->vec_mul(axxr, msk.b);
+    auto abxxr = pp.pairing_group->Zp->vec_mul(axxr, *b);
     // Attach the last point -alpha * delta.
-    abxxr.push_back(pp.pairing_group->Zp->neg(pp.pairing_group->Zp->mul(alpha, msk.d)));
+    abxxr.push_back(pp.pairing_group->Zp->neg(pp.pairing_group->Zp->mul(alpha, *d)));
 
     // Raise the vector to g1 and return.
     return pp.pairing_group->Gp->g1_raise(abxxr);
@@ -94,41 +129,105 @@ G2Vec Filter::keygen(const FilterPP& pp, const FilterMsk& msk, const VecOrMat& y
 
     // Generate the hash of the input y vector.
     FpMat y_digest;
-    // Make sure the input y is vector type.
+    // Make sure the input y is matrix type.
     std::visit([&pp, &msk, &sel, &y_digest](auto&& input_y){
         using T = std::decay_t<decltype(input_y)>;
         if constexpr (std::is_same_v<T, IntMat> || std::is_same_v<T, StrMat>)
             y_digest = msk.hmac->digest_mat_to_fp_mod(*pp.pairing_group, input_y, sel);
         else throw std::invalid_argument("The degree must be more than 1 when inputting a y matrix.");
     }, y);
-
     // We compute the coefficient for when mat y equals to zero.
     auto coeff = Helper::coeff_poly(pp.d, *pp.pairing_group, y_digest);
     // Split the coefficient to two parts.
     coeff = Helper::split_poly(*pp.pairing_group, coeff);
 
-    // Select r and bi.
-    FpVec sel_r, sel_bi;
+    // In this case, first figure out whether the msk values needs to be sampled.
+    if (msk.compress){
+        // Only one value is generated.
+        const Fp d = msk.hmac->digest_int_to_fp_vec_mod(*pp.pairing_group, msk.d_int, 1)[0];
+        const Fp di = pp.pairing_group->Zp->inv(d);
+        // Sample r and b.
+        const FpVec r = msk.hmac->digest_int_to_fp_vec_mod(*pp.pairing_group, msk.r_int, msk.vec_len);
+        const FpVec b = msk.hmac->digest_int_to_fp_vec_mod(*pp.pairing_group, msk.b_int, msk.vec_len);
+        // Compute the bi.
+        const FpVec bi = pp.pairing_group->Zp->vec_inv(b);
 
-    // Depends on whether sel is needed, we build the vectors.
-    if (sel.empty()){
-        sel_r = msk.r;
-        sel_bi = msk.bi;
-    }
-    // When sel is provided, filter out the keys.
-    else{
+        // Depends on whether sel is needed, we build the vectors.
+        if (sel.empty()){
+            // Compute beta * c.
+            const auto bc = pp.pairing_group->Zp->vec_mul(coeff, beta);
+            // Compute beta * bi * c.
+            auto bbic = pp.pairing_group->Zp->vec_mul(bc, bi);
+
+            // Compute the last point to join to the vector.
+            auto temp = pp.pairing_group->Zp->vec_ip(coeff, r);
+            temp = pp.pairing_group->Zp->mul(temp, beta);
+            bbic.push_back(pp.pairing_group->Zp->mul(temp, di));
+
+            // Raise to g2 and return.
+            return pp.pairing_group->Gp->g2_raise(bbic);
+        }
+
+        FpVec sel_r, sel_bi;
+
         // Get the selected index.
         const auto sel_index = Helper::get_sel_index(pp.d, pp.l, sel);
 
         for (const auto i : sel_index){
-            sel_r.push_back(msk.r[i]);
-            sel_bi.push_back(msk.bi[i]);
+            sel_r.push_back(r[i]);
+            sel_bi.push_back(bi[i]);
         }
         for (const auto i : sel_index){
-            sel_r.push_back(msk.r[msk.r.size() / 2 + i]);
-            sel_bi.push_back(msk.bi[msk.r.size() / 2 + i]);
+            sel_r.push_back(r[r.size() / 2 + i]);
+            sel_bi.push_back(bi[r.size() / 2 + i]);
         }
+
+
+        // Compute beta * c.
+        const auto bc = pp.pairing_group->Zp->vec_mul(coeff, beta);
+        // Compute beta * bi * c.
+        auto bbic = pp.pairing_group->Zp->vec_mul(bc, sel_bi);
+
+        // Compute the last point to join to the vector.
+        auto temp = pp.pairing_group->Zp->vec_ip(coeff, sel_r);
+        temp = pp.pairing_group->Zp->mul(temp, beta);
+        bbic.push_back(pp.pairing_group->Zp->mul(temp, di));
+
+        // Raise to g2 and return.
+        return pp.pairing_group->Gp->g2_raise(bbic);
     }
+
+
+    // Depends on whether sel is needed, we build the vectors.
+    if (sel.empty()){
+        // Compute beta * c.
+        const auto bc = pp.pairing_group->Zp->vec_mul(coeff, beta);
+        // Compute beta * bi * c.
+        auto bbic = pp.pairing_group->Zp->vec_mul(bc, msk.bi);
+
+        // Compute the last point to join to the vector.
+        auto temp = pp.pairing_group->Zp->vec_ip(coeff, msk.r);
+        temp = pp.pairing_group->Zp->mul(temp, beta);
+        bbic.push_back(pp.pairing_group->Zp->mul(temp, msk.di));
+
+        // Raise to g2 and return.
+        return pp.pairing_group->Gp->g2_raise(bbic);
+    }
+
+    FpVec sel_r, sel_bi;
+
+    // Get the selected index.
+    const auto sel_index = Helper::get_sel_index(pp.d, pp.l, sel);
+
+    for (const auto i : sel_index){
+        sel_r.push_back(msk.r[i]);
+        sel_bi.push_back(msk.bi[i]);
+    }
+    for (const auto i : sel_index){
+        sel_r.push_back(msk.r[msk.r.size() / 2 + i]);
+        sel_bi.push_back(msk.bi[msk.r.size() / 2 + i]);
+    }
+
 
     // Compute beta * c.
     const auto bc = pp.pairing_group->Zp->vec_mul(coeff, beta);
