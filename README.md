@@ -16,3 +16,10 @@ Xinle Cao, Weiqi Feng, Quanqing Xu, Chuanhui Yang, Rui Zhang, Jinfei Liu, and Ji
 
 ## How to run this code
 Our code base depends on the [RELIC library](https://github.com/relic-toolkit/relic) and the [LibRBP library](https://github.com/WeiqiNs/LibRBP); note that our experiment is done on the BLS12-381 curve. One could refer to the [Dockerfile](Dockerfile) to see how to create the dev environment (or use it to build a container directly).
+
+
+## Testing
+
+[![SCQ CI](https://github.com/WeiqiNs/SecureConjunctiveQuery/actions/workflows/ci.yml/badge.svg)](https://github.com/WeiqiNs/SecureConjunctiveQuery/actions/workflows/ci.yml)
+
+To support continuous development in this area, we maintain a well-tested codebase with a suite of unit tests integrated into our GitHub CI workflow. One could also refer to the [`ci.yml`](.github/workflows/ci.yml) file for details on setting up the dev environment.
