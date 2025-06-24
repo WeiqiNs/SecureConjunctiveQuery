@@ -1,6 +1,6 @@
 name: SCQ CI
 
-on: [ push, pull_request ]
+on: [ push, pull_request, workflow_dispatch ]
 
 jobs:
   build_and_test:
@@ -37,7 +37,7 @@ jobs:
       - name: Checkout main repository
         uses: actions/checkout@v4
 
-      - name: Build the EEJ project
+      - name: Build the SCQ project
         run: |
           mkdir build && cd build
           cmake .. && sudo make
