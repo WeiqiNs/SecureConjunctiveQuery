@@ -3,9 +3,9 @@
 /// Note that the testing data can be found at:
 /// https://github.com/EquiJoins/EquiJoinsOverEncryptedData/tree/main/hash_based_impl/data
 
-void ipe_total_multi_join_time(const int round){
+void ipe_total_mf_join_time(const int round){
     // Open the output files.
-    std::ofstream file("total_multi_join_time.txt", std::ios_base::app);
+    std::ofstream file("total_mf_join_time.txt", std::ios_base::app);
     file << "IPE Timings" << std::endl;
 
     // Read the data.
@@ -13,10 +13,10 @@ void ipe_total_multi_join_time(const int round){
     StrMat customer = Helper::read_tbl("data/customer.tbl", 1500000);
 
     // Create pp and msk.
-    auto pp_order = IpeJoin::pp_gen(5, 9);
-    auto msk_order = IpeJoin::msk_gen(pp_order);
-    auto pp_customer = IpeJoin::pp_gen(5, 8);
-    auto msk_customer = IpeJoin::msk_gen(pp_customer);
+    auto pp_order = IpeEj::pp_gen(5, 9);
+    auto msk_order = IpeEj::msk_gen(pp_order);
+    auto pp_customer = IpeEj::pp_gen(5, 8);
+    auto msk_customer = IpeEj::msk_gen(pp_customer);
 
     for (int num_col = 2; num_col <= 15; ++num_col){
         // Create holder for timings.
@@ -30,27 +30,27 @@ void ipe_total_multi_join_time(const int round){
 
             // Total timings.
             auto start = std::chrono::high_resolution_clock::now();
-            auto sk_order = IpeJoin::keygen(pp_order, msk_order, y_order);
-            auto sk_customer = IpeJoin::keygen(pp_customer, msk_customer, y_customer);
+            auto sk_order = IpeEj::keygen(pp_order, msk_order, y_order);
+            auto sk_customer = IpeEj::keygen(pp_customer, msk_customer, y_customer);
             auto end = std::chrono::high_resolution_clock::now();
             time += end - start;
 
             // Timing for order.
-            for (auto& order_row: order){
-                auto ct_order = IpeJoin::enc(pp_order, msk_order, order_row, 1);
+            for (auto& order_row : order){
+                auto ct_order = IpeEj::enc(pp_order, msk_order, order_row, 1);
                 // Total timings.
                 start = std::chrono::high_resolution_clock::now();
-                std::ignore = IpeJoin::dec(ct_order, sk_order);
+                std::ignore = IpeEj::dec(ct_order, sk_order);
                 end = std::chrono::high_resolution_clock::now();
                 time += end - start;
             }
 
             // Timing for customer.
-            for (auto& customer_row: customer){
-                auto ct_customer = IpeJoin::enc(pp_order, msk_order, customer_row, 1);
+            for (auto& customer_row : customer){
+                auto ct_customer = IpeEj::enc(pp_order, msk_order, customer_row, 1);
                 // Total timings.
                 start = std::chrono::high_resolution_clock::now();
-                std::ignore = IpeJoin::dec(ct_customer, sk_customer);
+                std::ignore = IpeEj::dec(ct_customer, sk_customer);
                 end = std::chrono::high_resolution_clock::now();
                 time += end - start;
             }
@@ -67,9 +67,9 @@ void ipe_total_multi_join_time(const int round){
     file << std::endl << std::endl;
 }
 
-void our_total_multi_join_time(const int round){
+void our_total_mf_join_time(const int round){
     // Open the output files.
-    std::ofstream file("total_multi_join_time.txt", std::ios_base::app);
+    std::ofstream file("total_mf_join_time.txt", std::ios_base::app);
     file << "Our Timings" << std::endl;
 
     // Read the data.
@@ -77,10 +77,10 @@ void our_total_multi_join_time(const int round){
     StrMat customer = Helper::read_tbl("data/customer.tbl", 1500000);
 
     // Create pp and msk.
-    auto pp_order = Join::pp_gen(5, 9);
-    auto msk_order = Join::msk_gen(pp_order);
-    auto pp_customer = Join::pp_gen(5, 8);
-    auto msk_customer = Join::msk_gen(pp_customer);
+    auto pp_order = FlexDbEj::pp_gen(5, 9);
+    auto msk_order = FlexDbEj::msk_gen(pp_order);
+    auto pp_customer = FlexDbEj::pp_gen(5, 8);
+    auto msk_customer = FlexDbEj::msk_gen(pp_customer);
 
     for (int num_col = 2; num_col <= 15; ++num_col){
         // Create holder for timings.
@@ -112,27 +112,27 @@ void our_total_multi_join_time(const int round){
 
             // Total timings.
             auto start = std::chrono::high_resolution_clock::now();
-            auto sk_order = Join::keygen(pp_order, msk_order, y_order, sel_order);
-            auto sk_customer = Join::keygen(pp_customer, msk_customer, y_customer, sel_customer);
+            auto sk_order = FlexDbEj::keygen(pp_order, msk_order, y_order, sel_order);
+            auto sk_customer = FlexDbEj::keygen(pp_customer, msk_customer, y_customer, sel_customer);
             auto end = std::chrono::high_resolution_clock::now();
             time += end - start;
 
             // Timing for order.
-            for (auto& order_row: order){
-                auto ct_order = Join::enc(pp_order, msk_order, order_row, 1);
+            for (auto& order_row : order){
+                auto ct_order = FlexDbEj::enc(pp_order, msk_order, order_row, 1);
                 // Total timings.
                 start = std::chrono::high_resolution_clock::now();
-                std::ignore = Join::dec(pp_order, ct_order, sk_order, sel_order);
+                std::ignore = FlexDbEj::dec(pp_order, ct_order, sk_order, sel_order);
                 end = std::chrono::high_resolution_clock::now();
                 time += end - start;
             }
 
             // Timing for customer.
-            for (auto& customer_row: customer){
-                auto ct_customer = Join::enc(pp_customer, msk_customer, customer_row, 1);
+            for (auto& customer_row : customer){
+                auto ct_customer = FlexDbEj::enc(pp_customer, msk_customer, customer_row, 1);
                 // Total timings.
                 start = std::chrono::high_resolution_clock::now();
-                std::ignore = Join::dec(pp_customer, ct_customer, sk_customer, sel_customer);
+                std::ignore = FlexDbEj::dec(pp_customer, ct_customer, sk_customer, sel_customer);
                 end = std::chrono::high_resolution_clock::now();
                 time += end - start;
             }
@@ -149,7 +149,7 @@ void our_total_multi_join_time(const int round){
     file << std::endl << std::endl;
 }
 
-void bench_total_multi_join_time(const int round){
-    ipe_total_multi_join_time(round);
-    our_total_multi_join_time(round);
+void bench_total_mf_join_time(const int round){
+    ipe_total_mf_join_time(round);
+    our_total_mf_join_time(round);
 }

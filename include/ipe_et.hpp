@@ -2,20 +2,20 @@
 
 #include "helper.hpp"
 
-struct KimAggrePP{
-    // Suppose by default the length is 1.
-    int l = 1;
+struct IpeEtPp{
+    // Store the input length.
+    int l;
     // Create a pointer to hold the bilinear pairing group object.
     std::unique_ptr<BP> pairing_group;
 };
 
-struct KimAggreMsk{
+struct IpeEtMsk{
     FpMat b;
     FpMat bi;
 };
 
 
-class KimAggre{
+class IpeEt{
 public:
     /**
      * Generate the required public parameters.
@@ -23,14 +23,14 @@ public:
      * @param pre whether we want to use the precomputed table for group exponentiation.
      * @return the generated public parameters.
      */
-    static KimAggrePP pp_gen(int length, bool pre = true);
+    static IpeEtPp pp_gen(int length, bool pre = true);
 
     /**
      * Generate master secret key.
      * @param pp the public parameters.
      * @return the generated master secret key.
      */
-    static KimAggreMsk msk_gen(const KimAggrePP& pp);
+    static IpeEtMsk msk_gen(const IpeEtPp& pp);
 
     /**
      * Perform the Aggre FE encryption.
@@ -39,7 +39,7 @@ public:
      * @param x a vector of integers.
      * @return the ciphertext.
      */
-    static G1Vec enc(const KimAggrePP& pp, const KimAggreMsk& msk, const IntVec& x);
+    static G1Vec enc(const IpeEtPp& pp, const IpeEtMsk& msk, const IntVec& x);
 
     /**
      * Perform the Aggre FE key generation.
@@ -49,7 +49,7 @@ public:
      * @param p an integer.
      * @return the function key.
      */
-    static G2Vec keygen(const KimAggrePP& pp, const KimAggreMsk& msk, const IntVec& y, int p);
+    static G2Vec keygen(const IpeEtPp& pp, const IpeEtMsk& msk, const IntVec& y, int p);
 
     /**
      * Perform the Aggre FE decryption.

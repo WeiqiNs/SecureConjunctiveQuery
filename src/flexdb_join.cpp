@@ -1,8 +1,8 @@
-#include "join.hpp"
+#include "flexdb_join.hpp"
 
-JoinPP Join::pp_gen(const int degree, const int length, const bool pre){
+FlexDbEjPp FlexDbEj::pp_gen(const int degree, const int length, const bool pre){
     // Create the pp instance.
-    JoinPP pp;
+    FlexDbEjPp pp{};
     // Update the degree according to input.
     pp.d = degree;
     // Update the input length according to input.
@@ -13,9 +13,9 @@ JoinPP Join::pp_gen(const int degree, const int length, const bool pre){
     return pp;
 }
 
-JoinMsk Join::msk_gen(const JoinPP& pp, const CharVec& key, const bool& compress){
+FlexDbEjMsk FlexDbEj::msk_gen(const FlexDbEjPp& pp, const CharVec& key, const bool& compress){
     // Create the msk instance.
-    JoinMsk msk;
+    FlexDbEjMsk msk{};
     // Save whether the values need to be compressed.
     msk.compress = compress;
     // Get the unique point for HMAC.
@@ -52,7 +52,7 @@ JoinMsk Join::msk_gen(const JoinPP& pp, const CharVec& key, const bool& compress
     return msk;
 }
 
-G1Vec Join::enc(const JoinPP& pp, const JoinMsk& msk, const Vec& x, const int join_index){
+G1Vec FlexDbEj::enc(const FlexDbEjPp& pp, const FlexDbEjMsk& msk, const Vec& x, const int join_index){
     // Declare variable to hold the point to join on.
     Fp join_on;
 
@@ -140,7 +140,7 @@ G1Vec Join::enc(const JoinPP& pp, const JoinMsk& msk, const Vec& x, const int jo
     return pp.pairing_group->Gp->g1_raise(abxxr);
 }
 
-G2Vec Join::keygen(const JoinPP& pp, const JoinMsk& msk, const VecOrMat& y, const IntVec& sel){
+G2Vec FlexDbEj::keygen(const FlexDbEjPp& pp, const FlexDbEjMsk& msk, const VecOrMat& y, const IntVec& sel){
     // Sample the random point beta.
     const auto beta = pp.pairing_group->Zp->rand();
 
@@ -260,7 +260,7 @@ G2Vec Join::keygen(const JoinPP& pp, const JoinMsk& msk, const VecOrMat& y, cons
     return pp.pairing_group->Gp->g2_raise(bbic);
 }
 
-Gt Join::dec(const JoinPP& pp, const G1Vec& ct, const G2Vec& sk, const IntVec& sel){
+Gt FlexDbEj::dec(const FlexDbEjPp& pp, const G1Vec& ct, const G2Vec& sk, const IntVec& sel){
     if (pp.d == 1){
         // We select desired things from ct.
         G1Vec sel_ct;

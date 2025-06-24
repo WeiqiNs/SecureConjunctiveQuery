@@ -2,27 +2,27 @@
 
 #include "crypto.hpp"
 
-struct AggrePP{
-    // Suppose by default the length is 1.
-    int l = 1;
+struct FlexDbEtPp{
+    // Store the input length.
+    int l;
     // Create a pointer to hold the bilinear pairing group object.
     std::unique_ptr<BP> pairing_group;
 };
 
-struct AggreMsk{
+struct FlexDbEtMsk{
     Fp d;
     Fp di;
     FpVec r;
     FpVec b;
     FpVec bi;
-    int d_int = 0;
-    int r_int = 0;
-    int b_int = 0;
+    int d_int;
+    int r_int;
+    int b_int;
     bool compress;
     std::unique_ptr<HMAC> hmac;
 };
 
-class Aggre{
+class FlexDbEt{
 public:
     /**
      * Generate the public parameters for FE with the Aggre functionality.
@@ -30,7 +30,7 @@ public:
      * @param pre whether we want to use the precomputed table for group exponentiation.
      * @return the generated public parameters.
      */
-    static AggrePP pp_gen(int length, bool pre = true);
+    static FlexDbEtPp pp_gen(int length, bool pre = true);
 
     /**
      * Generate master secret key.
@@ -39,7 +39,7 @@ public:
      * @param compress boolean to indicate whether to compress the private keys.
      * @return the generated master secret key.
      */
-    static AggreMsk msk_gen(const AggrePP& pp, const CharVec& key = {}, const bool& compress = false);
+    static FlexDbEtMsk msk_gen(const FlexDbEtPp& pp, const CharVec& key = {}, const bool& compress = false);
 
     /**
      * Perform the Aggre FE encryption.
@@ -48,7 +48,7 @@ public:
      * @param x a vector of integers.
      * @return the ciphertext.
      */
-    static G1Vec enc(const AggrePP& pp, const AggreMsk& msk, const IntVec& x);
+    static G1Vec enc(const FlexDbEtPp& pp, const FlexDbEtMsk& msk, const IntVec& x);
 
     /**
      * Perform the Aggre FE key generation.
@@ -59,7 +59,7 @@ public:
      * @param sel a vector of integers indicating which columns to select, by default is empty.
      * @return the function key.
      */
-    static G2Vec keygen(const AggrePP& pp, const AggreMsk& msk, const IntVec& y, int p, const IntVec& sel = {});
+    static G2Vec keygen(const FlexDbEtPp& pp, const FlexDbEtMsk& msk, const IntVec& y, int p, const IntVec& sel = {});
 
     /**
      * Perform the Aggre FE decryption.

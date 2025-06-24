@@ -209,7 +209,7 @@ FpVec HMAC::digest_vec_to_fp(const Vec& x, const IntVec& sel) const{
 
         // For integer vectors.
         if constexpr (std::is_same_v<T, IntVec>){
-            // If the selective is emtpy, we hash x_i + i.
+            // If the selective is empty, we hash x_i + i.
             if (sel.empty())
                 for (int i = 0; i < vec_x.size(); ++i){
                     r.push_back(Helper::char_vec_to_fp(
@@ -227,7 +227,7 @@ FpVec HMAC::digest_vec_to_fp(const Vec& x, const IntVec& sel) const{
         // For string vectors.
         else if constexpr (std::is_same_v<T, StrVec>){
             if (sel.empty())
-                // If the selective is emtpy, we hash x_i || i.
+                // If the selective is empty, we hash x_i || i.
                 for (int i = 0; i < vec_x.size(); ++i)
                     r.push_back(Helper::char_vec_to_fp(
                         digest(Helper::str_to_char_vec(vec_x[i] + std::to_string(i)))

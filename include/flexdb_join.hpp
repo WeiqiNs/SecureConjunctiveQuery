@@ -2,31 +2,30 @@
 
 #include "crypto.hpp"
 
-struct JoinPP{
-    // Suppose by default the degree is 1.
-    int d = 1;
-    // Suppose by default the length is 1.
-    int l = 1;
+struct FlexDbEjPp{
+    // Store the degree and input length.
+    int d;
+    int l;
     // Create a pointer to hold the bilinear pairing group object.
     std::unique_ptr<BP> pairing_group;
 };
 
-struct JoinMsk{
+struct FlexDbEjMsk{
     Fp k;
     Fp d;
     Fp di;
     FpVec r;
     FpVec b;
     FpVec bi;
-    int k_int = 0;
-    int d_int = 0;
-    int r_int = 0;
-    int b_int = 0;
+    int k_int;
+    int d_int;
+    int r_int;
+    int b_int;
     bool compress;
     std::unique_ptr<HMAC> hmac;
 };
 
-class Join{
+class FlexDbEj{
 public:
     /**
      * Generate the required public parameters.
@@ -35,7 +34,7 @@ public:
      * @param pre whether we want to use the precomputed table for group exponentiation.
      * @return the generated public parameters.
      */
-    static JoinPP pp_gen(int degree, int length, bool pre = true);
+    static FlexDbEjPp pp_gen(int degree, int length, bool pre = true);
 
     /**
      * Generate master secret key.
@@ -44,7 +43,7 @@ public:
      * @param compress boolean to indicate whether to compress the private keys.
      * @return the generated master secret key.
      */
-    static JoinMsk msk_gen(const JoinPP& pp, const CharVec& key = {}, const bool& compress = false);
+    static FlexDbEjMsk msk_gen(const FlexDbEjPp& pp, const CharVec& key = {}, const bool& compress = false);
 
     /**
      * Perform the Equal-Join encryption.
@@ -54,7 +53,7 @@ public:
      * @param join_index indicate which position to check for equality.
      * @return the ciphertext.
      */
-    static G1Vec enc(const JoinPP& pp, const JoinMsk& msk, const Vec& x, int join_index);
+    static G1Vec enc(const FlexDbEjPp& pp, const FlexDbEjMsk& msk, const Vec& x, int join_index);
 
     /**
      * Perform the Equal-Join key generation with selecting columns.
@@ -64,7 +63,7 @@ public:
      * @param sel a vector of integers indicating which columns to select, by default is empty.
      * @return 
      */
-    static G2Vec keygen(const JoinPP& pp, const JoinMsk& msk, const VecOrMat& y, const IntVec& sel = {});
+    static G2Vec keygen(const FlexDbEjPp& pp, const FlexDbEjMsk& msk, const VecOrMat& y, const IntVec& sel = {});
 
     /**
      * Perform the Equal-Join FE decryption with selecting columns.
@@ -74,5 +73,5 @@ public:
      * @param sel a vector of integers indicating which columns to select, by default is empty.
      * @return a Gt element of the pairing, needs to be compared with another to determine whether join can happen.
      */
-    static Gt dec(const JoinPP& pp, const G1Vec& ct, const G2Vec& sk, const IntVec& sel = {});
+    static Gt dec(const FlexDbEjPp& pp, const G1Vec& ct, const G2Vec& sk, const IntVec& sel = {});
 };

@@ -1,8 +1,8 @@
-#include "ipe_join.hpp"
+#include "ipe_ej.hpp"
 
-IpeJoinPP IpeJoin::pp_gen(const int degree, const int length, const bool pre){
+IpeEjPp IpeEj::pp_gen(const int degree, const int length, const bool pre){
     // Create the pp instance.
-    IpeJoinPP pp;
+    IpeEjPp pp{};
     // Update the degree according to input.
     pp.d = degree;
     // Update the input length according to input.
@@ -13,9 +13,9 @@ IpeJoinPP IpeJoin::pp_gen(const int degree, const int length, const bool pre){
     return pp;
 }
 
-IpeJoinMsk IpeJoin::msk_gen(const IpeJoinPP& pp, const CharVec& key){
+IpeEjMsk IpeEj::msk_gen(const IpeEjPp& pp, const CharVec& key){
     // Create the msk instance.
-    IpeJoinMsk msk;
+    IpeEjMsk msk{};
     // Get the unique point for HMAC.
     msk.hmac = std::make_unique<HMAC>(key);
     // Sample a random point k.
@@ -34,7 +34,7 @@ IpeJoinMsk IpeJoin::msk_gen(const IpeJoinPP& pp, const CharVec& key){
     return msk;
 }
 
-G1Vec IpeJoin::enc(const IpeJoinPP& pp, const IpeJoinMsk& msk, const Vec& x, const int join_index){
+G1Vec IpeEj::enc(const IpeEjPp& pp, const IpeEjMsk& msk, const Vec& x, const int join_index){
     // Declare variable to hold the point to join on.
     Fp join_on;
 
@@ -77,7 +77,7 @@ G1Vec IpeJoin::enc(const IpeJoinPP& pp, const IpeJoinMsk& msk, const Vec& x, con
     return pp.pairing_group->Gp->g1_raise(xb);
 }
 
-G2Vec IpeJoin::keygen(const IpeJoinPP& pp, const IpeJoinMsk& msk, const Mat& y){
+G2Vec IpeEj::keygen(const IpeEjPp& pp, const IpeEjMsk& msk, const Mat& y){
     // Compute the hash of filtered values.
     const auto y_digest = msk.hmac->digest_mat_to_fp_mod(*pp.pairing_group, y);
 
@@ -98,4 +98,4 @@ G2Vec IpeJoin::keygen(const IpeJoinPP& pp, const IpeJoinMsk& msk, const Mat& y){
     return pp.pairing_group->Gp->g2_raise(ybi);
 }
 
-Gt IpeJoin::dec(const G1Vec& ct, const G2Vec& sk){ return Group::pair(ct, sk); }
+Gt IpeEj::dec(const G1Vec& ct, const G2Vec& sk){ return Group::pair(ct, sk); }

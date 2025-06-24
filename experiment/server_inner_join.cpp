@@ -4,7 +4,7 @@ constexpr size_t TOTAL = static_cast<size_t>(150000) * 1500000;
 
 void bench_server_join_time(const int round){
     // Open the output files.
-    std::ofstream file("server_join_time.txt", std::ios_base::app);
+    std::ofstream file("server_inner_join_time.txt", std::ios_base::app);
 
     // Read some data.
     StrMat order = Helper::read_tbl("data/orders.tbl", 100);

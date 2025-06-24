@@ -173,6 +173,96 @@ FpVec Helper::split_poly(const BP& pairing_group, const FpVec& x){
     return r;
 }
 
+FpVec Helper::vec_to_fp(const BP& pairing_group, const Vec& x, const IntVec& sel){
+    // Create holder for the Fp result.
+    FpVec r;
+
+    // Depending on the input type, hash the input x vector.
+    std::visit([&pairing_group, &sel, &r](auto&& vec_x){
+        // Get the type of the input.
+        using T = std::decay_t<decltype(vec_x)>;
+
+        // For integer vectors.
+        if constexpr (std::is_same_v<T, IntVec>){
+            if (sel.empty()){
+                r = pairing_group.Zp->from_int(vec_x);
+            }
+            else{
+                for (const auto& i : sel){
+                    r.push_back(pairing_group.Zp->from_int(vec_x[i]));
+                }
+            }
+        }
+        // For string vectors.
+        else if constexpr (std::is_same_v<T, StrVec>){
+            if (sel.empty()){
+                for (const auto& each_str : vec_x){
+                    r.push_back(char_vec_to_fp(str_to_char_vec(each_str)));
+                }
+            }
+            else{
+                for (const auto& i : sel){
+                    r.push_back(char_vec_to_fp(str_to_char_vec(vec_x[i])));
+                }
+            }
+        }
+        // Otherwise the type is not supported.
+        else{
+            throw std::runtime_error("Unsupported fp conversion type");
+        }
+    }, x);
+
+    return r;
+}
+
+FpMat Helper::mat_to_fp(const BP& pairing_group, const Mat& x, const IntVec& sel){
+    // Create holder for the Fp result.
+    FpMat r;
+
+    // Depending on the input type, hash the input x vector.
+    std::visit([&pairing_group, &sel, &r](auto&& mat_x){
+        // Get the type of the input.
+        using T = std::decay_t<decltype(mat_x)>;
+
+        // For integer matrices.
+        if constexpr (std::is_same_v<T, IntMat>){
+            if (sel.empty()){
+                for (const auto& i : mat_x){
+                    r.push_back(pairing_group.Zp->from_int(i));
+                }
+            }
+            else{
+                for (const auto& i : sel){
+                    r.push_back(pairing_group.Zp->from_int(mat_x[i]));
+                }
+            }
+        }
+        // For string matrices.
+        else if constexpr (std::is_same_v<T, StrMat>){
+            if (sel.empty()){
+                for (const auto& i : mat_x){
+                    FpVec temp;
+                    for (const auto& j : i) temp.push_back(char_vec_to_fp(str_to_char_vec(j)));
+                    r.push_back(temp);
+                }
+            }
+            else{
+                for (const auto& i : mat_x){
+                    FpVec temp;
+                    for (const auto& j : sel) temp.push_back(char_vec_to_fp(str_to_char_vec(i[j])));
+                    r.push_back(temp);
+                }
+            }
+        }
+        // Otherwise the type is not supported.
+        else{
+            throw std::runtime_error("Unsupported fp conversion type");
+        }
+    }, x);
+
+    return r;
+}
+
 IntVec Helper::get_sel_index(const int degree, const int length, const IntVec& sel){
     // Create holder for the returned vector.
     IntVec r;

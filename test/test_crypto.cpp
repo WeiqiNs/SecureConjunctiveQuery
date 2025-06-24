@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "crypto.hpp"
 
+
 TEST(CryptoTests, AES128){
     const auto aes = AES(128);
 

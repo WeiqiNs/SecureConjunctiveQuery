@@ -121,6 +121,24 @@ public:
     static FpVec split_poly(const BP& pairing_group, const FpVec& x);
 
     /**
+     * Given an integer or a string vector, convert it to Zp representations.
+     * @param pairing_group the bilinear pairing group object.
+     * @param x a vector of integers or strings.
+     * @param sel an integer vector to indicate the index of input vector.
+     * @return a vector of field point values.
+     */
+    static FpVec vec_to_fp(const BP& pairing_group, const Vec& x, const IntVec& sel = {});
+
+    /**
+     * Given an integer or a string matrix, convert it to Zp representations.
+     * @param pairing_group the bilinear pairing group object.
+     * @param x a matrix of integers or strings.
+     * @param sel an integer vector to indicate the index of input vector.
+     * @return a matrix of field point values.
+     */
+    static FpMat mat_to_fp(const BP& pairing_group, const Mat& x, const IntVec& sel = {});
+
+    /**
      * This is specific to our functionality of selecting only a few columns from the entire ciphertext.
      * @param degree how many values we select for each index.
      * @param length total number of possible index.

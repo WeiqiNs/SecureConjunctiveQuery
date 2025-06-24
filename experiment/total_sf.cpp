@@ -1,8 +1,8 @@
 #include "exp.hpp"
 
-void ipe_total_single_filter_time(const int round){
+void ipe_total_sf_time(const int round){
     // Open the output files.
-    std::ofstream file("total_single_filter_time.txt", std::ios_base::app);
+    std::ofstream file("total_sf_time.txt", std::ios_base::app);
     file << "IPE Timings" << std::endl;
 
     // Generate pp and msk.
@@ -28,7 +28,7 @@ void ipe_total_single_filter_time(const int round){
             auto end = std::chrono::high_resolution_clock::now();
             time += end - start;
 
-            for (int j = 0; j < pow(2, 20); ++j){
+            for (int j = 0; j < 100; ++j){
                 // Compute ciphertext.
                 auto ct = IpeFilter::enc(pp, msk, x);
 
@@ -36,7 +36,7 @@ void ipe_total_single_filter_time(const int round){
                 start = std::chrono::high_resolution_clock::now();
                 std::ignore = IpeFilter::dec(ct, sk);
                 end = std::chrono::high_resolution_clock::now();
-                time += end - start;
+                time += (end - start) * 100;
             }
         }
 
@@ -51,57 +51,14 @@ void ipe_total_single_filter_time(const int round){
     file << std::endl << std::endl;
 }
 
-void sse_total_single_filter_time(const int round){
+void our_total_sf_time(const int round){
     // Open the output files.
-    std::ofstream file("total_single_filter_time.txt", std::ios_base::app);
-    file << "SSE Timings" << std::endl;
-
-    // Generate pp and msk.
-    auto msk = SseFilter::msk_gen();
-
-    for (int num_col = 1; num_col <= 20; ++num_col){
-        // Create holder for timings.
-        std::chrono::duration<double, std::milli> time{};
-
-        // Perform round number of Enc.
-        for (int i = 0; i < round; ++i){
-            // Create a random vector of desired length.
-            auto x = Helper::rand_int_vec(20, 1, std::numeric_limits<int>::max());
-            auto y = Helper::rand_int_vec(num_col, 1, std::numeric_limits<int>::max());
-
-            // Total timings.
-            auto start = std::chrono::high_resolution_clock::now();
-            auto sk = SseFilter::keygen(msk, y, static_cast<int>(std::pow(2, 20)));
-            auto end = std::chrono::high_resolution_clock::now();
-            time += end - start;
-
-            for (int j = 0; j < pow(2, 20); ++j){
-                // Compute ciphertext.
-                auto ct = SseFilter::enc(msk, x);
-
-                // Decryption time.
-                start = std::chrono::high_resolution_clock::now();
-                std::ignore = SseFilter::dec(ct, sk[round]);
-                end = std::chrono::high_resolution_clock::now();
-                time += end - start;
-            }
-        }
-
-        // Output the time.
-        file << "(" << num_col << ", " << time.count() / round << ")" << std::endl;
-    }
-    // Create some blank spaces.
-    file << std::endl << std::endl;
-}
-
-void our_total_single_filter_time(const int round){
-    // Open the output files.
-    std::ofstream file("total_single_filter_time.txt", std::ios_base::app);
+    std::ofstream file("total_sf_time.txt", std::ios_base::app);
     file << "Our Timings" << std::endl;
 
     // Generate pp and msk.
-    auto pp = Filter::pp_gen(1, 20);
-    auto msk = Filter::msk_gen(pp);
+    auto pp = FlexDbSf::pp_gen(20);
+    auto msk = FlexDbSf::msk_gen(pp);
 
     for (int num_col = 1; num_col <= 20; ++num_col){
         // Create holder for timings.
@@ -119,19 +76,19 @@ void our_total_single_filter_time(const int round){
 
             // Total timings.
             auto start = std::chrono::high_resolution_clock::now();
-            auto sk = Filter::keygen(pp, msk, y, sel);
+            auto sk = FlexDbSf::keygen(pp, msk, y, sel);
             auto end = std::chrono::high_resolution_clock::now();
             time += end - start;
 
-            for (int j = 0; j < pow(2, 20); ++j){
+            for (int j = 0; j < 100; ++j){
                 // Compute ciphertext.
-                auto ct = Filter::enc(pp, msk, x);
+                auto ct = FlexDbSf::enc(pp, msk, x);
 
                 // Decryption time.
                 start = std::chrono::high_resolution_clock::now();
-                std::ignore = Filter::dec(pp, ct, sk, sel);
+                std::ignore = FlexDbSf::dec(ct, sk, sel);
                 end = std::chrono::high_resolution_clock::now();
-                time += end - start;
+                time += (end - start) * 100;
             }
         }
 
@@ -146,8 +103,7 @@ void our_total_single_filter_time(const int round){
     file << std::endl << std::endl;
 }
 
-void bench_total_single_filter_time(const int round){
-    ipe_total_single_filter_time(round);
-    sse_total_single_filter_time(round);
-    our_total_single_filter_time(round);
+void bench_total_sf_time(const int round){
+    ipe_total_sf_time(round);
+    our_total_sf_time(round);
 }

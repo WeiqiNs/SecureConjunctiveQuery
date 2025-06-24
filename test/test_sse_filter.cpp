@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "sse_filter.hpp"
 
+
 TEST(SseFilterTests, FilterTrue){
     auto msk = SseFilter::msk_gen();
 

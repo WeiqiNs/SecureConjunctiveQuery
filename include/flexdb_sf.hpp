@@ -2,38 +2,35 @@
 
 #include "crypto.hpp"
 
-struct FilterPP{
-    // Suppose by default the degree is 1.
-    int d = 1;
-    // Suppose by default the length is 1.
-    int l = 1;
+struct FlexDbSfPp{
+    // Store the input length.
+    int l;
     // Create a pointer to hold the bilinear pairing group object.
     std::unique_ptr<BP> pairing_group;
 };
 
-struct FilterMsk{
+struct FlexDbSfMsk{
     Fp d;
     Fp di;
-    FpVec r;
     FpVec b;
-    FpVec bi;
-    int d_int = 0;
-    int r_int = 0;
-    int b_int = 0;
+    FpVec r;
+    int d_int;
+    int b_int;
+    int r_int;
     bool compress;
     std::unique_ptr<HMAC> hmac;
 };
 
-class Filter{
+
+class FlexDbSf{
 public:
     /**
      * Generate the required public parameters.
-     * @param degree the degree of the polynomial.
      * @param length the length of vectors to the encryption algorithm.
      * @param pre whether we want to use the precomputed table for group exponentiation.
      * @return the generated public parameters.
      */
-    static FilterPP pp_gen(int degree, int length, bool pre = true);
+    static FlexDbSfPp pp_gen(int length, bool pre = true);
 
     /**
      * Generate master secret key.
@@ -42,7 +39,7 @@ public:
      * @param compress boolean to indicate whether to compress the private keys.
      * @return the generated master secret key.
      */
-    static FilterMsk msk_gen(const FilterPP& pp, const CharVec& key = {}, const bool& compress = false);
+    static FlexDbSfMsk msk_gen(const FlexDbSfPp& pp, const CharVec& key = {}, const bool& compress = false);
 
     /**
      * Perform the Filter FE encryption.
@@ -51,25 +48,24 @@ public:
      * @param x a vector of strings or integers.
      * @return the ciphertext.
      */
-    static G1Vec enc(const FilterPP& pp, const FilterMsk& msk, const Vec& x);
+    static G1Vec enc(const FlexDbSfPp& pp, const FlexDbSfMsk& msk, const Vec& x);
 
     /**
      * Perform the Filter FE key generation with select selecting columns.
      * @param pp the public parameters.
      * @param msk the master secret key.
-     * @param y a vector or matrix of strings or integers. Use matrix only when you are selecting set of inputs.
+     * @param y a vector of strings or integers.
      * @param sel a vector of integers indicating which columns to select, by default is empty.
      * @return the function key.
      */
-    static G2Vec keygen(const FilterPP& pp, const FilterMsk& msk, const VecOrMat& y, const IntVec& sel = {});
+    static G2Vec keygen(const FlexDbSfPp& pp, const FlexDbSfMsk& msk, const Vec& y, const IntVec& sel = {});
 
     /**
      * Perform the Filter FE decryption with selecting columns.
-     * @param pp the public parameters.
      * @param ct the ciphertext.
      * @param sk the function key.
      * @param sel a vector of integers indicating which columns to select, by default is empty.
      * @return a boolean indicating the result of Filter.
      */
-    static bool dec(const FilterPP& pp, const G1Vec& ct, const G2Vec& sk, const IntVec& sel = {});
+    static bool dec(const G1Vec& ct, const G2Vec& sk, const IntVec& sel = {});
 };

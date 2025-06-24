@@ -1,8 +1,8 @@
-#include "aggre.hpp"
+#include "flexdb_et.hpp"
 
-AggrePP Aggre::pp_gen(const int length, const bool pre){
+FlexDbEtPp FlexDbEt::pp_gen(const int length, const bool pre){
     // Create the pp instance.
-    AggrePP pp;
+    FlexDbEtPp pp{};
     // Update the input length according to input.
     pp.l = length;
     // Save the created pairing group.
@@ -11,9 +11,9 @@ AggrePP Aggre::pp_gen(const int length, const bool pre){
     return pp;
 }
 
-AggreMsk Aggre::msk_gen(const AggrePP& pp, const CharVec& key, const bool& compress){
+FlexDbEtMsk FlexDbEt::msk_gen(const FlexDbEtPp& pp, const CharVec& key, const bool& compress){
     // Create the msk instance.
-    AggreMsk msk;
+    FlexDbEtMsk msk{};
     // Save whether the values need to be compressed.
     msk.compress = compress;
 
@@ -38,7 +38,7 @@ AggreMsk Aggre::msk_gen(const AggrePP& pp, const CharVec& key, const bool& compr
     return msk;
 }
 
-G1Vec Aggre::enc(const AggrePP& pp, const AggreMsk& msk, const IntVec& x){
+G1Vec FlexDbEt::enc(const FlexDbEtPp& pp, const FlexDbEtMsk& msk, const IntVec& x){
     // First convert x to field elements.
     const auto x_vec = pp.pairing_group->Zp->from_int(x);
 
@@ -83,7 +83,7 @@ G1Vec Aggre::enc(const AggrePP& pp, const AggreMsk& msk, const IntVec& x){
     return pp.pairing_group->Gp->g1_raise(abxr);
 }
 
-G2Vec Aggre::keygen(const AggrePP& pp, const AggreMsk& msk, const IntVec& y, int p, const IntVec& sel){
+G2Vec FlexDbEt::keygen(const FlexDbEtPp& pp, const FlexDbEtMsk& msk, const IntVec& y, int p, const IntVec& sel){
     // Convert the input y integer vector to FpVec.
     const FpVec y_vec = pp.pairing_group->Zp->from_int(y);
 
@@ -162,7 +162,7 @@ G2Vec Aggre::keygen(const AggrePP& pp, const AggreMsk& msk, const IntVec& y, int
     return pp.pairing_group->Gp->g2_raise(bbiy);
 }
 
-bool Aggre::dec(const G1Vec& ct, const G2Vec& sk, const IntVec& sel){
+bool FlexDbEt::dec(const G1Vec& ct, const G2Vec& sk, const IntVec& sel){
     // Select ciphertext that should be used.
     G1Vec sel_ct;
     if (sel.empty()) sel_ct = G1Vec(ct.begin(), ct.end() - 1);

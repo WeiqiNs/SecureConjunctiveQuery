@@ -1,8 +1,8 @@
-#include "kim_aggre.hpp"
+#include "ipe_et.hpp"
 
-KimAggrePP KimAggre::pp_gen(const int length, const bool pre){
+IpeEtPp IpeEt::pp_gen(const int length, const bool pre){
     // Create the pp instance.
-    KimAggrePP pp;
+    IpeEtPp pp{};
     // Update the input length according to input.
     pp.l = length;
     // Save the created pairing group.
@@ -11,12 +11,12 @@ KimAggrePP KimAggre::pp_gen(const int length, const bool pre){
     return pp;
 }
 
-KimAggreMsk KimAggre::msk_gen(const KimAggrePP& pp){
+IpeEtMsk IpeEt::msk_gen(const IpeEtPp& pp){
     // Create the msk instance.
-    KimAggreMsk msk;
+    IpeEtMsk msk{};
 
     // Compute the matrix size, length + 1 to hold
-    const int mat_size = pp.l + 1;
+    const int mat_size = pp.l + 3;
     // Generate the random matrix of desired size.
     msk.b = pp.pairing_group->Zp->rand_mat(mat_size, mat_size);
     // Find the inverse and the determinant.
@@ -28,7 +28,7 @@ KimAggreMsk KimAggre::msk_gen(const KimAggrePP& pp){
     return msk;
 }
 
-G1Vec KimAggre::enc(const KimAggrePP& pp, const KimAggreMsk& msk, const IntVec& x){
+G1Vec IpeEt::enc(const IpeEtPp& pp, const IpeEtMsk& msk, const IntVec& x){
     // First convert x to field elements.
     auto x_vec = pp.pairing_group->Zp->from_int(x);
 
@@ -36,34 +36,37 @@ G1Vec KimAggre::enc(const KimAggrePP& pp, const KimAggreMsk& msk, const IntVec& 
     x_vec.push_back(pp.pairing_group->Zp->from_int(-1));
 
     // Sample the random point alpha.
-    const Fp alpha = pp.pairing_group->Zp->rand();
+    const auto alpha = pp.pairing_group->Zp->rand();
 
-    // Compute xb.
-    const auto xb = pp.pairing_group->Zp->mat_mul(x_vec, msk.b);
-    // Compute axb.
-    const auto axb = pp.pairing_group->Zp->vec_mul(xb, alpha);
+    // We compute a * x.
+    auto ax = pp.pairing_group->Zp->vec_mul(x_vec, alpha);
+    // Attach (r, 0).
+    ax.push_back(pp.pairing_group->Zp->rand());
+    ax.emplace_back(0);
+
+    // Multiply with the matrix Bi.
+    const auto axb = pp.pairing_group->Zp->mat_mul(ax, msk.b);
 
     // Raise the vector to g1 and return.
     return pp.pairing_group->Gp->g1_raise(axb);
 }
 
-G2Vec KimAggre::keygen(const KimAggrePP& pp, const KimAggreMsk& msk, const IntVec& y, const int p){
+G2Vec IpeEt::keygen(const IpeEtPp& pp, const IpeEtMsk& msk, const IntVec& y, const int p){
     // First convert y to field elements.
     auto y_vec = pp.pairing_group->Zp->from_int(y);
 
     // Add p to the vector.
     y_vec.push_back(pp.pairing_group->Zp->from_int(p));
 
-    // Sample the random point alpha.
-    const Fp beta = pp.pairing_group->Zp->rand();
+    // Attach (0, r).
+    y_vec.emplace_back(0);
+    y_vec.push_back(pp.pairing_group->Zp->rand());
 
-    // Compute ybi.
+    // Compute y * bi.
     const auto ybi = pp.pairing_group->Zp->mat_mul(y_vec, msk.bi);
-    // Compute beta * ybi.
-    const auto bybi = pp.pairing_group->Zp->vec_mul(ybi, beta);
 
     // Raise the vector to g2 and return.
-    return pp.pairing_group->Gp->g2_raise(bybi);
+    return pp.pairing_group->Gp->g2_raise(ybi);
 }
 
-bool KimAggre::dec(const G1Vec& ct, const G2Vec& sk){ return gt_is_unity(Group::pair(ct, sk).value); }
+bool IpeEt::dec(const G1Vec& ct, const G2Vec& sk){ return gt_is_unity(Group::pair(ct, sk).value); }

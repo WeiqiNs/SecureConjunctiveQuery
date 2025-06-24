@@ -2,7 +2,7 @@
 
 SseFilterMsk SseFilter::msk_gen(const CharVec& key){
     // Create the msk instance.
-    SseFilterMsk msk;
+    SseFilterMsk msk{};
 
     msk.counter = 0;
     msk.prf = std::make_unique<PRF>(key);

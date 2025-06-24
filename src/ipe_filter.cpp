@@ -1,8 +1,8 @@
 #include "ipe_filter.hpp"
 
-IpeFilterPP IpeFilter::pp_gen(const int degree, const int length, const bool pre){
+IpeFilterPp IpeFilter::pp_gen(const int degree, const int length, const bool pre){
     // Create the pp instance.
-    IpeFilterPP pp;
+    IpeFilterPp pp{};
     // Update the degree according to input.
     pp.d = degree;
     // Update the input length according to input.
@@ -13,9 +13,9 @@ IpeFilterPP IpeFilter::pp_gen(const int degree, const int length, const bool pre
     return pp;
 }
 
-IpeFilterMsk IpeFilter::msk_gen(const IpeFilterPP& pp, const CharVec& key){
+IpeFilterMsk IpeFilter::msk_gen(const IpeFilterPp& pp, const CharVec& key){
     // Create the msk instance.
-    IpeFilterMsk msk;
+    IpeFilterMsk msk{};
     // Get the unique point for HMAC.
     msk.hmac = std::make_unique<HMAC>(key);
     // Compute the matrix size.
@@ -31,7 +31,7 @@ IpeFilterMsk IpeFilter::msk_gen(const IpeFilterPP& pp, const CharVec& key){
     return msk;
 }
 
-G1Vec IpeFilter::enc(const IpeFilterPP& pp, const IpeFilterMsk& msk, const Vec& x){
+G1Vec IpeFilter::enc(const IpeFilterPp& pp, const IpeFilterMsk& msk, const Vec& x){
     // Generate hash of the input x vector.
     const auto x_digest = msk.hmac->digest_vec_to_fp_mod(*pp.pairing_group, x);
 
@@ -49,7 +49,7 @@ G1Vec IpeFilter::enc(const IpeFilterPP& pp, const IpeFilterMsk& msk, const Vec& 
     return pp.pairing_group->Gp->g1_raise(xb);
 }
 
-G2Vec IpeFilter::keygen(const IpeFilterPP& pp, const IpeFilterMsk& msk, const Mat& y){
+G2Vec IpeFilter::keygen(const IpeFilterPp& pp, const IpeFilterMsk& msk, const Mat& y){
     // Generate hash of the input y matrix.
     const auto y_digest = msk.hmac->digest_mat_to_fp_mod(*pp.pairing_group, y);
 
