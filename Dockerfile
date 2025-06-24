@@ -22,7 +22,7 @@ WORKDIR "/LibRBP/build"
 RUN cmake .. && make && make install
 
 # Copy the files over to working directory.
-RUN mkdir -p /EEJ/build
-COPY . /EEJ
-WORKDIR "/EEJ/build"
+RUN mkdir -p /SCQ/build
+COPY . /SCQ
+WORKDIR "/SCQ/build"
 RUN cmake .. && make && ctest
