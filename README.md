@@ -22,4 +22,4 @@ Our code base depends on the [RELIC library](https://github.com/relic-toolkit/re
 
 [![SCQ CI](https://github.com/WeiqiNs/SecureConjunctiveQuery/actions/workflows/ci.yml/badge.svg)](https://github.com/WeiqiNs/SecureConjunctiveQuery/actions/workflows/ci.yml)
 
-To support continuous development in this area, we maintain a well-tested codebase with a suite of unit tests integrated into our GitHub CI workflow. One could also refer to the [`ci.yml`](.github/workflows/ci.yml) file for details on setting up the dev environment.
+To support continuous development in this research area, we maintain this codebase with a suite of unit tests integrated into our GitHub CI workflow. One could also refer to the [`ci.yml`](.github/workflows/ci.yml) file for details on setting up the dev environment.
